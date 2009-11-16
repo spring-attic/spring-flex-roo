@@ -1,0 +1,1 @@
+@set ROO_ADDON_CLASSPATH_FILE="/Users/jgrelle/workspace-flex/org.springframework.flex.roo.addon/target\roo_classpath.txt"
