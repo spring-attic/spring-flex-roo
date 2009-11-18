@@ -8,7 +8,7 @@
 		http://www.springframework.org/schema/flex 
 		http://www.springframework.org/schema/flex/spring-flex-1.0.xsd">
   	
-	<flex:message-broker>
+	<flex:message-broker mapping-order="1">
 		<flex:mapping pattern="/messagebroker/*"/>
 		<flex:message-service default-channels="longpolling-amf" />
 	</flex:message-broker>

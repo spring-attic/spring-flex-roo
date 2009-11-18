@@ -38,6 +38,11 @@
             <name>Spring Framework Maven Repository - Nightly Snapshots</name>
             <url>http://maven.springframework.org/milestone</url>
         </repository>
+        <repository>
+        	<id>metaas-repo</id>
+        	<name>Metaas Maven Repository</name>
+        	<url>http://maven.badgers-in-foil.co.uk/maven2/</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
@@ -49,6 +54,11 @@
 			<scope>provided</scope>
 		</dependency>
         <!-- Other modules (if any) -->
+        <dependency>
+	      <groupId>uk.co.badgersinfoil.metaas</groupId>
+	      <artifactId>metaas</artifactId>
+	      <version>0.8</version>
+	    </dependency>
 	</dependencies>
 
     <build>
