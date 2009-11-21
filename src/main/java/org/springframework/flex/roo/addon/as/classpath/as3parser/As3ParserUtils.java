@@ -2,12 +2,18 @@ package org.springframework.flex.roo.addon.as.classpath.as3parser;
 
 import java.util.List;
 
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.BooleanAttributeValue;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
+import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
+import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
 import uk.co.badgersinfoil.metaas.ActionScriptFactory;
 import uk.co.badgersinfoil.metaas.dom.ASType;
+import uk.co.badgersinfoil.metaas.dom.Visibility;
+import uk.co.badgersinfoil.metaas.dom.ASMetaTag.Param;
 
 public class As3ParserUtils {
 	
@@ -18,10 +24,7 @@ public class As3ParserUtils {
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
 		Assert.notNull(type, "ASType required");
 		
-		// Convert the ASType name into a ActionScriptType
-		ActionScriptType effectiveType = getActionScriptType(compilationUnitPackage, imports, type.getName());
-		
-		return new ActionScriptType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType());
+		return getActionScriptType(compilationUnitPackage, imports, type.getName());
 	}
 	
 	public static final ActionScriptType getActionScriptType(ActionScriptPackage compilationUnitPackage, List<String> imports, String nameToFind) {
@@ -31,6 +34,10 @@ public class As3ParserUtils {
 		
 		int offset = nameToFind.lastIndexOf('.');
 		if (offset > -1) {
+			return new ActionScriptType(nameToFind);
+		}
+		
+		if (ActionScriptType.isImplicitType(nameToFind)) {
 			return new ActionScriptType(nameToFind);
 		}
 		
@@ -74,5 +81,33 @@ public class As3ParserUtils {
 		}
 		
 		imports.add(typeToImport.getFullyQualifiedTypeName());
+	}
+	
+	public static ASTypeVisibility getASTypeVisibility(Visibility as3ParserVisibility) {
+		return ASTypeVisibility.valueOf(as3ParserVisibility.toString().replaceAll("\\[|\\]", "").toUpperCase());
+	}
+	
+	public static Visibility getAs3ParserVisiblity(ASTypeVisibility typeVisibility) {
+		switch(typeVisibility) {
+			case INTERNAL:
+				return Visibility.INTERNAL;
+			case PRIVATE:
+				return Visibility.PRIVATE;
+			case PROTECTED:
+				return Visibility.PROTECTED;
+			case PUBLIC:
+				return Visibility.PUBLIC;
+			case DEFAULT:
+			default:
+				return Visibility.DEFAULT;
+			
+		}
+	}
+
+	public static MetaTagAttributeValue<?> getMetaTagAttributeValue(Param param) {
+		if (param.getValue() instanceof Boolean) {
+			return new BooleanAttributeValue(new ActionScriptSymbolName(param.getName()), (Boolean) param.getValue());
+		}
+		return  null;
 	}
 }

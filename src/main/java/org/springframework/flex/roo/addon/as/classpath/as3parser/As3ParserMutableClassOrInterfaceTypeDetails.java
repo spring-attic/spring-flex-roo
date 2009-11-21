@@ -8,8 +8,8 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadataPro
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -106,7 +106,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		List<ASMetaTag> metaTagList = this.clazz.getAllMetaTags();
 		if (metaTagList != null) {
 			for (ASMetaTag metaTag : metaTagList) {
-				As3ParserMetaTagMetadata md = new As3ParserMetaTagMetadata(metaTag, this);
+				As3ParserMetaTagMetadata md = new As3ParserMetaTagMetadata(metaTag);
 				typeMetaTags.add(md);
 			}
 		}

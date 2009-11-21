@@ -1,5 +1,8 @@
 package org.springframework.flex.roo.addon.as.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public final class ActionScriptType implements Comparable<ActionScriptType> {
 
@@ -24,6 +27,26 @@ public final class ActionScriptType implements Comparable<ActionScriptType> {
 	public static final ActionScriptType REGEXP_TYPE = new ActionScriptType("RegExp");
 	public static final ActionScriptType XML_TYPE = new ActionScriptType("XML");
 	public static final ActionScriptType XML_LIST_TYPE = new ActionScriptType("XMLList");
+	
+	private static final Set<String> implicitTypes = new HashSet<String>();
+	
+	static {
+		implicitTypes.add("Boolean");
+		implicitTypes.add("int");
+		implicitTypes.add("Null");
+		implicitTypes.add("Number");
+		implicitTypes.add("String");
+		implicitTypes.add("uint");
+		implicitTypes.add("void");
+		implicitTypes.add("Object");
+		implicitTypes.add("Array");
+		implicitTypes.add("Date");
+		implicitTypes.add("Error");
+		implicitTypes.add("Function");
+		implicitTypes.add("RegExp");
+		implicitTypes.add("XML");
+		implicitTypes.add("XMLList");
+	}
 	
 	public ActionScriptType(String fullyQualifiedTypeName) {
 		this(fullyQualifiedTypeName, 0, ASDataType.TYPE);
@@ -101,5 +124,9 @@ public final class ActionScriptType implements Comparable<ActionScriptType> {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
 		if (o == null) return -1;
 		return this.fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
+	}
+	
+	public static boolean isImplicitType(String typeName) {
+		return implicitTypes.contains(typeName);
 	}
 }

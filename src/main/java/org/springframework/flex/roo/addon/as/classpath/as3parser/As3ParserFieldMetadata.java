@@ -4,22 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASField;
+import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.Visibility;
 
 public class As3ParserFieldMetadata implements FieldMetadata {
 
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
+	private ASTypeVisibility visibility;
 	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
 	private String declaredByMetadataId;
-	//TODO - store visibility
 	
 	public As3ParserFieldMetadata(
 			String declaredByMetadataId,
@@ -32,10 +34,15 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 		this.declaredByMetadataId = declaredByMetadataId;
 		
 		this.fieldType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getType());
+		this.fieldName = new ActionScriptSymbolName(field.getName());
+		this.visibility = As3ParserUtils.getASTypeVisibility(field.getVisibility());
+
+		for(ASMetaTag metaTag : (List<ASMetaTag>)field.getAllMetaTags()) {
+			metaTags.add(new As3ParserMetaTagMetadata(metaTag));
+		}
 	}
 
-	public static void addField(
-			CompilationUnitServices compilationUnitServices, 
+	public static void addField(CompilationUnitServices compilationUnitServices, 
 			ASClassType clazz, FieldMetadata field, boolean permitFlush) {
 		
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
@@ -45,27 +52,37 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 		// Import the field type into the compilation unit
 		As3ParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getFieldType());
 		
-		//TODO - Implement proper visibility semantics
-		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), Visibility.PUBLIC, field.getFieldType().getSimpleTypeName());
+		// Add the field
+		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
 		
+		// Add meta tags to the field
 		for(MetaTagMetadata metaTag : field.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagElement(metaTag, newField, false);
+			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, newField, false);
+		}
+		
+		if (permitFlush) {
+			compilationUnitServices.flush();
 		}
 	}
 
+	public String getDeclaredByMetadataId() {
+		return declaredByMetadataId;
+	}
+
 	public ActionScriptSymbolName getFieldName() {
-		// TODO Auto-generated method stub
-		return null;
+		return fieldName;
 	}
 
 	public ActionScriptType getFieldType() {
-		// TODO Auto-generated method stub
-		return null;
+		return fieldType;
 	}
 
 	public List<MetaTagMetadata> getMetaTags() {
-		// TODO Auto-generated method stub
-		return null;
+		return metaTags;
+	}
+
+	public ASTypeVisibility getVisibility() {
+		return visibility;
 	}
 
 }
