@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry including="**/*.java" kind="src" output="target/test-classes" path="src/test/java"/>
+	<classpathentry including="**/*.as|**/*.java" kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry excluding="**/*.java" kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry including="**/*.java" kind="src" path="src/main/java"/>
 	<classpathentry excluding="**/*.java" kind="src" path="src/main/resources"/>
 	<classpathentry kind="var" path="M2_REPO/org/antlr/antlr-runtime/3.0.1/antlr-runtime-3.0.1.jar" sourcepath="M2_REPO/org/antlr/antlr-runtime/3.0.1/antlr-runtime-3.0.1-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/google/javaparser/com.springsource.japa.parser/1.0.7/com.springsource.japa.parser-1.0.7.jar" sourcepath="M2_REPO/com/google/javaparser/com.springsource.japa.parser/1.0.7/com.springsource.japa.parser-1.0.7-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/net/sourceforge/jline/com.springsource.jline/0.9.94/com.springsource.jline-0.9.94.jar" sourcepath="M2_REPO/net/sourceforge/jline/com.springsource.jline/0.9.94/com.springsource.jline-0.9.94-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/jvnet/inflector/com.springsource.org.jvnet.inflector/0.7.0/com.springsource.org.jvnet.inflector-0.7.0.jar" sourcepath="M2_REPO/org/jvnet/inflector/com.springsource.org.jvnet.inflector/0.7.0/com.springsource.org.jvnet.inflector-0.7.0-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.api/1.5.6/com.springsource.slf4j.api-1.5.6.jar" sourcepath="M2_REPO/org/slf4j/com.springsource.slf4j.api/1.5.6/com.springsource.slf4j.api-1.5.6-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.juli/1.5.6/com.springsource.slf4j.juli-1.5.6.jar" sourcepath="M2_REPO/org/slf4j/com.springsource.slf4j.juli/1.5.6/com.springsource.slf4j.juli-1.5.6-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.org.apache.commons.logging/1.5.6/com.springsource.slf4j.org.apache.commons.logging-1.5.6.jar" sourcepath="M2_REPO/org/slf4j/com.springsource.slf4j.org.apache.commons.logging/1.5.6/com.springsource.slf4j.org.apache.commons.logging-1.5.6-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/net/java/dev/jna/com.springsource.com.sun.jna/3.2.3/com.springsource.com.sun.jna-3.2.3.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/google/javaparser/com.springsource.japa.parser/1.0.7/com.springsource.japa.parser-1.0.7.jar"/>
+	<classpathentry kind="var" path="M2_REPO/net/sourceforge/jline/com.springsource.jline/0.9.94.S2-A/com.springsource.jline-0.9.94.S2-A.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/fusesource/jansi/com.springsource.org.fusesource.jansi/1.1.0/com.springsource.org.fusesource.jansi-1.1.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jvnet/inflector/com.springsource.org.jvnet.inflector/0.7.0/com.springsource.org.jvnet.inflector-0.7.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.api/1.5.6/com.springsource.slf4j.api-1.5.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.juli/1.5.6/com.springsource.slf4j.juli-1.5.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/slf4j/com.springsource.slf4j.org.apache.commons.logging/1.5.6/com.springsource.slf4j.org.apache.commons.logging-1.5.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/4.7/junit-4.7.jar" sourcepath="M2_REPO/junit/junit/4.7/junit-4.7-sources.jar"/>
 	<classpathentry kind="var" path="M2_REPO/uk/co/badgersinfoil/metaas/metaas/0.8/metaas-0.8.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.asm/3.0.0.RC2/org.springframework.asm-3.0.0.RC2.jar" sourcepath="M2_REPO/org/springframework/org.springframework.asm/3.0.0.RC2/org.springframework.asm-3.0.0.RC2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.beans/3.0.0.RC2/org.springframework.beans-3.0.0.RC2.jar" sourcepath="M2_REPO/org/springframework/org.springframework.beans/3.0.0.RC2/org.springframework.beans-3.0.0.RC2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.context/3.0.0.RC2/org.springframework.context-3.0.0.RC2.jar" sourcepath="M2_REPO/org/springframework/org.springframework.context/3.0.0.RC2/org.springframework.context-3.0.0.RC2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.core/3.0.0.RC2/org.springframework.core-3.0.0.RC2.jar" sourcepath="M2_REPO/org/springframework/org.springframework.core/3.0.0.RC2/org.springframework.core-3.0.0.RC2-sources.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.expression/3.0.0.RC2/org.springframework.expression-3.0.0.RC2.jar" sourcepath="M2_REPO/org/springframework/org.springframework.expression/3.0.0.RC2/org.springframework.expression-3.0.0.RC2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/mockito/mockito-all/1.8.2/mockito-all-1.8.2.jar" sourcepath="M2_REPO/org/mockito/mockito-all/1.8.2/mockito-all-1.8.2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.asm/3.0.0.RELEASE/org.springframework.asm-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.beans/3.0.0.RELEASE/org.springframework.beans-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.context/3.0.0.RELEASE/org.springframework.context-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.core/3.0.0.RELEASE/org.springframework.core-3.0.0.RELEASE.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/springframework/org.springframework.expression/3.0.0.RELEASE/org.springframework.expression-3.0.0.RELEASE.jar"/>
 	<classpathentry kind="src" path="/org.springframework.roo.addon.backup"/>
 	<classpathentry kind="src" path="/org.springframework.roo.addon.beaninfo"/>
 	<classpathentry kind="src" path="/org.springframework.roo.addon.configurable"/>
@@ -55,6 +59,5 @@
 	<classpathentry kind="src" path="/org.springframework.roo.support"/>
 	<classpathentry kind="var" path="M2_REPO/org/antlr/stringtemplate/3.1-b1/stringtemplate-3.1-b1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

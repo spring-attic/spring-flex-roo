@@ -13,12 +13,12 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 public interface InvocableMemberMetadata extends IdentifiableMember {
 	
 	/**
-	 * @return the parameter types (never null, but may be an empty)
+	 * @return the parameter types (never null, but may be empty)
 	 */
 	List<ActionScriptType> getParameterTypes();
 
 	/**
-	 * @return the parameter names, if available (never null, but may be an empty)
+	 * @return the parameter names, if available (never null, but may be empty)
 	 */
 	List<ActionScriptSymbolName> getParameterNames();
 

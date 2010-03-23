@@ -1,7 +1,5 @@
 package org.springframework.flex.roo.addon.as.classpath.details;
 
-import java.lang.reflect.Modifier;
-
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 
 /**

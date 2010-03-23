@@ -15,7 +15,6 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
 
@@ -25,7 +24,6 @@ import uk.co.badgersinfoil.metaas.dom.ASField;
 import uk.co.badgersinfoil.metaas.dom.ASInterfaceType;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.ASMethod;
-import uk.co.badgersinfoil.metaas.dom.ASPackage;
 import uk.co.badgersinfoil.metaas.dom.ASType;
 
 public class As3ParserMutableClassOrInterfaceTypeDetails implements
@@ -102,7 +100,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 		
 		//TODO - populate superclass, supertype, and implementsTypes
-		
 		List<ASMetaTag> metaTagList = this.clazz.getAllMetaTags();
 		if (metaTagList != null) {
 			for (ASMetaTag metaTag : metaTagList) {
@@ -112,7 +109,11 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		}
 		
 		for (ASMethod method : ((List<ASMethod>)this.clazz.getMethods())) {
-			declaredMethods.add(new As3ParserMethodMetadata(declaredByMetadataId, method, this));
+			if (method.getName().equals(name.getSimpleTypeName())) {
+				declaredConstructors.add(new As3ParserConstructorMetadata(declaredByMetadataId, method, this));
+			} else {
+				declaredMethods.add(new As3ParserMethodMetadata(declaredByMetadataId, method, this));
+			}
 		}
 		
 		//TODO - is it possible to find constructors???
