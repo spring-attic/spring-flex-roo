@@ -8,7 +8,8 @@ import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMe
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
-import org.springframework.util.Assert;
+import org.springframework.roo.support.util.Assert;
+
 
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.ASMethod;

@@ -1,5 +1,8 @@
 package org.springframework.flex.roo.addon;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
@@ -7,21 +10,15 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public class FlexScaffoldMetadataProvider extends AbstractItdMetadataProvider {
-
 	
-	public FlexScaffoldMetadataProvider(MetadataService metadataService,
-			MetadataDependencyRegistry metadataDependencyRegistry,
-			FileManager fileManager) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooFlexScaffold.class.getName()));
 	}
 

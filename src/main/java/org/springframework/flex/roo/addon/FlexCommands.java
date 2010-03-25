@@ -1,14 +1,13 @@
 package org.springframework.flex.roo.addon;
 
-import java.util.logging.Logger;
-
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Sample of a command class. The command class is registered by the Roo shell following an
@@ -18,22 +17,17 @@ import org.springframework.roo.support.util.Assert;
  * non-Windows systems).
  * 
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class FlexCommands implements CommandMarker {
 	
-	private static Logger logger = Logger.getLogger(FlexCommands.class.getName());
+	//private static Logger logger = Logger.getLogger(FlexCommands.class.getName());
 
-	private FlexOperations operations;
-
-	public FlexCommands(FlexOperations operations) {
-		Assert.notNull(operations, "Operations object required");
-		this.operations = operations;
-		logger.warning("Loaded " + FlexCommands.class.getName() + "; try the 'flex' commands");
-	}
+	@Reference private FlexOperations operations;
 	
 	@CliAvailabilityIndicator({"flex setup", "flex remoting scaffold"})
-	public boolean isInstallFlexAvailable() {
-		return operations.isProjectAvailable();
+	public boolean isFlexAvailable() {
+		return operations.isFlexAvailable();
 	}
 	
 	@CliCommand(value="flex setup", help="Install Spring BlazeDS configuration artifacts into your project")
