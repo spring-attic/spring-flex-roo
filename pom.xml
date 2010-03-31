@@ -45,112 +45,112 @@
 			<url>http://maven.badgers-in-foil.co.uk/maven2/</url>
 		</repository>
 	</repositories>
-	
-	
+
+
 
 	<dependencies>
-	    <!-- OSGi -->
-         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <version>4.1.0</version>
-        </dependency>
-        <!-- Apache Felix -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <version>1.2.0</version>
-        </dependency>
+		<!-- OSGi -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<version>4.1.0</version>
+		</dependency>
+		<!-- Apache Felix -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+			<version>1.2.0</version>
+		</dependency>
 		<!-- Spring Roo modules -->
 		<dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.entity</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.finder</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.web.controller</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.classpath</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.monitor</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.file.undo</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.metadata</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.model</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.process.manager</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.project</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.shell</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.entity</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.finder</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.web.controller</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.classpath</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.file.monitor</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.file.undo</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.metadata</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.model</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.process.manager</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.project</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.shell</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.support</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
 		<!-- Other modules (if any) -->
 		<dependency>
 			<groupId>uk.co.badgersinfoil.metaas</groupId>
@@ -169,30 +169,57 @@
 			<version>1.8.2</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>
 		<plugins>
-		    <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
-                    <excludeGroupIds>org.springframework.flex,org.springframework.roo,org.osgi</excludeGroupIds>
-                    <includeScope>compile</includeScope>
-                </configuration>
-            </plugin>
+			<!--
+				<plugin> <groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.1</version> <executions> <execution>
+				<id>copy-dependencies</id> <phase>package</phase> <goals>
+				<goal>copy-dependencies</goal> </goals> </execution> </executions>
+				<configuration>
+				<excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
+				<excludeGroupIds>org.springframework.flex,org.springframework.roo,org.osgi</excludeGroupIds>
+				<includeScope>compile</includeScope> </configuration> </plugin>
+			-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.3.2</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+								    <include>org.antlr:*</include>
+									<include>uk.co.badgersinfoil.metaas:metaas</include>
+								</includes>
+							</artifactSet>
+							<relocations>
+								<relocation>
+									<pattern>org.antlr</pattern>
+									<shadedPattern>org.springframework.flex.roo.addon.antlr</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>org.asdt</pattern>
+									<shadedPattern>org.springframework.flex.roo.addon.asdt</shadedPattern>
+								</relocation>
+								<relocation>
+									<pattern>uk.co.badgersinfoil.metaas</pattern>
+									<shadedPattern>org.springframework.flex.roo.addon.metaas</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -284,32 +311,35 @@
 				</executions>
 			</plugin>
 			<plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.0.1</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Copyright>Copyright ${pom.organization.name}. All Rights Reserved.</Bundle-Copyright>
-                        <Bundle-DocURL>${pom.url}</Bundle-DocURL>
-                    </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <version>1.4.2</version>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <!--<phase>compile</phase>-->
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.0.1</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+						<Bundle-Copyright>Copyright ${pom.organization.name}. All Rights
+							Reserved.</Bundle-Copyright>
+						<Bundle-DocURL>${pom.url}</Bundle-DocURL>
+						<Export-Package>!org.springframework.flex.roo.addon.as.classpath.as3parser,org.springframework.flex.roo.addon.*</Export-Package>
+						<Import-Package>!uk.co.badgersinfoil.*,*</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+				<version>1.4.2</version>
+				<executions>
+					<execution>
+						<id>generate-scr-scrdescriptor</id>
+						<!--<phase>compile</phase>-->
+						<goals>
+							<goal>scr</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<!-- Other -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -350,9 +380,9 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<properties>
-        <roo.version>1.1.0.M1</roo.version>
-    </properties>
+		<roo.version>1.1.0.M1</roo.version>
+	</properties>
 
 </project>
