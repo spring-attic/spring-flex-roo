@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <dependencies>
 	<springFlex>
-		<dependency org="org.springframework.flex" name="org.springframework.flex" rev="1.5.0.BUILD-20091116212119" />
+		<dependency org="org.springframework.flex" name="spring-flex" rev="1.0.3.RELEASE" />
 		<dependency org="org.springframework.flex.roo.addon" name="org.springframework.flex.roo.addon" rev="0.1.0-SNAPSHOT"/>
 	</springFlex>
 </dependencies>

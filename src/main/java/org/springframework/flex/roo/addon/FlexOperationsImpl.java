@@ -4,14 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.mvc.jsp.JspOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -66,22 +63,7 @@ public class FlexOperationsImpl implements FlexOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations webMvcOperations;
-	@Reference private JspOperations jspOperations;
 	@Reference private ClasspathOperations classpathOperations;
-	
-	private static final Map<String, String> amfTypeTable = new HashMap<String, String>();
-	
-	static {
-		amfTypeTable.put("java.lang.String", "String");
-		amfTypeTable.put(JavaType.BOOLEAN_OBJECT.toString(), "Boolean");
-		amfTypeTable.put(JavaType.BOOLEAN_PRIMITIVE.toString(), "Boolean");
-		amfTypeTable.put(JavaType.INT_OBJECT.toString(), "int");
-		amfTypeTable.put(JavaType.INT_PRIMITIVE.toString(), "int");
-		amfTypeTable.put(JavaType.SHORT_OBJECT.toString(), "int");
-		amfTypeTable.put(JavaType.SHORT_PRIMITIVE.toString(), "int");
-		amfTypeTable.put(JavaType.LONG_OBJECT.toString(), "Number");
-		amfTypeTable.put(JavaType.LONG_PRIMITIVE.toString(), "Number");
-	}
 	
 	public void createRemotingDestination(JavaType service, JavaType entity) {
 		Assert.notNull(service, "Remoting Destination Java Type required");
@@ -202,7 +184,7 @@ public class FlexOperationsImpl implements FlexOperations {
 	
 	private void createFlexConfig() {
 		
-		String flexConfigFilename = "/WEB-INF/config/flex-config.xml";
+		String flexConfigFilename = "/WEB-INF/spring/flex-config.xml";
 		
 		try {	
 			if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, flexConfigFilename))) {
@@ -213,14 +195,13 @@ public class FlexOperationsImpl implements FlexOperations {
 		}
 		
 		//adjust MVC config to accommodate Spring Flex
-		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webmvc-config.xml");
+		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
 		MutableFile mvcContextMutableFile = null;
 		
 		Document mvcAppCtx;
 		try {
 			if (!fileManager.exists(mvcContextPath)) {
 				webMvcOperations.installMvcArtefacts();	
-				jspOperations.installCommonViewArtefacts();
 			} 
 			mvcContextMutableFile = fileManager.updateFile(mvcContextPath);
 			mvcAppCtx = XmlUtils.getDocumentBuilder().parse(mvcContextMutableFile.getInputStream());
