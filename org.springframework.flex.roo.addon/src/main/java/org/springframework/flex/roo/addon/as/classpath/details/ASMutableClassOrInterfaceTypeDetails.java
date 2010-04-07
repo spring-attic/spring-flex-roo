@@ -8,7 +8,7 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
 /**
- * Provides information about the different members in a class, interface, enum or aspect.
+ * Provides information about the different members in a class or interface.
  * 
  * @author Jeremy Grelle
  * @since 1.0

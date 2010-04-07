@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadataProvider;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
@@ -210,6 +214,12 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public static void createType(FileManager fileManager2,
+			ASMutableClassOrInterfaceTypeDetails cit, String fileIdentifier2) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -5,4 +5,6 @@ import org.springframework.roo.metadata.MetadataItem;
 public interface ASPhysicalTypeMetadata extends MetadataItem {
 
 	ASPhysicalTypeDetails getPhysicalTypeDetails();
+	
+	String getPhysicalLocationCanonicalPath();
 }

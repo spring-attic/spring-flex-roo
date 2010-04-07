@@ -69,8 +69,6 @@ public class FlexOperationsImpl implements FlexOperations {
 		Assert.notNull(service, "Remoting Destination Java Type required");
 		Assert.notNull(entity, "Entity Java Type required");
 		
-		//createActionScriptEntity(entity);
-		
 		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(service, Path.SRC_MAIN_JAVA);		
 		
 		//create annotation @RooFlexScaffold

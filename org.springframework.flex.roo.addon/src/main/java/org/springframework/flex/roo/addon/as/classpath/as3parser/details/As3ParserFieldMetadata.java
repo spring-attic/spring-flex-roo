@@ -1,8 +1,10 @@
-package org.springframework.flex.roo.addon.as.classpath.as3parser;
+package org.springframework.flex.roo.addon.as.classpath.as3parser.details;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;

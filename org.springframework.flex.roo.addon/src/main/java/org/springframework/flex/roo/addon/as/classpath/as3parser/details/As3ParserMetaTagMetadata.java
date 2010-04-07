@@ -1,10 +1,12 @@
-package org.springframework.flex.roo.addon.as.classpath.as3parser;
+package org.springframework.flex.roo.addon.as.classpath.as3parser.details;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
+import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.BooleanAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.IntegerAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
