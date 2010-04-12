@@ -9,6 +9,8 @@ import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3Pars
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASClassOrInterfaceTypeDetails;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMemberHoldingTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
@@ -35,10 +37,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 
 	// passed into constructor
 	private FileManager fileManager;
-	
-	// computed from constructor
 	private String fileIdentifier;
-	
 	private String declaredByMetadataId;
 	
 	// to satisfy interface
@@ -47,8 +46,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
-	private ASMutableClassOrInterfaceTypeDetails superclass = null;
-	private ActionScriptType superType = null;
+	private ASClassOrInterfaceTypeDetails superclass = null;
 	private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
 	private List<MetaTagMetadata> typeMetaTags = new ArrayList<MetaTagMetadata>();
 	
@@ -103,7 +101,8 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 		
-		//TODO - populate superclass, supertype, and implementsTypes
+		//TODO - populate superclass, and implementsTypes
+		
 		List<ASMetaTag> metaTagList = this.clazz.getAllMetaTags();
 		if (metaTagList != null) {
 			for (ASMetaTag metaTag : metaTagList) {
@@ -112,6 +111,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			}
 		}
 		
+		//TODO - is this good enough for finding constructors?
 		for (ASMethod method : ((List<ASMethod>)this.clazz.getMethods())) {
 			if (method.getName().equals(name.getSimpleTypeName())) {
 				declaredConstructors.add(new As3ParserConstructorMetadata(declaredByMetadataId, method, this));
@@ -120,7 +120,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			}
 		}
 		
-		//TODO - is it possible to find constructors???
 		if (physicalTypeCategory == ASPhysicalTypeCategory.CLASS) {
 			ASClassType clazzType = (ASClassType) this.clazz;
 			
@@ -147,38 +146,27 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public String getDeclaredByMetadataId() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.declaredByMetadataId;
 	}
 
 	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.declaredConstructors;
 	}
 
 	public List<? extends FieldMetadata> getDeclaredFields() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.declaredFields;
 	}
 
 	public List<? extends MethodMetadata> getDeclaredMethods() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.declaredMethods;
 	}
 
 	public List<ActionScriptType> getImplementsTypes() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public ActionScriptType getSuperType() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.implementsTypes;
 	}
 
 	public List<? extends MetaTagMetadata> getTypeMetaTags() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.typeMetaTags;
 	}
 
 	public void removeField(ActionScriptSymbolName fieldName) {
@@ -192,8 +180,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public ActionScriptType getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.name;
 	}
 
 	public void flush() {
@@ -202,24 +189,25 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public ActionScriptPackage getCompilationUnitPackage() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.compilationUnitPackage;
 	}
 
 	public List<String> getImports() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.imports;
 	}
 
 	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.physicalTypeCategory;
 	}
 
 	public static void createType(FileManager fileManager2,
-			ASMutableClassOrInterfaceTypeDetails cit, String fileIdentifier2) {
+			ASMemberHoldingTypeDetails cit, String fileIdentifier2) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public ASClassOrInterfaceTypeDetails getSuperClass() {
+		return this.superclass;
 	}
 
 }

@@ -7,14 +7,18 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.flex.roo.addon.as.classpath.ASMutablePhysicalTypeMetadataProvider;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMemberHoldingTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
@@ -41,7 +45,7 @@ public class As3ParserMetadataProvider implements
 		ASPhysicalTypeDetails physicalTypeDetails = toCreate.getPhysicalTypeDetails();
 		Assert.notNull(physicalTypeDetails, "Unable to parse '" + toCreate + "'");
 		Assert.isInstanceOf(ASMutableClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
-		ASMutableClassOrInterfaceTypeDetails cit = (ASMutableClassOrInterfaceTypeDetails) physicalTypeDetails;
+		ASMemberHoldingTypeDetails cit = (ASMemberHoldingTypeDetails) physicalTypeDetails;
 		String fileIdentifier = toCreate.getPhysicalLocationCanonicalPath();
 		As3ParserMutableClassOrInterfaceTypeDetails.createType(fileManager, cit, fileIdentifier);
 	}
@@ -61,8 +65,30 @@ public class As3ParserMetadataProvider implements
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
-		// TODO Auto-generated method stub
-		return null;
+		Assert.isTrue(ASPhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' is not valid for this metadata provider");
+		String fileIdentifier = obtainPathToIdentifier(metadataIdentificationString);
+		metadataDependencyRegistry.deregisterDependencies(metadataIdentificationString);
+		if (!fileManager.exists(fileIdentifier)) {
+			// Couldn't find the file, so return null to distinguish from a file that was found but could not be parsed
+			return null;
+		}
+		As3ParserClassMetadata result = new As3ParserClassMetadata(fileManager, fileIdentifier, metadataIdentificationString, metadataService, this);
+		if (result.getPhysicalTypeDetails() != null && result.getPhysicalTypeDetails() instanceof ASMemberHoldingTypeDetails) {
+			ASMutableClassOrInterfaceTypeDetails details = (ASMutableClassOrInterfaceTypeDetails) result.getPhysicalTypeDetails();
+			if (details.getPhysicalTypeCategory() == ASPhysicalTypeCategory.CLASS && details.getSuperClass() != null) {
+				// This is a class, and it extends another class
+				//TODO - For now we're ignoring implemented interfaces (at least in terms of registering a dependency on them) -
+				//this should be re-evaluated as we get further into the implementation
+					
+				// We have a dependency on the superclass, and there is metadata available for the superclass
+				// We won't implement the full MetadataNotificationListener here, but rely on MetadataService's fallback
+				// (which is to evict from cache and call get again given As3ParserMetadataProvider doesn't implement MetadataNotificationListener, then notify everyone we've changed)
+				//TODO - This is how the JavaParser impl does it...are we sure it's pertinent here as well?
+				String superclassId = details.getSuperClass().getDeclaredByMetadataId();
+				metadataDependencyRegistry.registerDependency(superclassId, result.getId());
+			}
+		}
+		return result;
 	}
 
 	public String getProvidesType() {
@@ -70,7 +96,41 @@ public class As3ParserMetadataProvider implements
 	}
 	
 	public void onFileEvent(FileEvent fileEvent) {
-		// TODO Auto-generated method stub
+		String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
+		
+		if (fileIdentifier.endsWith(".as") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH) {
+			// file is of interest
+			
+			// figure out the ActionScriptType this should be
+			FlexPathResolver pathResolver = getPathResolver();
+			Path sourcePath = null;
+			for (Path path : pathResolver.getFlexSourcePaths()) {
+				if (new FileDetails(new File(pathResolver.getRoot(path)), null).isParentOf(fileIdentifier)) {
+					sourcePath = path;
+					break;
+				}
+			}
+			if (sourcePath == null) {
+				// the .as file is not under a source path, so ignore it
+				return;
+			}
+			// determine the ActionScriptType for this file
+			String relativePath = pathResolver.getRelativeSegment(fileIdentifier);
+			Assert.hasText(relativePath, "Could not determine compilation unit name for file '" + fileIdentifier + "'");
+			Assert.isTrue(relativePath.startsWith(File.separator), "Relative path unexpectedly dropped the '" + File.separator + "' prefix (received '" + relativePath + "' from '" + fileIdentifier + "'");
+			relativePath = relativePath.substring(1);
+			Assert.isTrue(relativePath.endsWith(".as"), "The relative path unexpectedly dropped the .as extension for file '" + fileIdentifier + "'");
+			relativePath = relativePath.substring(0, relativePath.lastIndexOf(".as"));
+			
+			ActionScriptType actionScriptType = new ActionScriptType(relativePath.replace(File.separatorChar, '.'));
+			
+			// figure out the PhysicalTypeIdentifier
+			String id = ASPhysicalTypeIdentifier.createIdentifier(actionScriptType, sourcePath);
+			
+			// Now we've worked out the id, we can publish the event in case others were interested
+			metadataService.evict(id);
+			metadataDependencyRegistry.notifyDownstream(id);
+		}
 
 	}
 	
@@ -81,6 +141,16 @@ public class As3ParserMetadataProvider implements
 		Assert.notNull(pathResolver, "Path resolver unavailable because valid project metadata not currently available");
 		Assert.isInstanceOf(FlexPathResolver.class, "Path resolver is of an unexpected type, not appropriate for a Flex project.");
 		return (FlexPathResolver) pathResolver;
+	}
+	
+	private String obtainPathToIdentifier(String physicalTypeIdentifier) {
+		Assert.isTrue(ASPhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Metadata identification string '" + physicalTypeIdentifier + "' is not valid for this metadata provider");
+		Path path = ASPhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		ActionScriptType type = ASPhysicalTypeIdentifier.getActionScriptType(physicalTypeIdentifier);
+		PathResolver pathResolver = getPathResolver();
+		String relativePath = type.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".as";
+		String fileIdentifier = pathResolver.getIdentifier(path, relativePath);
+		return fileIdentifier;
 	}
 
 }

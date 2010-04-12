@@ -1,4 +1,4 @@
-package
+package com.foo.stuff
 {
 	import com.foo.Bar;
 	
@@ -8,17 +8,23 @@ package
 		[FieldLevelTag1]
 		public var field1:String;
 		
-		public var field2:String;
+		private var field2:Bar;
 		
 		public function Foo(){
 			var localField1 = "localField1";
+			field2 = new Bar(localField);
 		}
 		
-		public function method1():void{
+		[MethodLevelTag1]
+		private function method1():void{
 		
 		}
 		
 		public function fooFactory():Foo{
+		
+		}
+		
+		public function calculateStuff(bar:String, baz:Bar):String {
 		
 		}
 	}

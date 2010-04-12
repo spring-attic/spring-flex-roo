@@ -41,7 +41,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 		
 		this.methodName = new ActionScriptSymbolName(method.getName());
 		
-		this.returnType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), method.getType());
+		this.returnType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), method.getName());
 		
 		StringBuffer bodyBuf = new StringBuffer();
 		for (Statement statement : (List<Statement>) method.getStatementList()){
@@ -69,13 +69,11 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 	}
 
 	public List<ActionScriptSymbolName> getParameterNames() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.paramNames;
 	}
 
 	public List<ActionScriptType> getParameterTypes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.paramTypes;
 	}
 
 	public String getDeclaredByMetadataId() {

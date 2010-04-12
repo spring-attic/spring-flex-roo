@@ -12,8 +12,8 @@ import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
 
-@Component
-@Service
+//@Component
+//@Service
 public class FlexMojosPathResolver extends MavenPathResolver implements FlexPathResolver {
 
 	@Override
