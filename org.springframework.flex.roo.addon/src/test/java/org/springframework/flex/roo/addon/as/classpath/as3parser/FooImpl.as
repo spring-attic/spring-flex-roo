@@ -1,16 +1,18 @@
 package com.foo.stuff
 {
+	import com.foo.Alpha;
 	import com.foo.Bar;
+	import com.foo.Foo;
 	
 	[ClassLevelTag1]
-	public class Foo
+	public class FooImpl extends Alpha implements Foo
 	{
 		[FieldLevelTag1]
 		public var field1:String;
 		
 		private var field2:Bar;
 		
-		public function Foo(){
+		public function FooImpl(){
 			var localField1 = "localField1";
 			field2 = new Bar(localField);
 		}
@@ -20,7 +22,7 @@ package com.foo.stuff
 		
 		}
 		
-		public function fooFactory():Foo{
+		public function fooFactory():FooImpl{
 		
 		}
 		

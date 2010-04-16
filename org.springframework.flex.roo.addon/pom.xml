@@ -175,6 +175,12 @@
 			<version>1.8.2</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>3.0.2.RELEASE</version>
+            <scope>test</scope>
+        </dependency>
 
 	</dependencies>
 

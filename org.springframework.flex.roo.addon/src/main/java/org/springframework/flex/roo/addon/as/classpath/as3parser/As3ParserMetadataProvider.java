@@ -75,17 +75,23 @@ public class As3ParserMetadataProvider implements
 		As3ParserClassMetadata result = new As3ParserClassMetadata(fileManager, fileIdentifier, metadataIdentificationString, metadataService, this);
 		if (result.getPhysicalTypeDetails() != null && result.getPhysicalTypeDetails() instanceof ASMemberHoldingTypeDetails) {
 			ASMutableClassOrInterfaceTypeDetails details = (ASMutableClassOrInterfaceTypeDetails) result.getPhysicalTypeDetails();
-			if (details.getPhysicalTypeCategory() == ASPhysicalTypeCategory.CLASS && details.getSuperClass() != null) {
+			if (details.getPhysicalTypeCategory() == ASPhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
 				// This is a class, and it extends another class
-				//TODO - For now we're ignoring implemented interfaces (at least in terms of registering a dependency on them) -
-				//this should be re-evaluated as we get further into the implementation
-					
-				// We have a dependency on the superclass, and there is metadata available for the superclass
-				// We won't implement the full MetadataNotificationListener here, but rely on MetadataService's fallback
-				// (which is to evict from cache and call get again given As3ParserMetadataProvider doesn't implement MetadataNotificationListener, then notify everyone we've changed)
-				//TODO - This is how the JavaParser impl does it...are we sure it's pertinent here as well?
-				String superclassId = details.getSuperClass().getDeclaredByMetadataId();
-				metadataDependencyRegistry.registerDependency(superclassId, result.getId());
+				
+				if (details.getSuperClass() != null) {
+					// We have a dependency on the superclass, and there is metadata available for the superclass
+					// We won't implement the full MetadataNotificationListener here, but rely on MetadataService's fallback
+					// (which is to evict from cache and call get again given As3ParserMetadataProvider doesn't implement MetadataNotificationListener, then notify everyone we've changed)
+					String superclassId = details.getSuperClass().getDeclaredByMetadataId();
+					metadataDependencyRegistry.registerDependency(superclassId, result.getId());
+				} else {
+					// We have a dependency on the superclass, but no metadata is available
+					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
+					for (Path sourcePath : getPathResolver().getSourcePaths()) {
+						String possibleSuperclass = ASPhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
+						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
+					}
+				}
 			}
 		}
 		return result;

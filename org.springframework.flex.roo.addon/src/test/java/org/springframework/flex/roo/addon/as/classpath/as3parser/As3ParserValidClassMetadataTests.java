@@ -56,8 +56,8 @@ public class As3ParserValidClassMetadataTests {
 		initMocks(this);
 		when(processManager.isDevelopmentMode()).thenReturn(true);
 		ActiveProcessManager.setActiveProcessManager(processManager);
-		fileIdentifier = "org/springframework/flex/roo/addon/as/classpath/as3parser/Foo.as";
-		metadataId = "MID:"+ASPhysicalTypeIdentifier.class.getName()+"#SRC_MAIN_FLEX?com.foo.stuff.Foo";
+		fileIdentifier = "org/springframework/flex/roo/addon/as/classpath/as3parser/FooImpl.as";
+		metadataId = "MID:"+ASPhysicalTypeIdentifier.class.getName()+"#SRC_MAIN_FLEX?com.foo.stuff.FooImpl";
 		when(fileManager.exists(fileIdentifier)).thenReturn(true);
 		when(fileManager.readFile(fileIdentifier)).thenReturn(fileDetails);
 		testFile = new ClassPathResource(fileIdentifier).getFile();
@@ -75,17 +75,23 @@ public class As3ParserValidClassMetadataTests {
 		assertNotNull(details.getName());
 		assertEquals("com.foo.stuff", details.getName().getPackage().getFullyQualifiedPackageName());
 		assertEquals(details.getCompilationUnitPackage(), details.getName().getPackage());
-		assertEquals("com.foo.stuff.Foo", details.getName().getFullyQualifiedTypeName());
-		assertEquals("Foo", details.getName().getSimpleTypeName());
+		assertEquals("com.foo.stuff.FooImpl", details.getName().getFullyQualifiedTypeName());
+		assertEquals("FooImpl", details.getName().getSimpleTypeName());
 		assertEquals(ASPhysicalTypeCategory.CLASS, details.getPhysicalTypeCategory());
 		assertEquals(2, details.getDeclaredFields().size());
 		assertEquals(3, details.getDeclaredMethods().size());
+		assertEquals(1, details.getImplementsTypes().size());
+		assertEquals("com.foo.Foo", details.getImplementsTypes().get(0).getFullyQualifiedTypeName());
+		assertEquals(1, details.getExtendsTypes().size());
+		assertEquals("com.foo.Alpha", details.getExtendsTypes().get(0).getFullyQualifiedTypeName());
 	}
 	
 	@Test
 	public void testImports() {
-		assertEquals(1, details.getImports().size());
-		assertEquals("com.foo.Bar", details.getImports().get(0));
+		assertEquals(3, details.getImports().size());
+		assertEquals("com.foo.Alpha", details.getImports().get(0));
+		assertEquals("com.foo.Bar", details.getImports().get(1));
+		assertEquals("com.foo.Foo", details.getImports().get(2));
 	}
 	
 	@Test
@@ -144,7 +150,7 @@ public class As3ParserValidClassMetadataTests {
 		assertEquals("fooFactory", method.getMethodName().getSymbolName());
 		assertEquals(ASTypeVisibility.PUBLIC, method.getVisibility());
 		assertEquals(0, method.getParameterNames().size());
-		assertEquals("com.foo.stuff.Foo", method.getReturnType().getFullyQualifiedTypeName());
+		assertEquals("com.foo.stuff.FooImpl", method.getReturnType().getFullyQualifiedTypeName());
 		assertEquals(0, method.getMetaTags().size());
 	}
 	

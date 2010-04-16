@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadataProvider;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserFieldMetadata;
@@ -23,6 +24,8 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASCompilationUnit;
@@ -47,6 +50,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 	private ASClassOrInterfaceTypeDetails superclass = null;
+	private List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
 	private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
 	private List<MetaTagMetadata> typeMetaTags = new ArrayList<MetaTagMetadata>();
 	
@@ -86,11 +90,11 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		this.clazz = compilationUnit.getType();
 
 		// Determine the type name
-		ActionScriptType newName = As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, this.clazz);
+		//ActionScriptType newName = As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, this.clazz);
 		
 		// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
 		//TODO - is this necessary for us?
-		this.name = new ActionScriptType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType());
+		//this.name = new ActionScriptType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType());
 		
 		if (this.clazz instanceof ASInterfaceType) {
 			physicalTypeCategory = ASPhysicalTypeCategory.INTERFACE;
@@ -101,7 +105,35 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 		
-		//TODO - populate superclass, and implementsTypes
+		if (this.clazz instanceof ASClassType) {
+			ASClassType classDef = (ASClassType) this.clazz;
+			if (StringUtils.hasLength(classDef.getSuperclass())) {
+				ActionScriptType superType = As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, classDef.getSuperclass());
+				this.extendsTypes.add(superType);
+				String superclassId = physicalTypeMetadataProvider.findIdentifier(superType);
+				ASPhysicalTypeMetadata superPtm = null;
+				if (superclassId != null) {
+					superPtm = (ASPhysicalTypeMetadata) metadataService.get(superclassId);
+				}
+				if (superPtm != null && superPtm.getPhysicalTypeDetails() != null && superPtm.getPhysicalTypeDetails() instanceof ASClassOrInterfaceTypeDetails) {
+					this.superclass = (ASClassOrInterfaceTypeDetails) superPtm.getPhysicalTypeDetails();
+				}
+			}
+			if (!CollectionUtils.isEmpty(classDef.getImplementedInterfaces())) {
+				List<String> interfaces = classDef.getImplementedInterfaces();
+				for(String interfaceName : interfaces) {
+					this.implementsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, interfaceName));
+				}
+			}
+		} else if (this.clazz instanceof ASInterfaceType) {
+			ASInterfaceType interfaceDef = (ASInterfaceType) this.clazz;
+			if (!CollectionUtils.isEmpty(interfaceDef.getSuperInterfaces())) {
+				List<String> superInterfaces = interfaceDef.getSuperInterfaces();
+				for(String superInterface : superInterfaces) {
+					this.extendsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, superInterface));
+				}
+			}
+		}
 		
 		List<ASMetaTag> metaTagList = this.clazz.getAllMetaTags();
 		if (metaTagList != null) {
@@ -111,7 +143,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			}
 		}
 		
-		//TODO - is this good enough for finding constructors?
 		for (ASMethod method : ((List<ASMethod>)this.clazz.getMethods())) {
 			if (method.getName().equals(name.getSimpleTypeName())) {
 				declaredConstructors.add(new As3ParserConstructorMetadata(declaredByMetadataId, method, this));
@@ -159,6 +190,10 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 
 	public List<? extends MethodMetadata> getDeclaredMethods() {
 		return this.declaredMethods;
+	}
+	
+	public List<ActionScriptType> getExtendsTypes() {
+		return this.extendsTypes;
 	}
 
 	public List<ActionScriptType> getImplementsTypes() {
@@ -209,5 +244,4 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	public ASClassOrInterfaceTypeDetails getSuperClass() {
 		return this.superclass;
 	}
-
 }
