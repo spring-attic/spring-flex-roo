@@ -18,8 +18,8 @@ public class FlexMojosPathResolver extends MavenPathResolver implements FlexPath
 
 	@Override
 	protected void activate(ComponentContext context) {
-		File root = MonitoringRequest.getInitialMonitoringRequest().getFile();
-		getPathInformation().add(new PathInformation(FlexPath.SRC_MAIN_FLEX, true, new File(root, "src/main/flex")));
+		//File root = MonitoringRequest.getInitialMonitoringRequest().getFile();
+		//getPathInformation().add(new PathInformation(FlexPath.SRC_MAIN_FLEX, true, new File(root, "src/main/flex")));
 		init();
 	}
 

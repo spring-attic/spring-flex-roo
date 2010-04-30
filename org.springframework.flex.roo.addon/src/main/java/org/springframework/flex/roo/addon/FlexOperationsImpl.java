@@ -199,7 +199,7 @@ public class FlexOperationsImpl implements FlexOperations {
 		Document mvcAppCtx;
 		try {
 			if (!fileManager.exists(mvcContextPath)) {
-				webMvcOperations.installMvcArtefacts();	
+				webMvcOperations.installAllWebMvcArtifacts();	
 			} 
 			mvcContextMutableFile = fileManager.updateFile(mvcContextPath);
 			mvcAppCtx = XmlUtils.getDocumentBuilder().parse(mvcContextMutableFile.getInputStream());
