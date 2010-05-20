@@ -1,4 +1,5 @@
-<project-modules id="moduleCoreId" project-version="2.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
   <wb-module deploy-name="flexrocks">
     <property name="context-root" value="flexrocks"/>
     <wb-resource deploy-path="/" source-path="src/main/webapp"/>
@@ -129,7 +130,7 @@
     <dependent-module archiveName="spring-expression-3.0.2.RELEASE.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/springframework/spring-expression/3.0.2.RELEASE/spring-expression-3.0.2.RELEASE.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="spring-flex-core.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/spring-flex-core/spring-flex-core">
+    <dependent-module archiveName="spring-flex-core-1.5.0.BUILD-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/springframework/flex/spring-flex-core/1.5.0.BUILD-SNAPSHOT/spring-flex-core-1.5.0.BUILD-SNAPSHOT.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
     <dependent-module archiveName="spring-jdbc-3.0.2.RELEASE.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/org/springframework/spring-jdbc/3.0.2.RELEASE/spring-jdbc-3.0.2.RELEASE.jar">
@@ -159,9 +160,9 @@
     <dependent-module archiveName="xml-apis-1.0.b2.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/var/M2_REPO/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar">
       <dependency-type>uses</dependency-type>
     </dependent-module>
-    <dependent-module archiveName="flex-rds-server.jar" deploy-path="/WEB-INF/lib" handle="module:/flex-rds-server.jar">
-      <dependency-type>uses</dependency-type>
-    </dependent-module>
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/flexrocks/flex-rds-server.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
     <wb-resource deploy-path="/WEB-INF/classes" source-path="src/main/java"/>
     <wb-resource deploy-path="/WEB-INF/classes" source-path="src/main/resources"/>
   </wb-module>

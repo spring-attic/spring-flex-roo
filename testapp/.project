@@ -3,8 +3,6 @@
   <comment/>
   <projects>
     <project>org.springframework.flex.roo.annotations</project>
-    <project>org.springframework.roo.annotations</project>
-    <project>spring-flex-core</project>
   </projects>
   <buildSpec>
     <buildCommand>
