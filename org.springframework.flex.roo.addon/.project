@@ -5,6 +5,7 @@
     <project>org.springframework.roo.addon.beaninfo</project>
     <project>org.springframework.roo.addon.entity</project>
     <project>org.springframework.roo.addon.finder</project>
+    <project>org.springframework.roo.addon.maven</project>
     <project>org.springframework.roo.addon.web.controller</project>
     <project>org.springframework.roo.addon.web.mvc.jsp</project>
     <project>org.springframework.roo.classpath</project>

@@ -235,12 +235,20 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.physicalTypeCategory;
 	}
 
-	public static void createType(FileManager fileManager2,
-			ASMemberHoldingTypeDetails cit, String fileIdentifier2) {
-		// TODO Auto-generated method stub
+	public static final void createType(FileManager fileManager, final ASClassOrInterfaceTypeDetails cit, String fileIdentifier) {
+		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(cit, "Class or interface type details required");
+		Assert.hasText(fileIdentifier, "File identifier required");
 		
-	}
+		final String newContents = getOutput(cit);
 
+		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+	}
+	
+	public static final String getOutput(final ASClassOrInterfaceTypeDetails cit) {
+		return "";
+	}
+	
 	public ASClassOrInterfaceTypeDetails getSuperClass() {
 		return this.superclass;
 	}

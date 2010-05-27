@@ -55,7 +55,7 @@ public class FlexScaffoldMetadata extends
 		builder.addMethod(getCreateMethod());
 		builder.addMethod(getShowMethod());
 		builder.addMethod(getListMethod());
-		builder.addMethod(getPagedListMethod());
+		builder.addMethod(getListPagedMethod());
 		builder.addMethod(getUpdateMethod());
 		builder.addMethod(getDeleteMethod());
 		
@@ -119,12 +119,12 @@ public class FlexScaffoldMetadata extends
 		JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 		
-		bodyBuilder.appendFormalLine("return " + methodName + "(null, null);");
+		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "();");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, null, null, null, null, bodyBuilder.getOutput());
 	}
 	
-	private MethodMetadata getPagedListMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("list");		
+	private MethodMetadata getListPagedMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("listPaged");		
 		
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
@@ -149,7 +149,7 @@ public class FlexScaffoldMetadata extends
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return list();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 

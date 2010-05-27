@@ -176,11 +176,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>3.0.2.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>3.0.2.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>3.0.2.RELEASE</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 
@@ -210,7 +216,7 @@
 						<configuration>
 							<artifactSet>
 								<includes>
-								    <include>org.antlr:*</include>
+									<include>org.antlr:*</include>
 									<include>uk.co.badgersinfoil.metaas:metaas</include>
 								</includes>
 							</artifactSet>
@@ -284,6 +290,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.4.3</version>
+				<configuration>
+					<includes>
+						<include>**/*Tests.class</include>
+					</includes>
+					<excludes>
+						<exclude>**/Abstract*</exclude>
+					</excludes>
+					<forkMode>once</forkMode>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

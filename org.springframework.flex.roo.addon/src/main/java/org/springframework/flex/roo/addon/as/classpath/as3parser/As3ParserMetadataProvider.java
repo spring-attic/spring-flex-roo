@@ -11,6 +11,7 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMemberHoldingTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -24,8 +25,6 @@ import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 
 @Component(immediate=true)
@@ -36,6 +35,7 @@ public class As3ParserMetadataProvider implements
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private FlexPathResolver pathResolver; //TODO - Is this the correct way to get the FlexPathResolver, or should we look it up the way JavaParserMetadataProvider does
 	
 	protected void activate(ComponentContext context) {
 	}
@@ -44,15 +44,14 @@ public class As3ParserMetadataProvider implements
 		Assert.notNull(toCreate, "Metadata to create is required");
 		ASPhysicalTypeDetails physicalTypeDetails = toCreate.getPhysicalTypeDetails();
 		Assert.notNull(physicalTypeDetails, "Unable to parse '" + toCreate + "'");
-		Assert.isInstanceOf(ASMutableClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
-		ASMemberHoldingTypeDetails cit = (ASMemberHoldingTypeDetails) physicalTypeDetails;
+		Assert.isInstanceOf(ASClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
+		ASClassOrInterfaceTypeDetails cit = (ASClassOrInterfaceTypeDetails) physicalTypeDetails;
 		String fileIdentifier = toCreate.getPhysicalLocationCanonicalPath();
 		As3ParserMutableClassOrInterfaceTypeDetails.createType(fileManager, cit, fileIdentifier);
 	}
 
 	public String findIdentifier(ActionScriptType actionScriptType) {
 		Assert.notNull(actionScriptType, "ActionScript type to locate is required");
-		FlexPathResolver pathResolver = getPathResolver();
 		for (Path sourcePath : pathResolver.getFlexSourcePaths()) {
 			String relativePath = actionScriptType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".as";
 			String fileIdentifier = pathResolver.getIdentifier(sourcePath, relativePath);
@@ -87,7 +86,7 @@ public class As3ParserMetadataProvider implements
 				} else {
 					// We have a dependency on the superclass, but no metadata is available
 					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
-					for (Path sourcePath : getPathResolver().getSourcePaths()) {
+					for (Path sourcePath : pathResolver.getSourcePaths()) {
 						String possibleSuperclass = ASPhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
 						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
 					}
@@ -108,7 +107,6 @@ public class As3ParserMetadataProvider implements
 			// file is of interest
 			
 			// figure out the ActionScriptType this should be
-			FlexPathResolver pathResolver = getPathResolver();
 			Path sourcePath = null;
 			for (Path path : pathResolver.getFlexSourcePaths()) {
 				if (new FileDetails(new File(pathResolver.getRoot(path)), null).isParentOf(fileIdentifier)) {
@@ -140,20 +138,19 @@ public class As3ParserMetadataProvider implements
 
 	}
 	
-	private FlexPathResolver getPathResolver() {
+	/*private FlexPathResolver getPathResolver() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.notNull(pathResolver, "Path resolver unavailable because valid project metadata not currently available");
 		Assert.isInstanceOf(FlexPathResolver.class, "Path resolver is of an unexpected type, not appropriate for a Flex project.");
 		return (FlexPathResolver) pathResolver;
-	}
+	}*/
 	
 	private String obtainPathToIdentifier(String physicalTypeIdentifier) {
 		Assert.isTrue(ASPhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Metadata identification string '" + physicalTypeIdentifier + "' is not valid for this metadata provider");
 		Path path = ASPhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		ActionScriptType type = ASPhysicalTypeIdentifier.getActionScriptType(physicalTypeIdentifier);
-		PathResolver pathResolver = getPathResolver();
 		String relativePath = type.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".as";
 		String fileIdentifier = pathResolver.getIdentifier(path, relativePath);
 		return fileIdentifier;
