@@ -12,7 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASClassOrInterfaceTypeDetails;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASPhysicalTypeDetails;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASPhysicalTypeMetadata;
+import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexMojosPathResolver;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
@@ -72,8 +79,12 @@ public class As3ParserMetadataProviderTests {
 	}
 	
 	@Test
-	public void testCreatePhysicalType() {
-		fail("Not implemented.");
+	public void testCreatePhysicalType_EmptyClass() throws IOException {
+		String fileIdentifier = new ClassPathResource("com/foo/stuff/EmptyImpl.as").getFile().getCanonicalPath();
+		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.EmptyImpl"), 
+				ASPhysicalTypeCategory.CLASS, null);
+		ASPhysicalTypeMetadata type = new DefaultASPhysicalTypeMetadata(metadataId, fileIdentifier, details);
+		provider.createPhysicalType(type);
 	}
 	
 	@Test

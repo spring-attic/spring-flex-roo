@@ -1,5 +1,7 @@
 package org.springframework.flex.roo.addon.as.classpath.as3parser;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 
+import uk.co.badgersinfoil.metaas.ActionScriptFactory;
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASCompilationUnit;
 import uk.co.badgersinfoil.metaas.dom.ASField;
@@ -246,7 +249,17 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 	
 	public static final String getOutput(final ASClassOrInterfaceTypeDetails cit) {
-		return "";
+		ActionScriptFactory factory = new ActionScriptFactory();
+		final ASCompilationUnit compilationUnit = factory.newClass(cit.getName().getFullyQualifiedTypeName());
+		
+		StringWriter writer = new StringWriter();
+		try {
+			factory.newWriter().write(writer, compilationUnit);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return writer.toString();
 	}
 	
 	public ASClassOrInterfaceTypeDetails getSuperClass() {
