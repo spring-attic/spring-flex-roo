@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
 import uk.co.badgersinfoil.metaas.ActionScriptFactory;
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASCompilationUnit;
+import uk.co.badgersinfoil.metaas.dom.ASInterfaceType;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.ASMethod;
 
@@ -127,9 +128,18 @@ public class As3ParserMetadataProviderTests {
 	}
 	
 	@Test
-	@Ignore
-	public void testCreatePhysicalType_Interface() {
-		fail("Not implemented.");
+	public void testCreatePhysicalType_Interface() throws IOException {
+		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
+		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.Foo"), 
+				ASPhysicalTypeCategory.INTERFACE, null);
+		ASPhysicalTypeMetadata type = new DefaultASPhysicalTypeMetadata(metadataId, fileIdentifier, details);
+		provider.createPhysicalType(type);
+		assertTrue(StringUtils.hasText(fileManager.lastFile));
+		
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(fileManager.lastFile));
+		assertEquals("com.foo.stuff", compUnit.getPackageName());
+		assertTrue(compUnit.getType() instanceof ASInterfaceType);
+		assertEquals("Foo", compUnit.getType().getName());
 	}
 	
 	@Test
@@ -155,15 +165,50 @@ public class As3ParserMetadataProviderTests {
 	}
 	
 	@Test
-	@Ignore
-	public void testCreatePhysicalType_ClassWithSuperclass() {
-		fail("Not implemented.");
+	public void testCreatePhysicalType_ClassWithSuperclass() throws IOException {
+		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
+		
+		List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
+		extendsTypes.add(new ActionScriptType("com.foo.other.Parent"));
+		
+		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
+				ASPhysicalTypeCategory.CLASS, null, null, null, null, extendsTypes, null, null);
+		ASPhysicalTypeMetadata type = new DefaultASPhysicalTypeMetadata(metadataId, fileIdentifier, details);
+		provider.createPhysicalType(type);
+		assertTrue(StringUtils.hasText(fileManager.lastFile));
+		
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(fileManager.lastFile));
+		assertEquals("com.foo.stuff", compUnit.getPackageName());
+		assertTrue(compUnit.getType() instanceof ASClassType);
+		assertEquals("FooImpl", compUnit.getType().getName());
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertEquals("Parent", clazz.getSuperclass());
+		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Parent"));
 	}
 	
 	@Test
-	@Ignore
-	public void testCreatePhysicalType_ClassWithInterfaces() {
-		fail("Not implemented.");
+	public void testCreatePhysicalType_ClassWithInterfaces() throws IOException {
+		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
+		
+		List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
+		implementsTypes.add(new ActionScriptType("com.foo.other.Parent"));
+		implementsTypes.add(new ActionScriptType("com.foo.other.Sibling"));
+		
+		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
+				ASPhysicalTypeCategory.CLASS, null, null, null, null, null, implementsTypes, null);
+		ASPhysicalTypeMetadata type = new DefaultASPhysicalTypeMetadata(metadataId, fileIdentifier, details);
+		provider.createPhysicalType(type);
+		assertTrue(StringUtils.hasText(fileManager.lastFile));
+		
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(fileManager.lastFile));
+		assertEquals("com.foo.stuff", compUnit.getPackageName());
+		assertTrue(compUnit.getType() instanceof ASClassType);
+		assertEquals("FooImpl", compUnit.getType().getName());
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertEquals("Parent", clazz.getImplementedInterfaces().get(0));
+		assertEquals("Sibling", clazz.getImplementedInterfaces().get(1));
+		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Parent"));
+		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Sibling"));
 	}
 	
 	@Test

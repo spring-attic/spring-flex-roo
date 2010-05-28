@@ -72,8 +72,8 @@ public class As3ParserMetadataProvider implements
 			return null;
 		}
 		As3ParserClassMetadata result = new As3ParserClassMetadata(fileManager, fileIdentifier, metadataIdentificationString, metadataService, this);
-		if (result.getPhysicalTypeDetails() != null && result.getPhysicalTypeDetails() instanceof ASMemberHoldingTypeDetails) {
-			ASMutableClassOrInterfaceTypeDetails details = (ASMutableClassOrInterfaceTypeDetails) result.getPhysicalTypeDetails();
+		if (result.getPhysicalTypeDetails() != null && result.getPhysicalTypeDetails() instanceof ASClassOrInterfaceTypeDetails) {
+			ASClassOrInterfaceTypeDetails details = (ASClassOrInterfaceTypeDetails) result.getPhysicalTypeDetails();
 			if (details.getPhysicalTypeCategory() == ASPhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
 				// This is a class, and it extends another class
 				

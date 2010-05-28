@@ -1,6 +1,9 @@
 package org.springframework.flex.roo.addon.as.classpath.as3parser;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +26,10 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
+import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 import uk.co.badgersinfoil.metaas.ActionScriptFactory;
@@ -57,7 +62,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	
 	// internal use
 	private ASCompilationUnit compilationUnit;
-	private List<String> imports;
 	private ActionScriptPackage compilationUnitPackage;
 	private ASType clazz;
 	
@@ -78,11 +82,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		this.fileIdentifier = fileIdentifier;
 		
 		this.compilationUnit = compilationUnit;
-		
-		imports = compilationUnit.getPackage().findImports();
-		if (imports == null) {
-			imports = new ArrayList<String>();
-		}
 		
 		compilationUnitPackage = typeName.getPackage();
 		
@@ -109,7 +108,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		if (this.clazz instanceof ASClassType) {
 			ASClassType classDef = (ASClassType) this.clazz;
 			if (StringUtils.hasLength(classDef.getSuperclass())) {
-				ActionScriptType superType = As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, classDef.getSuperclass());
+				ActionScriptType superType = As3ParserUtils.getActionScriptType(compilationUnitPackage, getImports(), classDef.getSuperclass());
 				this.extendsTypes.add(superType);
 				String superclassId = physicalTypeMetadataProvider.findIdentifier(superType);
 				ASPhysicalTypeMetadata superPtm = null;
@@ -123,7 +122,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			if (!CollectionUtils.isEmpty(classDef.getImplementedInterfaces())) {
 				List<String> interfaces = classDef.getImplementedInterfaces();
 				for(String interfaceName : interfaces) {
-					this.implementsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, interfaceName));
+					this.implementsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, getImports(), interfaceName));
 				}
 			}
 		} else if (this.clazz instanceof ASInterfaceType) {
@@ -131,7 +130,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			if (!CollectionUtils.isEmpty(interfaceDef.getSuperInterfaces())) {
 				List<String> superInterfaces = interfaceDef.getSuperInterfaces();
 				for(String superInterface : superInterfaces) {
-					this.extendsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, imports, superInterface));
+					this.extendsTypes.add(As3ParserUtils.getActionScriptType(compilationUnitPackage, getImports(), superInterface));
 				}
 			}
 		}
@@ -221,8 +220,21 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public void flush() {
-		// TODO Auto-generated method stub
-
+		ActionScriptFactory factory = new ActionScriptFactory();
+		StringWriter writer = new StringWriter();
+		try {
+			factory.newWriter().write(writer, compilationUnit);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Reader compilationUnitInputStream = new StringReader(writer.toString());
+		MutableFile mutableFile = fileManager.updateFile(fileIdentifier);
+		try {
+			FileCopyUtils.copy(compilationUnitInputStream, new OutputStreamWriter(mutableFile.getOutputStream()));
+		} catch (IOException ioe) {
+			throw new IllegalStateException("Could not update '" + fileIdentifier + "'", ioe);
+		}
 	}
 
 	public ActionScriptPackage getCompilationUnitPackage() {
@@ -230,11 +242,11 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public List<String> getImports() {
-		return this.imports;
+		return this.compilationUnit.getPackage().findImports();
 	}
 	
 	public void addImport(String fullyQualifiedTypeName) {
-		this.imports.add(fullyQualifiedTypeName);
+		this.compilationUnit.getPackage().addImport(fullyQualifiedTypeName);				
 	}
 
 	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
@@ -260,8 +272,6 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			compilationUnit = factory.newInterface(cit.getName().getFullyQualifiedTypeName());
 		}
 		
-		//TODO - handle extends and implements
-		
 		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
 
 			public void flush() {
@@ -281,6 +291,21 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 				compilationUnit.getPackage().addImport(fullyQualifiedTypeName);				
 			}
 		};
+		
+		for(ActionScriptType extendsType : cit.getExtendsTypes()) {
+			As3ParserUtils.importTypeIfRequired(compilationUnitServices, extendsType);
+			if (compilationUnit.getType() instanceof ASClassType) {
+				Assert.isNull(((ASClassType)compilationUnit.getType()).getSuperclass(), "An ActionScript class may only extend one type.");
+				((ASClassType)compilationUnit.getType()).setSuperclass(extendsType.getSimpleTypeName());
+			} else {
+				((ASInterfaceType)compilationUnit.getType()).addSuperInterface(extendsType.getSimpleTypeName());
+			}
+		}
+		
+		for(ActionScriptType implementsType : cit.getImplementsTypes()) {
+			As3ParserUtils.importTypeIfRequired(compilationUnitServices, implementsType);
+			((ASClassType)compilationUnit.getType()).addImplementedInterface(implementsType.getSimpleTypeName());
+		}
 		
 		//Add type MetaTags
 		for (MetaTagMetadata metaTag : cit.getTypeMetaTags()) {
