@@ -52,7 +52,7 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 		Assert.notNull(field, "Field required");
 		
 		// Import the field type into the compilation unit
-		As3ParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getFieldType());
+		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
 		
 		// Add the field
 		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());

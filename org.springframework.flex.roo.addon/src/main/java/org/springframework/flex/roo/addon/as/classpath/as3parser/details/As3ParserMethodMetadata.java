@@ -17,6 +17,7 @@ import org.springframework.roo.support.util.Assert;
 import uk.co.badgersinfoil.metaas.dom.ASArg;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.ASMethod;
+import uk.co.badgersinfoil.metaas.dom.ASType;
 import uk.co.badgersinfoil.metaas.dom.Statement;
 
 public class As3ParserMethodMetadata implements MethodMetadata {
@@ -95,6 +96,33 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 
 	public ASTypeVisibility getVisibility() {
 		return this.visibility;
+	}
+
+	public static void addMethod(CompilationUnitServices compilationUnitServices, ASType type, MethodMetadata declaredMethod, boolean permitFlush) {
+		
+		Assert.isNull(type.getMethod(declaredMethod.getMethodName().getSymbolName()), "Method with name "+declaredMethod.getMethodName().getSymbolName()+" already exists and ActionScript does not allow method overloading.");
+		
+		As3ParserUtils.importTypeIfRequired(compilationUnitServices, declaredMethod.getReturnType());
+		ASMethod method = type.newMethod(declaredMethod.getMethodName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(declaredMethod.getVisibility()), declaredMethod.getReturnType().getSimpleTypeName());
+		
+		//TODO - The parser doesn't allow any control over re-ordering methods.  It would be good if we could at the very least ensure methods get added after the constructor.
+		
+		//Add MetaTags
+		for (MetaTagMetadata metaTag : declaredMethod.getMetaTags()) {
+			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, method, false);			
+		}
+		
+		//Add Arguments
+		for (int x=0; x<declaredMethod.getParameterNames().size(); x++) {
+			ActionScriptSymbolName argName = declaredMethod.getParameterNames().get(x);
+			ActionScriptType argType = declaredMethod.getParameterTypes().get(x);
+			As3ParserUtils.importTypeIfRequired(compilationUnitServices, argType);
+			method.addParam(argName.getSymbolName(), argType.getSimpleTypeName());
+		}
+		
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
 	}
 
 }

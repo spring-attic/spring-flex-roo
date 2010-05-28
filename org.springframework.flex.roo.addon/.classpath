@@ -7,6 +7,7 @@
   <classpathentry kind="var" path="M2_REPO/org/antlr/antlr-runtime/3.0.1/antlr-runtime-3.0.1.jar" sourcepath="M2_REPO/org/antlr/antlr-runtime/3.0.1/antlr-runtime-3.0.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar" sourcepath="M2_REPO/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.7/junit-4.7.jar" sourcepath="M2_REPO/junit/junit/4.7/junit-4.7-sources.jar"/>
+  <classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16.jar" sourcepath="M2_REPO/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/uk/co/badgersinfoil/metaas/metaas/0.8/metaas-0.8.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/mockito/mockito-all/1.8.2/mockito-all-1.8.2.jar" sourcepath="M2_REPO/org/mockito/mockito-all/1.8.2/mockito-all-1.8.2-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/felix/org.apache.felix.scr.annotations/1.2.0/org.apache.felix.scr.annotations-1.2.0.jar" sourcepath="M2_REPO/org/apache/felix/org.apache.felix.scr.annotations/1.2.0/org.apache.felix.scr.annotations-1.2.0-sources.jar"/>

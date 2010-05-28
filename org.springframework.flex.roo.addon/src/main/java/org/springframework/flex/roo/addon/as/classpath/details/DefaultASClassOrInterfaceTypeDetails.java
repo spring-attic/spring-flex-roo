@@ -13,7 +13,7 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 
 	private ActionScriptType name;
 	private ASPhysicalTypeCategory physicalTypeCategory;
-	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
+	private ConstructorMetadata declaredConstructor;
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 	private ASClassOrInterfaceTypeDetails superClass;
@@ -42,8 +42,8 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 
 	public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId,
 			ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
-			List<ConstructorMetadata> declaredConstructors,
 			List<FieldMetadata> declaredFields,
+			ConstructorMetadata declaredConstructor,
 			List<MethodMetadata> declaredMethods,
 			ASClassOrInterfaceTypeDetails superClass,
 			List<ActionScriptType> extendsTypes,
@@ -59,10 +59,7 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		this.name = name;
 		this.physicalTypeCategory = physicalTypeCategory;
 		this.superClass = superClass;
-
-		if (declaredConstructors != null) {
-			this.declaredConstructors = declaredConstructors;
-		}
+		this.declaredConstructor = declaredConstructor;
 
 		if (declaredFields != null) {
 			this.declaredFields = declaredFields;
@@ -93,8 +90,8 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		return physicalTypeCategory;
 	}
 
-	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
-		return declaredConstructors;
+	public ConstructorMetadata getDeclaredConstructor() {
+		return declaredConstructor;
 	}
 
 	public List<? extends FieldMetadata> getDeclaredFields() {

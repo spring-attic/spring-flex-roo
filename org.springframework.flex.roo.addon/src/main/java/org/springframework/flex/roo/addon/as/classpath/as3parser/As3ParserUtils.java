@@ -66,20 +66,23 @@ public class As3ParserUtils {
 		return null;
 	}
 
-	public static void importTypeIfRequired(ActionScriptPackage compilationUnitPackage, List<String> imports, ActionScriptType typeToImport) {
-		Assert.notNull(compilationUnitPackage, "Compilation unit package is required");
-		Assert.notNull(imports, "Compilation unit imports required");
+	public static void importTypeIfRequired(CompilationUnitServices compilationUnitServices, ActionScriptType typeToImport) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services is required");
 		Assert.notNull(typeToImport, "ActionScript type to import is required");
 		
+		if(ActionScriptType.isImplicitType(typeToImport.getFullyQualifiedTypeName())) {
+			return;
+		}
+			
 		if(typeToImport.isDefaultPackage()) {
 			return;
 		}
 		
-		if (imports.contains(typeToImport.getFullyQualifiedTypeName())) {
+		if (compilationUnitServices.getImports().contains(typeToImport.getFullyQualifiedTypeName())) {
 			return;
 		}
 		
-		imports.add(typeToImport.getFullyQualifiedTypeName());
+		compilationUnitServices.addImport(typeToImport.getFullyQualifiedTypeName());
 	}
 	
 	public static ASTypeVisibility getASTypeVisibility(Visibility as3ParserVisibility) {

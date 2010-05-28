@@ -7,6 +7,8 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 public interface CompilationUnitServices {
 
 	List<String> getImports();
+	
+	void addImport(String fullyQualifiedTypeName);
 
 	ActionScriptPackage getCompilationUnitPackage();
 

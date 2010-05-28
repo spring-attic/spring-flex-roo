@@ -117,8 +117,8 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test
 	public void testConstructors() {
-		assertEquals(1, details.getDeclaredConstructors().size());
-		ConstructorMetadata constructor = details.getDeclaredConstructors().get(0);
+		assertNotNull(details.getDeclaredConstructor());
+		ConstructorMetadata constructor = details.getDeclaredConstructor();
 		assertEquals(metadataId, constructor.getDeclaredByMetadataId());
 	}
 	

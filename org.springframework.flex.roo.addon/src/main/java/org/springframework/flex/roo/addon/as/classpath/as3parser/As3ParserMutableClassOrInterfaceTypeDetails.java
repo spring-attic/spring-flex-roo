@@ -13,7 +13,6 @@ import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3Pars
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASClassOrInterfaceTypeDetails;
-import org.springframework.flex.roo.addon.as.classpath.details.ASMemberHoldingTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
@@ -22,7 +21,6 @@ import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMe
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
-
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
@@ -49,7 +47,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	// to satisfy interface
 	private ActionScriptType name;
 	private ASPhysicalTypeCategory physicalTypeCategory;
-	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
+	private ConstructorMetadata declaredConstructor;
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 	private ASClassOrInterfaceTypeDetails superclass = null;
@@ -148,7 +146,8 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		
 		for (ASMethod method : ((List<ASMethod>)this.clazz.getMethods())) {
 			if (method.getName().equals(name.getSimpleTypeName())) {
-				declaredConstructors.add(new As3ParserConstructorMetadata(declaredByMetadataId, method, this));
+				Assert.isNull(declaredConstructor, "ActionScript classes may only have one constructor method.");
+				declaredConstructor = new As3ParserConstructorMetadata(declaredByMetadataId, method, this);
 			} else {
 				declaredMethods.add(new As3ParserMethodMetadata(declaredByMetadataId, method, this));
 			}
@@ -183,8 +182,8 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.declaredByMetadataId;
 	}
 
-	public List<? extends ConstructorMetadata> getDeclaredConstructors() {
-		return this.declaredConstructors;
+	public ConstructorMetadata getDeclaredConstructor() {
+		return this.declaredConstructor;
 	}
 
 	public List<? extends FieldMetadata> getDeclaredFields() {
@@ -233,6 +232,10 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	public List<String> getImports() {
 		return this.imports;
 	}
+	
+	public void addImport(String fullyQualifiedTypeName) {
+		this.imports.add(fullyQualifiedTypeName);
+	}
 
 	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
 		return this.physicalTypeCategory;
@@ -250,7 +253,55 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	
 	public static final String getOutput(final ASClassOrInterfaceTypeDetails cit) {
 		ActionScriptFactory factory = new ActionScriptFactory();
-		final ASCompilationUnit compilationUnit = factory.newClass(cit.getName().getFullyQualifiedTypeName());
+		final ASCompilationUnit compilationUnit;
+		if (ASPhysicalTypeCategory.CLASS.equals(cit.getPhysicalTypeCategory())) {
+			compilationUnit = factory.newClass(cit.getName().getFullyQualifiedTypeName());
+		} else {
+			compilationUnit = factory.newInterface(cit.getName().getFullyQualifiedTypeName());
+		}
+		
+		//TODO - handle extends and implements
+		
+		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
+
+			public void flush() {
+				//No-op				
+			}
+
+			public ActionScriptPackage getCompilationUnitPackage() {
+				return cit.getName().getPackage();
+			}
+
+			@SuppressWarnings("unchecked")
+			public List<String> getImports() {
+				return compilationUnit.getPackage().findImports();
+			}
+
+			public void addImport(String fullyQualifiedTypeName) {
+				compilationUnit.getPackage().addImport(fullyQualifiedTypeName);				
+			}
+		};
+		
+		//Add type MetaTags
+		for (MetaTagMetadata metaTag : cit.getTypeMetaTags()) {
+			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, compilationUnit.getType(), false);
+		}
+		
+		if (compilationUnit.getType() instanceof ASClassType) {
+			//Add fields
+			for (FieldMetadata field : cit.getDeclaredFields()) {
+				As3ParserFieldMetadata.addField(compilationUnitServices, ((ASClassType)compilationUnit.getType()), field, false);
+			}
+			
+			//Add constructor
+			if (cit.getDeclaredConstructor() != null) {
+				As3ParserConstructorMetadata.addConstructor(compilationUnitServices, compilationUnit.getType(), cit.getDeclaredConstructor(), false);
+			}
+		}
+		
+		for(MethodMetadata method : cit.getDeclaredMethods()) {
+			As3ParserMethodMetadata.addMethod(compilationUnitServices, compilationUnit.getType(), method, false);
+		}
 		
 		StringWriter writer = new StringWriter();
 		try {

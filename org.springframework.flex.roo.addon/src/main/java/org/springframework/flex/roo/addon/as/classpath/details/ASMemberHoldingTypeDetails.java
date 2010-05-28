@@ -10,7 +10,7 @@ public interface ASMemberHoldingTypeDetails extends ASPhysicalTypeDetails {
 
 	List<? extends MethodMetadata> getDeclaredMethods();
 
-	List<? extends ConstructorMetadata> getDeclaredConstructors();
+	ConstructorMetadata getDeclaredConstructor();
 
 	List<? extends FieldMetadata> getDeclaredFields();
 
