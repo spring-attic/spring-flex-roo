@@ -65,6 +65,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	private ActionScriptPackage compilationUnitPackage;
 	private ASType clazz;
 	
+	@SuppressWarnings("unchecked")
 	public As3ParserMutableClassOrInterfaceTypeDetails(ASCompilationUnit compilationUnit, FileManager fileManager, String declaredByMetadataId, String fileIdentifier, ActionScriptType typeName, MetadataService metadataService, ASPhysicalTypeMetadataProvider physicalTypeMetadataProvider) {
 		Assert.notNull(compilationUnit, "Compilation unit required");
 		Assert.notNull(fileManager, "File manager requried");
@@ -168,13 +169,11 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public void addMethod(MethodMetadata methodMetadata) {
-		// TODO Auto-generated method stub
-
+		As3ParserMethodMetadata.addMethod(this, this.clazz, methodMetadata, true);
 	}
 
 	public void addTypeMetaTag(MetaTagMetadata metaTag) {
-		// TODO Auto-generated method stub
-
+		As3ParserMetaTagMetadata.addMetaTagToElement(this, metaTag, this.clazz, true);
 	}
 
 	public String getDeclaredByMetadataId() {
@@ -206,13 +205,12 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	}
 
 	public void removeField(ActionScriptSymbolName fieldName) {
-		// TODO Auto-generated method stub
-
+		Assert.isInstanceOf(ASClassType.class, this.clazz, "Cannot remove a field from an interface");
+		As3ParserFieldMetadata.removeField(this, ((ASClassType)this.clazz), fieldName);
 	}
 
-	public void removeTypeAnnotation(String name) {
-		// TODO Auto-generated method stub
-
+	public void removeTypeMetaTag(String name) {
+		As3ParserMetaTagMetadata.removeMetatagFromElement(this, this.clazz, name);
 	}
 
 	public ActionScriptType getName() {
@@ -241,6 +239,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.compilationUnitPackage;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<String> getImports() {
 		return this.compilationUnit.getPackage().findImports();
 	}
@@ -309,7 +308,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		
 		//Add type MetaTags
 		for (MetaTagMetadata metaTag : cit.getTypeMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, compilationUnit.getType(), false);
+			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, compilationUnit.getType(), false);
 		}
 		
 		if (compilationUnit.getType() instanceof ASClassType) {

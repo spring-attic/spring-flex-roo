@@ -30,6 +30,7 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 	private Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
 	private ASTypeVisibility visibility;
 	
+	@SuppressWarnings("unchecked")
 	public As3ParserMethodMetadata(
 			String declaredByMetadataId,
 			ASMethod method,
@@ -109,7 +110,7 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 		
 		//Add MetaTags
 		for (MetaTagMetadata metaTag : declaredMethod.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, method, false);			
+			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, method, false);			
 		}
 		
 		//Add Arguments

@@ -24,6 +24,7 @@ public class As3ParserMetaTagMetadata implements MetaTagMetadata {
 	private String name;
 	private Map<ActionScriptSymbolName, MetaTagAttributeValue<?>> attributes = new LinkedHashMap<ActionScriptSymbolName, MetaTagAttributeValue<?>>();
 	
+	@SuppressWarnings("unchecked")
 	public As3ParserMetaTagMetadata(ASMetaTag metaTag) {
 		Assert.notNull(metaTag, "Meta Tag required");
 		
@@ -34,8 +35,26 @@ public class As3ParserMetaTagMetadata implements MetaTagMetadata {
 		}
 	}
 
-	public static void addMetaTagElement(CompilationUnitServices compilationUnitServices, MetaTagMetadata metaTag,
+	public String getName() {
+		return name;
+	}
+
+	public MetaTagAttributeValue<?> getAttribute(ActionScriptSymbolName attributeName) {
+		Assert.notNull(attributeName, "Attribute name required");
+		return attributes.get(attributeName);		
+	}
+
+	public List<ActionScriptSymbolName> getAttributeNames() {
+		return new ArrayList<ActionScriptSymbolName>(attributes.keySet());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void addMetaTagToElement(CompilationUnitServices compilationUnitServices, MetaTagMetadata metaTag,
 			MetaTagable element, boolean permitFlush) {
+		
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(metaTag, "Metatag required");
+		Assert.notNull(element, "Element required");
 		
 		for (ASMetaTag existingTag : (List<ASMetaTag>)element.getAllMetaTags()) {
 			Assert.isTrue(!metaTag.getName().equals(existingTag.getName()), "Found an existing meta tag of type '" +metaTag.getName()+"'");
@@ -60,17 +79,21 @@ public class As3ParserMetaTagMetadata implements MetaTagMetadata {
 		}
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public MetaTagAttributeValue<?> getAttribute(ActionScriptSymbolName attributeName) {
-		Assert.notNull(attributeName, "Attribute name required");
-		return attributes.get(attributeName);		
-	}
-
-	public List<ActionScriptSymbolName> getAttributeNames() {
-		return new ArrayList<ActionScriptSymbolName>(attributes.keySet());
+	public static void removeMetatagFromElement(CompilationUnitServices compilationUnitServices, MetaTagable element, String name) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(name, "Name required");
+		Assert.notNull(element, "Element required");
+		
+		ASMetaTag tag = element.getFirstMetatag(name);
+		
+		Assert.notNull(tag, "Could not locate metatag '" + name + "' to delete");
+		
+		//TODO - this doesn't actually work as the getAllMetaTags list is an unmodifiable collections
+		element.getAllMetaTags().remove(tag);
+		
+		//For this to work, we'll have to extend the existing parser and add in something like MetaTagable#removeTag(String name)
+		
+		compilationUnitServices.flush();
 	}
 
 }

@@ -15,7 +15,6 @@ import org.springframework.roo.support.util.Assert;
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASField;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
-import uk.co.badgersinfoil.metaas.dom.Visibility;
 
 public class As3ParserFieldMetadata implements FieldMetadata {
 
@@ -25,6 +24,7 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
 	private String declaredByMetadataId;
 	
+	@SuppressWarnings("unchecked")
 	public As3ParserFieldMetadata(
 			String declaredByMetadataId,
 			ASField field,
@@ -41,29 +41,6 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 
 		for(ASMetaTag metaTag : (List<ASMetaTag>)field.getAllMetaTags()) {
 			metaTags.add(new As3ParserMetaTagMetadata(metaTag));
-		}
-	}
-
-	public static void addField(CompilationUnitServices compilationUnitServices, 
-			ASClassType clazz, FieldMetadata field, boolean permitFlush) {
-		
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(clazz, "Class required");
-		Assert.notNull(field, "Field required");
-		
-		// Import the field type into the compilation unit
-		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
-		
-		// Add the field
-		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
-		
-		// Add meta tags to the field
-		for(MetaTagMetadata metaTag : field.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, newField, false);
-		}
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
 		}
 	}
 
@@ -86,5 +63,39 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 	public ASTypeVisibility getVisibility() {
 		return visibility;
 	}
-
+	
+	public static void addField(CompilationUnitServices compilationUnitServices, 
+			ASClassType clazz, FieldMetadata field, boolean permitFlush) {
+		
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(clazz, "Class required");
+		Assert.notNull(field, "Field required");
+		
+		// Import the field type into the compilation unit
+		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
+		
+		// Add the field
+		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
+		
+		// Add meta tags to the field
+		for(MetaTagMetadata metaTag : field.getMetaTags()) {
+			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, newField, false);
+		}
+		
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
+	}
+	
+	public static void removeField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ActionScriptSymbolName fieldName) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(clazz, "Class required");
+		Assert.notNull(fieldName, "Field name required");
+		
+		Assert.notNull(clazz.getField(fieldName.getSymbolName()), "Could not locate field '" + fieldName + "' to delete");
+		
+		clazz.removeField(fieldName.getSymbolName());
+		
+		compilationUnitServices.flush();
+	}
 }

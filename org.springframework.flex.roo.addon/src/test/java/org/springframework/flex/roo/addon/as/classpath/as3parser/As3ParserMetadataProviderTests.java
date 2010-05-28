@@ -8,13 +8,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.ClassPathResource;
@@ -40,6 +40,9 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexMojosPathResolver;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.file.monitor.event.FileEvent;
+import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.ActiveProcessManager;
@@ -351,15 +354,26 @@ public class As3ParserMetadataProviderTests {
 	}
 	
 	@Test
-	@Ignore
 	public void testFindIdentifier() {
-		fail("Not implemented.");
+		
+		String expectedId = "MID:"+ASPhysicalTypeIdentifier.class.getName()+"#SRC_MAIN_FLEX?com.foo.stuff.FooImpl";
+		String id = provider.findIdentifier(new ActionScriptType("com.foo.stuff.FooImpl"));
+		
+		assertTrue(StringUtils.hasText(id));
+		assertEquals(expectedId, id);
 	}
 	
 	@Test
-	@Ignore
-	public void testOnFileEvent() {
-		fail("Not implemented.");
+	public void testOnFileEvent() throws IOException {
+		
+		String expectedId = "MID:"+ASPhysicalTypeIdentifier.class.getName()+"#SRC_MAIN_FLEX?com.foo.stuff.FooImpl";
+		
+		FileDetails details = new FileDetails(new ClassPathResource("com/foo/stuff/FooImpl.as").getFile(), new Date().getTime());
+		
+		provider.onFileEvent(new FileEvent(details, FileOperation.CREATED, null));
+		
+		verify(metadataService).evict(expectedId);
+		verify(registry).notifyDownstream(expectedId);
 	}
 	
 	private static class TestPathResolver extends FlexMojosPathResolver {

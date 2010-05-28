@@ -27,7 +27,7 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	 * 
 	 * @param name of the meta tag to remove (required)
 	 */
-	void removeTypeAnnotation(String name);
+	void removeTypeMetaTag(String name);
 	
 	/**
 	 * Adds a new field. There must not be a field of this name already existing.

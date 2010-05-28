@@ -12,8 +12,6 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASClassOrInterfaceTypeDetails;
-import org.springframework.flex.roo.addon.as.classpath.details.ASMemberHoldingTypeDetails;
-import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.file.monitor.event.FileDetails;

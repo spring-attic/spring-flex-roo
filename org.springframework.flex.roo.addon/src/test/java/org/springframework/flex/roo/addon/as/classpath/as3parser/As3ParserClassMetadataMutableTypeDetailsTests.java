@@ -17,14 +17,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultMethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.DefaultMetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.StringAttributeValue;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -44,6 +49,8 @@ import org.springframework.util.StringUtils;
 import uk.co.badgersinfoil.metaas.ActionScriptFactory;
 import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASCompilationUnit;
+import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
+import uk.co.badgersinfoil.metaas.dom.ASMethod;
 
 
 public class As3ParserClassMetadataMutableTypeDetailsTests {
@@ -126,6 +133,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 		details.addField(fieldMetadata);
 		
 		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
 		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
 		assertTrue(compUnit.getType() instanceof ASClassType);
 		ASClassType clazz = (ASClassType) compUnit.getType();
@@ -145,12 +153,102 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 		details.addField(fieldMetadata);
 		
 		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
 		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
 		assertTrue(compUnit.getType() instanceof ASClassType);
 		ASClassType clazz = (ASClassType) compUnit.getType();
 		assertNotNull(clazz.getField("baz"));
 		assertEquals("Baz",clazz.getField("baz").getType());
 		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Baz"));
+	}
+	
+	@Test 
+	public void testRemoveField() throws UnsupportedEncodingException {
+		
+		details.removeField(new ActionScriptSymbolName("field1"));
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		assertTrue(compUnit.getType() instanceof ASClassType);
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertNull(clazz.getField("field1"));
+	}
+	
+	@Test
+	public void testAddSimpleMethod() throws UnsupportedEncodingException {
+		
+		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), ActionScriptType.VOID_TYPE, ASTypeVisibility.PUBLIC);
+		
+		details.addMethod(method);
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertNotNull(clazz.getMethod("doStuff"));
+		ASMethod result = clazz.getMethod("doStuff");
+		assertEquals("void", result.getType());
+		assertEquals(0, result.getArgs().size());
+	}
+	
+	@Test
+	public void testAddComplexMethod() throws UnsupportedEncodingException { 
+		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
+		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("MagicalMetadata", null);
+		metaTags.add(metaTag);
+		
+		List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
+		paramTypes.add(new ActionScriptType("String"));
+		paramTypes.add(new ActionScriptType("com.foo.other.Bar"));
+		
+		List<ActionScriptSymbolName> paramNames = new ArrayList<ActionScriptSymbolName>();
+		paramNames.add(new ActionScriptSymbolName("arg1"));
+		paramNames.add(new ActionScriptSymbolName("arg2"));
+		
+		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), new ActionScriptType("com.foo.smothered.Covered"), 
+				ASTypeVisibility.PRIVATE, "", metaTags, paramTypes, paramNames);
+		
+		details.addMethod(method);
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertNotNull(clazz.getMethod("doStuff"));
+		ASMethod result = clazz.getMethod("doStuff");
+		assertEquals("Covered", result.getType());
+		assertEquals(1, result.getMetaTagsWithName("MagicalMetadata").size());
+		assertEquals(2, result.getArgs().size());
+		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Bar"));
+		assertTrue(compUnit.getPackage().findImports().contains("com.foo.smothered.Covered"));
+	}
+	
+	@Test
+	public void testAddTypeMetaTag() throws UnsupportedEncodingException {
+		List <MetaTagAttributeValue<?>> attributes = new ArrayList<MetaTagAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new ActionScriptSymbolName("alias"), "com.foo.stuff.domain.FooImpl"));
+		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("RemoteClass", attributes);
+		
+		details.addTypeMetaTag(metaTag);
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		assertNotNull(compUnit.getType().getFirstMetatag("RemoteClass"));
+		ASMetaTag tag = compUnit.getType().getFirstMetatag("RemoteClass");
+		assertEquals("com.foo.stuff.domain.FooImpl", tag.getParamValue("alias"));
+	}
+	
+	@Test
+	@Ignore
+	public void testRemoveTypeMetatag() throws UnsupportedEncodingException {
+		details.removeTypeMetaTag("ClassLevelTag1");
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		assertNull(compUnit.getType().getFirstMetatag("ClassLevelTag1"));
 	}
 	
 	private void readLastFile() throws UnsupportedEncodingException {

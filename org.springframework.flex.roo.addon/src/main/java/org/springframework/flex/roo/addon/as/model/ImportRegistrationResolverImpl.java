@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
-
+//TODO - Not actually sure we need this...only here as a result of the Java porting process...not currently used.
 public class ImportRegistrationResolverImpl implements ImportRegistrationResolver {
 
 	private Set<ActionScriptType> registeredImports = new HashSet<ActionScriptType>();

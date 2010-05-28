@@ -29,6 +29,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 	private Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
 	private ASTypeVisibility visibility;
 
+	@SuppressWarnings("unchecked")
 	public As3ParserConstructorMetadata(
 			String declaredByMetadataId,
 			ASMethod method,
@@ -96,7 +97,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 		
 		//Add MetaTags
 		for (MetaTagMetadata metaTag : declaredConstructor.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagElement(compilationUnitServices, metaTag, constructor, false);			
+			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, constructor, false);			
 		}
 		
 		//Add Arguments
