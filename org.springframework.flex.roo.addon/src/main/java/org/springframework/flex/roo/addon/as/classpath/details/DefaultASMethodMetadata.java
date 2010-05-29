@@ -2,19 +2,19 @@ package org.springframework.flex.roo.addon.as.classpath.details;
 
 import java.util.List;
 
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
-public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
+public class DefaultASMethodMetadata extends AbstractInvocableMemberMetadata implements ASMethodMetadata {
 
 	private ActionScriptSymbolName methodName;
 	private ActionScriptType returnType;
 	
-	public DefaultMethodMetadata(String declaredByMetadataId, ActionScriptSymbolName methodName, ActionScriptType returnType,
-			ASTypeVisibility visibility, String methodBody, List<MetaTagMetadata> metaTags,
+	public DefaultASMethodMetadata(String declaredByMetadataId, ActionScriptSymbolName methodName, ActionScriptType returnType,
+			ASTypeVisibility visibility, String methodBody, List<ASMetaTagMetadata> metaTags,
 			List<ActionScriptType> paramTypes,
 			List<ActionScriptSymbolName> paramNames) {
 		super(declaredByMetadataId, methodBody, metaTags, paramTypes, paramNames,
@@ -26,7 +26,7 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 		this.returnType = returnType;
 	}
 
-	public DefaultMethodMetadata(String declaredByMetadataId, ActionScriptSymbolName methodName, ActionScriptType returnType, ASTypeVisibility visibility) {
+	public DefaultASMethodMetadata(String declaredByMetadataId, ActionScriptSymbolName methodName, ActionScriptType returnType, ASTypeVisibility visibility) {
 		this(declaredByMetadataId, methodName, returnType, visibility, null, null, null, null);
 	}
 

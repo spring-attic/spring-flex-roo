@@ -3,23 +3,23 @@ package org.springframework.flex.roo.addon.as.classpath.details;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
-public class DefaultFieldMetadata implements FieldMetadata {
+public class DefaultASFieldMetadata implements ASFieldMetadata {
 
 	private String declaredByMetadataId;
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
 	private ASTypeVisibility visibility;
-	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 
-	public DefaultFieldMetadata(String declaredByMetadataId,
+	public DefaultASFieldMetadata(String declaredByMetadataId,
 			ActionScriptType fieldType, ActionScriptSymbolName fieldName,
-			ASTypeVisibility visibility, List<MetaTagMetadata> metaTags) {
+			ASTypeVisibility visibility, List<ASMetaTagMetadata> metaTags) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
@@ -46,7 +46,7 @@ public class DefaultFieldMetadata implements FieldMetadata {
 	public ASTypeVisibility getVisibility() {
 		return visibility;
 	}
-	public List<MetaTagMetadata> getMetaTags() {
+	public List<ASMetaTagMetadata> getMetaTags() {
 		return metaTags;
 	}
 }

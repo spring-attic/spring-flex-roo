@@ -12,9 +12,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadataProvider;
-import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.file.monitor.event.FileDetails;
@@ -94,7 +94,7 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test
 	public void testImplicitTypeFieldWithMetatag() {
-		FieldMetadata field = details.getDeclaredFields().get(0);
+		ASFieldMetadata field = details.getDeclaredFields().get(0);
 		assertEquals(metadataId, field.getDeclaredByMetadataId());
 		assertEquals("field1", field.getFieldName().getSymbolName());
 		assertEquals("Field1", field.getFieldName().getSymbolNameCapitalisedFirstLetter());
@@ -106,7 +106,7 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test 
 	public void testImportedTypeField() {
-		FieldMetadata field = details.getDeclaredFields().get(1);
+		ASFieldMetadata field = details.getDeclaredFields().get(1);
 		assertEquals(metadataId, field.getDeclaredByMetadataId());
 		assertEquals("field2", field.getFieldName().getSymbolName());
 		assertEquals("Field2", field.getFieldName().getSymbolNameCapitalisedFirstLetter());
@@ -118,13 +118,13 @@ public class As3ParserClassMetadataValidParsingTests {
 	@Test
 	public void testConstructors() {
 		assertNotNull(details.getDeclaredConstructor());
-		ConstructorMetadata constructor = details.getDeclaredConstructor();
+		ASConstructorMetadata constructor = details.getDeclaredConstructor();
 		assertEquals(metadataId, constructor.getDeclaredByMetadataId());
 	}
 	
 	@Test
 	public void testPrivateVoidMethodWithMetatag() {
-		MethodMetadata method = details.getDeclaredMethods().get(0);
+		ASMethodMetadata method = details.getDeclaredMethods().get(0);
 		assertEquals(metadataId, method.getDeclaredByMetadataId());
 		assertEquals("method1", method.getMethodName().getSymbolName());
 		assertEquals(ASTypeVisibility.PRIVATE, method.getVisibility());
@@ -136,7 +136,7 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test
 	public void testPublicFactoryMethod() {
-		MethodMetadata method = details.getDeclaredMethods().get(1);
+		ASMethodMetadata method = details.getDeclaredMethods().get(1);
 		assertEquals(metadataId, method.getDeclaredByMetadataId());
 		assertEquals("fooFactory", method.getMethodName().getSymbolName());
 		assertEquals(ASTypeVisibility.PUBLIC, method.getVisibility());
@@ -147,7 +147,7 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test
 	public void testPublicVoidMethodWithParams() {
-		MethodMetadata method = details.getDeclaredMethods().get(2);
+		ASMethodMetadata method = details.getDeclaredMethods().get(2);
 		assertEquals(metadataId, method.getDeclaredByMetadataId());
 		assertEquals("calculateStuff", method.getMethodName().getSymbolName());
 		assertEquals(ASTypeVisibility.PUBLIC, method.getVisibility());

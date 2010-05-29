@@ -6,7 +6,7 @@ import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
  * Allows a member to be traced back to its declaring type.
  *
  */
-public interface IdentifiableMember {
+public interface ASIdentifiableMember {
 
 	/**
 	 * @return the ID of the metadata that declared this member (never null)

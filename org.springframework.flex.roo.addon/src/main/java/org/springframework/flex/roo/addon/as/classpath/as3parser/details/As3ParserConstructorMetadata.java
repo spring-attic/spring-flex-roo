@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
-import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -20,12 +20,12 @@ import uk.co.badgersinfoil.metaas.dom.ASMethod;
 import uk.co.badgersinfoil.metaas.dom.ASType;
 import uk.co.badgersinfoil.metaas.dom.Statement;
 
-public class As3ParserConstructorMetadata implements ConstructorMetadata {
+public class As3ParserConstructorMetadata implements ASConstructorMetadata {
 
 	private String declaredByMetadataId;
 	
 	private String methodBody;
-	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 	private Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
 	private ASTypeVisibility visibility;
 
@@ -67,7 +67,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 		return this.methodBody;
 	}
 
-	public List<MetaTagMetadata> getMetaTags() {
+	public List<ASMetaTagMetadata> getMetaTags() {
 		return this.metaTags;
 	}
 
@@ -87,7 +87,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 		return this.visibility;
 	}
 	
-	public static void addConstructor(CompilationUnitServices compilationUnitServices, ASType type, ConstructorMetadata declaredConstructor, boolean permitFlush) {
+	public static void addConstructor(CompilationUnitServices compilationUnitServices, ASType type, ASConstructorMetadata declaredConstructor, boolean permitFlush) {
 		
 		Assert.isNull(type.getMethod(type.getName()), "ActionScript classes may only have one constructor method.");
 		
@@ -96,7 +96,7 @@ public class As3ParserConstructorMetadata implements ConstructorMetadata {
 		//TODO - The parser doesn't allow any control over re-ordering methods.  It would be good if we could ensure the constructor is the first method in the class.
 		
 		//Add MetaTags
-		for (MetaTagMetadata metaTag : declaredConstructor.getMetaTags()) {
+		for (ASMetaTagMetadata metaTag : declaredConstructor.getMetaTags()) {
 			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, constructor, false);			
 		}
 		

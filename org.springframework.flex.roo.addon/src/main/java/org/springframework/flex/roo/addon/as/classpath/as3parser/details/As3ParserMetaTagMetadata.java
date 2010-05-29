@@ -10,7 +10,7 @@ import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnit
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.BooleanAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.IntegerAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.StringAttributeValue;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.roo.support.util.Assert;
@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.Assert;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 import uk.co.badgersinfoil.metaas.dom.MetaTagable;
 
-public class As3ParserMetaTagMetadata implements MetaTagMetadata {
+public class As3ParserMetaTagMetadata implements ASMetaTagMetadata {
 	
 	//provided
 	private String name;
@@ -49,7 +49,7 @@ public class As3ParserMetaTagMetadata implements MetaTagMetadata {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void addMetaTagToElement(CompilationUnitServices compilationUnitServices, MetaTagMetadata metaTag,
+	public static void addMetaTagToElement(CompilationUnitServices compilationUnitServices, ASMetaTagMetadata metaTag,
 			MetaTagable element, boolean permitFlush) {
 		
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");

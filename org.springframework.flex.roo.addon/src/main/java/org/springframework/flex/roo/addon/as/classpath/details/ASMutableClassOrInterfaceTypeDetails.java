@@ -1,7 +1,7 @@
 package org.springframework.flex.roo.addon.as.classpath.details;
 
 
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 
 /**
@@ -19,7 +19,7 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	 * 
 	 * @param metaTag to add (required)
 	 */
-	void addTypeMetaTag(MetaTagMetadata metaTag);
+	void addTypeMetaTag(ASMetaTagMetadata metaTag);
 	
 	/**
 	 * Removes the type-level meta tag of the name indicated. This meta tag must
@@ -34,7 +34,7 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	 * 
 	 * @param fieldMetadata to add (required)
 	 */
-	void addField(FieldMetadata fieldMetadata);
+	void addField(ASFieldMetadata fieldMetadata);
 	
 	/**
 	 * Removes an existing field. A field with the specified name must already exist.
@@ -48,7 +48,7 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	 * 
 	 * @param methodMetadata to add (required)
 	 */
-	void addMethod(MethodMetadata methodMetadata);
+	void addMethod(ASMethodMetadata methodMetadata);
 	
 
 }

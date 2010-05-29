@@ -8,12 +8,12 @@ import java.util.Map;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.roo.support.util.Assert;
 
-public class DefaultMetaTagMetadata implements MetaTagMetadata {
+public class DefaultASMetaTagMetadata implements ASMetaTagMetadata {
 
 	private String name;
 	private Map<ActionScriptSymbolName, MetaTagAttributeValue<?>> attributes = new LinkedHashMap<ActionScriptSymbolName, MetaTagAttributeValue<?>>();
 	
-	public DefaultMetaTagMetadata(String name,
+	public DefaultASMetaTagMetadata(String name,
 			List<MetaTagAttributeValue<?>> attributes) {
 		this.name = name;
 		if (attributes != null) {

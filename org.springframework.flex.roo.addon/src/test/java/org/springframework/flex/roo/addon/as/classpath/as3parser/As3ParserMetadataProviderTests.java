@@ -22,17 +22,17 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASConstructorMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASPhysicalTypeMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.DefaultConstructorMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.DefaultFieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.DefaultMethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.DefaultMetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.DefaultASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.StringAttributeValue;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
@@ -151,8 +151,8 @@ public class As3ParserMetadataProviderTests {
 		
 		List <MetaTagAttributeValue<?>> attributes = new ArrayList<MetaTagAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new ActionScriptSymbolName("alias"), "com.foo.stuff.domain.FooImpl"));
-		MetaTagMetadata remoteClassTag = new DefaultMetaTagMetadata("RemoteClass", attributes);
-		List<MetaTagMetadata> typeMetaTags = new ArrayList<MetaTagMetadata>();
+		ASMetaTagMetadata remoteClassTag = new DefaultASMetaTagMetadata("RemoteClass", attributes);
+		List<ASMetaTagMetadata> typeMetaTags = new ArrayList<ASMetaTagMetadata>();
 		typeMetaTags.add(remoteClassTag);
 		
 		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
@@ -218,7 +218,7 @@ public class As3ParserMetadataProviderTests {
 	public void testCreatePhysicalType_ClassWithSimpleConstructor() throws IOException {
 		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
 		
-		ConstructorMetadata constructor = new DefaultConstructorMetadata(metadataId);
+		ASConstructorMetadata constructor = new DefaultASConstructorMetadata(metadataId);
 		
 		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
 				ASPhysicalTypeCategory.CLASS, null, constructor, null, null, null, null, null);
@@ -237,8 +237,8 @@ public class As3ParserMetadataProviderTests {
 	public void testCreatePhysicalType_ClassWithComplexConstructor() throws IOException {
 		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
 		
-		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
-		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("Autowired", null);
+		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
+		ASMetaTagMetadata metaTag = new DefaultASMetaTagMetadata("Autowired", null);
 		metaTags.add(metaTag);
 		
 		List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
@@ -249,7 +249,7 @@ public class As3ParserMetadataProviderTests {
 		paramNames.add(new ActionScriptSymbolName("arg1"));
 		paramNames.add(new ActionScriptSymbolName("arg2"));
 		
-		ConstructorMetadata constructor = new DefaultConstructorMetadata(metadataId, null, metaTags, paramTypes, paramNames, ASTypeVisibility.PRIVATE);
+		ASConstructorMetadata constructor = new DefaultASConstructorMetadata(metadataId, null, metaTags, paramTypes, paramNames, ASTypeVisibility.PRIVATE);
 		
 		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
 				ASPhysicalTypeCategory.CLASS, null, constructor, null, null, null, null, null);
@@ -270,8 +270,8 @@ public class As3ParserMetadataProviderTests {
 	public void testCreatePhysicalType_ClassWithSimpleMethod() throws IOException {
 		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
 		
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), ActionScriptType.VOID_TYPE, ASTypeVisibility.PUBLIC);
+		List<ASMethodMetadata> methods = new ArrayList<ASMethodMetadata>();
+		ASMethodMetadata method = new DefaultASMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), ActionScriptType.VOID_TYPE, ASTypeVisibility.PUBLIC);
 		methods.add(method);
 		
 		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
@@ -292,8 +292,8 @@ public class As3ParserMetadataProviderTests {
 	public void testCreatePhysicalType_ClassWithComplexMethod() throws IOException {
 		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
 		
-		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
-		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("MagicalMetadata", null);
+		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
+		ASMetaTagMetadata metaTag = new DefaultASMetaTagMetadata("MagicalMetadata", null);
 		metaTags.add(metaTag);
 		
 		List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
@@ -304,8 +304,8 @@ public class As3ParserMetadataProviderTests {
 		paramNames.add(new ActionScriptSymbolName("arg1"));
 		paramNames.add(new ActionScriptSymbolName("arg2"));
 		
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), new ActionScriptType("com.foo.smothered.Covered"), 
+		List<ASMethodMetadata> methods = new ArrayList<ASMethodMetadata>();
+		ASMethodMetadata method = new DefaultASMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), new ActionScriptType("com.foo.smothered.Covered"), 
 				ASTypeVisibility.PRIVATE, "", metaTags, paramTypes, paramNames);
 		methods.add(method);
 		
@@ -330,13 +330,13 @@ public class As3ParserMetadataProviderTests {
 	public void testCreatePhysicalType_ClassWithFields() throws IOException {
 		String fileIdentifier = new ClassPathResource("").getFile().getCanonicalPath()+"com/foo/stuff/FooImpl.as";
 		
-		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
-		MetaTagMetadata bindableTag = new DefaultMetaTagMetadata("Bindable", null);
+		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
+		ASMetaTagMetadata bindableTag = new DefaultASMetaTagMetadata("Bindable", null);
 		metaTags.add(bindableTag);
 		
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		FieldMetadata field1 = new DefaultFieldMetadata(metadataId, new ActionScriptType("String"), new ActionScriptSymbolName("name"), null, metaTags);
-		FieldMetadata field2 = new DefaultFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Brother"), new ActionScriptSymbolName("brother"), ASTypeVisibility.PROTECTED, null);
+		List<ASFieldMetadata> fields = new ArrayList<ASFieldMetadata>();
+		ASFieldMetadata field1 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), new ActionScriptSymbolName("name"), null, metaTags);
+		ASFieldMetadata field2 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Brother"), new ActionScriptSymbolName("brother"), ASTypeVisibility.PROTECTED, null);
 		fields.add(field1);
 		fields.add(field2);
 		

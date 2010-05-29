@@ -22,13 +22,13 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
-import org.springframework.flex.roo.addon.as.classpath.details.DefaultFieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.DefaultMethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.DefaultMetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.DefaultASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.DefaultASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.StringAttributeValue;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
@@ -127,7 +127,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	@Test
 	public void testAddSimpleField() throws UnsupportedEncodingException {
 		
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(metadataId, new ActionScriptType("String"), 
+		ASFieldMetadata fieldMetadata = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), 
 				new ActionScriptSymbolName("name"), ASTypeVisibility.PRIVATE, null);
 		
 		details.addField(fieldMetadata);
@@ -143,11 +143,11 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	@Test
 	public void testAddComplexField() throws UnsupportedEncodingException {
 		
-		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
-		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("Bindable", null);
+		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
+		ASMetaTagMetadata metaTag = new DefaultASMetaTagMetadata("Bindable", null);
 		metaTags.add(metaTag);
 		
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Baz"), 
+		ASFieldMetadata fieldMetadata = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Baz"), 
 				new ActionScriptSymbolName("baz"), ASTypeVisibility.PRIVATE, metaTags);
 		
 		details.addField(fieldMetadata);
@@ -178,7 +178,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	@Test
 	public void testAddSimpleMethod() throws UnsupportedEncodingException {
 		
-		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), ActionScriptType.VOID_TYPE, ASTypeVisibility.PUBLIC);
+		ASMethodMetadata method = new DefaultASMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), ActionScriptType.VOID_TYPE, ASTypeVisibility.PUBLIC);
 		
 		details.addMethod(method);
 		
@@ -194,8 +194,8 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	
 	@Test
 	public void testAddComplexMethod() throws UnsupportedEncodingException { 
-		List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
-		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("MagicalMetadata", null);
+		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
+		ASMetaTagMetadata metaTag = new DefaultASMetaTagMetadata("MagicalMetadata", null);
 		metaTags.add(metaTag);
 		
 		List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
@@ -206,7 +206,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 		paramNames.add(new ActionScriptSymbolName("arg1"));
 		paramNames.add(new ActionScriptSymbolName("arg2"));
 		
-		MethodMetadata method = new DefaultMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), new ActionScriptType("com.foo.smothered.Covered"), 
+		ASMethodMetadata method = new DefaultASMethodMetadata(metadataId, new ActionScriptSymbolName("doStuff"), new ActionScriptType("com.foo.smothered.Covered"), 
 				ASTypeVisibility.PRIVATE, "", metaTags, paramTypes, paramNames);
 		
 		details.addMethod(method);
@@ -228,7 +228,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	public void testAddTypeMetaTag() throws UnsupportedEncodingException {
 		List <MetaTagAttributeValue<?>> attributes = new ArrayList<MetaTagAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new ActionScriptSymbolName("alias"), "com.foo.stuff.domain.FooImpl"));
-		MetaTagMetadata metaTag = new DefaultMetaTagMetadata("RemoteClass", attributes);
+		ASMetaTagMetadata metaTag = new DefaultASMetaTagMetadata("RemoteClass", attributes);
 		
 		details.addTypeMetaTag(metaTag);
 		

@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
-import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -20,12 +20,12 @@ import uk.co.badgersinfoil.metaas.dom.ASMethod;
 import uk.co.badgersinfoil.metaas.dom.ASType;
 import uk.co.badgersinfoil.metaas.dom.Statement;
 
-public class As3ParserMethodMetadata implements MethodMetadata {
+public class As3ParserMethodMetadata implements ASMethodMetadata {
 	
 	private ActionScriptSymbolName methodName;
 	private ActionScriptType returnType;
 	private String declaredByMetadataId;
-	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 	private String body = "";
 	private Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
 	private ASTypeVisibility visibility;
@@ -75,7 +75,7 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 		return this.returnType;
 	}
 
-	public List<MetaTagMetadata> getMetaTags() {
+	public List<ASMetaTagMetadata> getMetaTags() {
 		return this.metaTags;
 	}
 
@@ -99,7 +99,7 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 		return this.visibility;
 	}
 
-	public static void addMethod(CompilationUnitServices compilationUnitServices, ASType type, MethodMetadata declaredMethod, boolean permitFlush) {
+	public static void addMethod(CompilationUnitServices compilationUnitServices, ASType type, ASMethodMetadata declaredMethod, boolean permitFlush) {
 		
 		Assert.isNull(type.getMethod(declaredMethod.getMethodName().getSymbolName()), "Method with name "+declaredMethod.getMethodName().getSymbolName()+" already exists and ActionScript does not allow method overloading.");
 		
@@ -109,7 +109,7 @@ public class As3ParserMethodMetadata implements MethodMetadata {
 		//TODO - The parser doesn't allow any control over re-ordering methods.  It would be good if we could at the very least ensure methods get added after the constructor.
 		
 		//Add MetaTags
-		for (MetaTagMetadata metaTag : declaredMethod.getMetaTags()) {
+		for (ASMetaTagMetadata metaTag : declaredMethod.getMetaTags()) {
 			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, method, false);			
 		}
 		

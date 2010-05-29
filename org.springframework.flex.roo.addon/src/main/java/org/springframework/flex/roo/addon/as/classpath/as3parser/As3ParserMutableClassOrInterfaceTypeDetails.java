@@ -17,10 +17,10 @@ import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3Pars
 import org.springframework.flex.roo.addon.as.classpath.as3parser.details.As3ParserMethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
-import org.springframework.flex.roo.addon.as.classpath.details.ConstructorMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.MethodMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASConstructorMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -52,13 +52,13 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	// to satisfy interface
 	private ActionScriptType name;
 	private ASPhysicalTypeCategory physicalTypeCategory;
-	private ConstructorMetadata declaredConstructor;
-	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private ASConstructorMetadata declaredConstructor;
+	private List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
+	private List<ASMethodMetadata> declaredMethods = new ArrayList<ASMethodMetadata>();
 	private ASClassOrInterfaceTypeDetails superclass = null;
 	private List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
 	private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
-	private List<MetaTagMetadata> typeMetaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> typeMetaTags = new ArrayList<ASMetaTagMetadata>();
 	
 	// internal use
 	private ASCompilationUnit compilationUnit;
@@ -163,16 +163,16 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		
 	}
 	
-	public void addField(FieldMetadata fieldMetadata) {
+	public void addField(ASFieldMetadata fieldMetadata) {
 		Assert.isInstanceOf(ASClassType.class, this.clazz, "Cannot add a field to an interface");
 		As3ParserFieldMetadata.addField(this, ((ASClassType)this.clazz), fieldMetadata, true);
 	}
 
-	public void addMethod(MethodMetadata methodMetadata) {
+	public void addMethod(ASMethodMetadata methodMetadata) {
 		As3ParserMethodMetadata.addMethod(this, this.clazz, methodMetadata, true);
 	}
 
-	public void addTypeMetaTag(MetaTagMetadata metaTag) {
+	public void addTypeMetaTag(ASMetaTagMetadata metaTag) {
 		As3ParserMetaTagMetadata.addMetaTagToElement(this, metaTag, this.clazz, true);
 	}
 
@@ -180,15 +180,15 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.declaredByMetadataId;
 	}
 
-	public ConstructorMetadata getDeclaredConstructor() {
+	public ASConstructorMetadata getDeclaredConstructor() {
 		return this.declaredConstructor;
 	}
 
-	public List<? extends FieldMetadata> getDeclaredFields() {
+	public List<? extends ASFieldMetadata> getDeclaredFields() {
 		return this.declaredFields;
 	}
 
-	public List<? extends MethodMetadata> getDeclaredMethods() {
+	public List<? extends ASMethodMetadata> getDeclaredMethods() {
 		return this.declaredMethods;
 	}
 	
@@ -200,7 +200,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.implementsTypes;
 	}
 
-	public List<? extends MetaTagMetadata> getTypeMetaTags() {
+	public List<? extends ASMetaTagMetadata> getTypeMetaTags() {
 		return this.typeMetaTags;
 	}
 
@@ -307,13 +307,13 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		}
 		
 		//Add type MetaTags
-		for (MetaTagMetadata metaTag : cit.getTypeMetaTags()) {
+		for (ASMetaTagMetadata metaTag : cit.getTypeMetaTags()) {
 			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, compilationUnit.getType(), false);
 		}
 		
 		if (compilationUnit.getType() instanceof ASClassType) {
 			//Add fields
-			for (FieldMetadata field : cit.getDeclaredFields()) {
+			for (ASFieldMetadata field : cit.getDeclaredFields()) {
 				As3ParserFieldMetadata.addField(compilationUnitServices, ((ASClassType)compilationUnit.getType()), field, false);
 			}
 			
@@ -323,7 +323,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			}
 		}
 		
-		for(MethodMetadata method : cit.getDeclaredMethods()) {
+		for(ASMethodMetadata method : cit.getDeclaredMethods()) {
 			As3ParserMethodMetadata.addMethod(compilationUnitServices, compilationUnit.getType(), method, false);
 		}
 		

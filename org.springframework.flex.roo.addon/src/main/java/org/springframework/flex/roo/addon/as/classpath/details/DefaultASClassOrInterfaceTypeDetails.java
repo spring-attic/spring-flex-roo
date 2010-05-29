@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeCategory;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
@@ -13,18 +13,18 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 
 	private ActionScriptType name;
 	private ASPhysicalTypeCategory physicalTypeCategory;
-	private ConstructorMetadata declaredConstructor;
-	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private ASConstructorMetadata declaredConstructor;
+	private List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
+	private List<ASMethodMetadata> declaredMethods = new ArrayList<ASMethodMetadata>();
 	private ASClassOrInterfaceTypeDetails superClass;
 	private List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
 	private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
-	private List<MetaTagMetadata> typeMetaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> typeMetaTags = new ArrayList<ASMetaTagMetadata>();
 	private String declaredByMetadataId;
 
 	public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId,
 			ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
-			List<MetaTagMetadata> typeMetaTags) {
+			List<ASMetaTagMetadata> typeMetaTags) {
 		Assert
 				.hasText(declaredByMetadataId,
 						"Declared by metadata ID required");
@@ -42,13 +42,13 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 
 	public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId,
 			ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
-			List<FieldMetadata> declaredFields,
-			ConstructorMetadata declaredConstructor,
-			List<MethodMetadata> declaredMethods,
+			List<ASFieldMetadata> declaredFields,
+			ASConstructorMetadata declaredConstructor,
+			List<ASMethodMetadata> declaredMethods,
 			ASClassOrInterfaceTypeDetails superClass,
 			List<ActionScriptType> extendsTypes,
 			List<ActionScriptType> implementsTypes,
-			List<MetaTagMetadata> typeMetaTags) {
+			List<ASMetaTagMetadata> typeMetaTags) {
 		Assert
 				.hasText(declaredByMetadataId,
 						"Declared by metadata ID required");
@@ -90,15 +90,15 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		return physicalTypeCategory;
 	}
 
-	public ConstructorMetadata getDeclaredConstructor() {
+	public ASConstructorMetadata getDeclaredConstructor() {
 		return declaredConstructor;
 	}
 
-	public List<? extends FieldMetadata> getDeclaredFields() {
+	public List<? extends ASFieldMetadata> getDeclaredFields() {
 		return declaredFields;
 	}
 
-	public List<? extends MethodMetadata> getDeclaredMethods() {
+	public List<? extends ASMethodMetadata> getDeclaredMethods() {
 		return declaredMethods;
 	}
 
@@ -114,7 +114,7 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		return implementsTypes;
 	}
 
-	public List<? extends MetaTagMetadata> getTypeMetaTags() {
+	public List<? extends ASMetaTagMetadata> getTypeMetaTags() {
 		return typeMetaTags;
 	}
 

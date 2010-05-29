@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 
-public interface MetaTagMetadata {
+public interface ASMetaTagMetadata {
 
 	String getName();
 	

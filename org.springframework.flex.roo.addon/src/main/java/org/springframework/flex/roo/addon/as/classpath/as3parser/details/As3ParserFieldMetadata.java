@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
-import org.springframework.flex.roo.addon.as.classpath.details.FieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
@@ -16,12 +16,12 @@ import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASField;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 
-public class As3ParserFieldMetadata implements FieldMetadata {
+public class As3ParserFieldMetadata implements ASFieldMetadata {
 
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
 	private ASTypeVisibility visibility;
-	private List<MetaTagMetadata> metaTags = new ArrayList<MetaTagMetadata>();
+	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 	private String declaredByMetadataId;
 	
 	@SuppressWarnings("unchecked")
@@ -56,7 +56,7 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 		return fieldType;
 	}
 
-	public List<MetaTagMetadata> getMetaTags() {
+	public List<ASMetaTagMetadata> getMetaTags() {
 		return metaTags;
 	}
 
@@ -65,7 +65,7 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 	}
 	
 	public static void addField(CompilationUnitServices compilationUnitServices, 
-			ASClassType clazz, FieldMetadata field, boolean permitFlush) {
+			ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
 		
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(clazz, "Class required");
@@ -78,7 +78,7 @@ public class As3ParserFieldMetadata implements FieldMetadata {
 		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
 		
 		// Add meta tags to the field
-		for(MetaTagMetadata metaTag : field.getMetaTags()) {
+		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
 			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, newField, false);
 		}
 		

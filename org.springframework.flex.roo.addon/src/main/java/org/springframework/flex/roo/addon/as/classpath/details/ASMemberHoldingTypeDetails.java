@@ -3,18 +3,18 @@ package org.springframework.flex.roo.addon.as.classpath.details;
 import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
 public interface ASMemberHoldingTypeDetails extends ASPhysicalTypeDetails {
 
-	List<? extends MethodMetadata> getDeclaredMethods();
+	List<? extends ASMethodMetadata> getDeclaredMethods();
 
-	ConstructorMetadata getDeclaredConstructor();
+	ASConstructorMetadata getDeclaredConstructor();
 
-	List<? extends FieldMetadata> getDeclaredFields();
+	List<? extends ASFieldMetadata> getDeclaredFields();
 
-	List<? extends MetaTagMetadata> getTypeMetaTags();
+	List<? extends ASMetaTagMetadata> getTypeMetaTags();
 	
 	List<ActionScriptType> getExtendsTypes();
 
