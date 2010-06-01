@@ -8,13 +8,13 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
 public interface ASMemberHoldingTypeDetails extends ASPhysicalTypeDetails {
 
-	List<? extends ASMethodMetadata> getDeclaredMethods();
+	List<ASMethodMetadata> getDeclaredMethods();
 
 	ASConstructorMetadata getDeclaredConstructor();
 
-	List<? extends ASFieldMetadata> getDeclaredFields();
+	List<ASFieldMetadata> getDeclaredFields();
 
-	List<? extends ASMetaTagMetadata> getTypeMetaTags();
+	List<ASMetaTagMetadata> getTypeMetaTags();
 	
 	List<ActionScriptType> getExtendsTypes();
 

@@ -5,6 +5,7 @@ package com.foo.stuff
 	import com.foo.Foo;
 	
 	[ClassLevelTag1]
+	[ClassLevelTag2(foo="bar")]
 	public class FooImpl extends Alpha implements Foo
 	{
 		[FieldLevelTag1]

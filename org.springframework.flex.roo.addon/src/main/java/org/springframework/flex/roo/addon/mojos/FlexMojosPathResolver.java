@@ -13,7 +13,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
 
 @Component
-@Service
+@Service(FlexPathResolver.class)
 public class FlexMojosPathResolver extends AbstractPathResolver implements FlexPathResolver {
 
 	private List<PathInformation> pathInformation = new ArrayList<PathInformation>();

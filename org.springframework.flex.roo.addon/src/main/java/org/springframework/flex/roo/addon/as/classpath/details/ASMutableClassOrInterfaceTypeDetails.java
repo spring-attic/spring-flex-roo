@@ -18,12 +18,58 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	 * defined on the type.
 	 * 
 	 * @param metaTag to add (required)
+	 * @param flush changes to disk immediately
+	 */
+	void addTypeMetaTag(ASMetaTagMetadata metaTag, boolean flush);
+	
+	/**
+	 * Removes the type-level meta tag of the name indicated. This meta tag must
+	 * already exist.
+	 * 
+	 * @param name of the meta tag to remove (required)
+	 * @param flush changes to disk immediately
+	 */
+	void removeTypeMetaTag(String name, boolean flush);
+	
+	/**
+	 * Adds a new field. There must not be a field of this name already existing.
+	 * 
+	 * @param fieldMetadata to add (required)
+	 * @param flush changes to disk immediately
+	 */
+	void addField(ASFieldMetadata fieldMetadata, boolean flush);
+	
+	/**
+	 * Removes an existing field. A field with the specified name must already exist.
+	 * 
+	 * @param fieldName to remove (required)
+	 * @param flush changes to disk immediately
+	 */
+	void removeField(ActionScriptSymbolName fieldName, boolean flush);
+	
+	/**
+	 * Adds a new method. A method with the same name and parameter types must not already exist.
+	 * 
+	 * @param methodMetadata to add (required)
+	 * @param flush changes to disk immediately
+	 */
+	void addMethod(ASMethodMetadata methodMetadata, boolean flush);
+	
+	/**
+	 * Adds a new type-level meta tag. There must not already be an equivalent meta tag of this
+	 * defined on the type.
+	 * 
+	 * Changes will be immediately written to disk.
+	 * 
+	 * @param metaTag to add (required)
 	 */
 	void addTypeMetaTag(ASMetaTagMetadata metaTag);
 	
 	/**
 	 * Removes the type-level meta tag of the name indicated. This meta tag must
 	 * already exist.
+	 * 
+	 * Changes will be immediately written to disk.
 	 * 
 	 * @param name of the meta tag to remove (required)
 	 */
@@ -32,12 +78,16 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	/**
 	 * Adds a new field. There must not be a field of this name already existing.
 	 * 
+	 * Changes will be immediately written to disk.
+	 * 
 	 * @param fieldMetadata to add (required)
 	 */
 	void addField(ASFieldMetadata fieldMetadata);
 	
 	/**
 	 * Removes an existing field. A field with the specified name must already exist.
+	 * 
+	 * Changes will be immediately written to disk.
 	 * 
 	 * @param fieldName to remove (required)
 	 */
@@ -46,9 +96,18 @@ public interface ASMutableClassOrInterfaceTypeDetails extends ASClassOrInterface
 	/**
 	 * Adds a new method. A method with the same name and parameter types must not already exist.
 	 * 
+	 * Changes will be immediately written to disk.
+	 * 
 	 * @param methodMetadata to add (required)
 	 */
 	void addMethod(ASMethodMetadata methodMetadata);
 	
+	/**
+	 * Commit changes to disk
+	 */
+	void commit();
 
+	void updateField(ASFieldMetadata fieldMetadata, boolean flush);
+
+	void updateField(ASFieldMetadata fieldMetadata);
 }

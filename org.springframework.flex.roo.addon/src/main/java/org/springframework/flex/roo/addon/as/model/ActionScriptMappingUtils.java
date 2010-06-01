@@ -1,6 +1,10 @@
 package org.springframework.flex.roo.addon.as.model;
 
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +40,31 @@ public abstract class ActionScriptMappingUtils {
 		javaToAmfTypeMap.put(JavaType.LONG_PRIMITIVE, ActionScriptType.NUMBER_TYPE);
 		javaToAmfTypeMap.put(JavaType.FLOAT_OBJECT, ActionScriptType.NUMBER_TYPE);
 		javaToAmfTypeMap.put(JavaType.FLOAT_PRIMITIVE, ActionScriptType.NUMBER_TYPE);
+		javaToAmfTypeMap.put(JavaType.CHAR_OBJECT, ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(JavaType.CHAR_PRIMITIVE, ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(new JavaType(Character.class.getName(), 1, DataType.TYPE, null, null), ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(new JavaType(Character.class.getName(), 1, DataType.PRIMITIVE, null, null), ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(new JavaType(BigInteger.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(new JavaType(BigDecimal.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.STRING_TYPE);
+		javaToAmfTypeMap.put(new JavaType(Calendar.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.DATE_TYPE);
+		javaToAmfTypeMap.put(new JavaType(Date.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.DATE_TYPE);
 	}
 	
 	public static ActionScriptType toActionScriptType(JavaType javaType) {
 		if (javaToAmfTypeMap.containsKey(javaType)) {
 			return javaToAmfTypeMap.get(javaType);
+		}
+		
+		if (javaType.isCommonCollectionType()) {
+			if(javaType.getSimpleTypeName().endsWith("Map")) {
+				if (javaType.isArray()) {
+					return ActionScriptType.ARRAY_TYPE;
+				} else {
+					return ActionScriptType.OBJECT_TYPE;
+				}
+			} else {
+				return new ActionScriptType("mx.collections.ArrayCollection");
+			}
 		}
 		
 		return new ActionScriptType(javaType.getFullyQualifiedTypeName(), (javaType.isArray() ? 1 : 0), ASDataType.TYPE);

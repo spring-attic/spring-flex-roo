@@ -94,11 +94,11 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		return declaredConstructor;
 	}
 
-	public List<? extends ASFieldMetadata> getDeclaredFields() {
+	public List<ASFieldMetadata> getDeclaredFields() {
 		return declaredFields;
 	}
 
-	public List<? extends ASMethodMetadata> getDeclaredMethods() {
+	public List<ASMethodMetadata> getDeclaredMethods() {
 		return declaredMethods;
 	}
 
@@ -114,7 +114,7 @@ public class DefaultASClassOrInterfaceTypeDetails implements
 		return implementsTypes;
 	}
 
-	public List<? extends ASMetaTagMetadata> getTypeMetaTags() {
+	public List<ASMetaTagMetadata> getTypeMetaTags() {
 		return typeMetaTags;
 	}
 

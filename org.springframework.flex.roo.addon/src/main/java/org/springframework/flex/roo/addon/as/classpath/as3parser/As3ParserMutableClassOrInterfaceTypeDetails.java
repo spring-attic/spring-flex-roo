@@ -63,7 +63,8 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	// internal use
 	private ASCompilationUnit compilationUnit;
 	private ActionScriptPackage compilationUnitPackage;
-	private ASType clazz;
+	public ASType clazz;
+	public boolean isDirty = false;
 	
 	@SuppressWarnings("unchecked")
 	public As3ParserMutableClassOrInterfaceTypeDetails(ASCompilationUnit compilationUnit, FileManager fileManager, String declaredByMetadataId, String fileIdentifier, ActionScriptType typeName, MetadataService metadataService, ASPhysicalTypeMetadataProvider physicalTypeMetadataProvider) {
@@ -163,17 +164,35 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		
 	}
 	
-	public void addField(ASFieldMetadata fieldMetadata) {
+	public void addField(ASFieldMetadata fieldMetadata, boolean flush) {
 		Assert.isInstanceOf(ASClassType.class, this.clazz, "Cannot add a field to an interface");
-		As3ParserFieldMetadata.addField(this, ((ASClassType)this.clazz), fieldMetadata, true);
+		As3ParserFieldMetadata.addField(this, ((ASClassType)this.clazz), fieldMetadata, flush);
+		if (!flush) {
+			isDirty = true;
+		}
 	}
 
-	public void addMethod(ASMethodMetadata methodMetadata) {
-		As3ParserMethodMetadata.addMethod(this, this.clazz, methodMetadata, true);
+	public void addMethod(ASMethodMetadata methodMetadata, boolean flush) {
+		As3ParserMethodMetadata.addMethod(this, this.clazz, methodMetadata, flush);
+		if (!flush) {
+			isDirty = true;
+		}
 	}
 
-	public void addTypeMetaTag(ASMetaTagMetadata metaTag) {
-		As3ParserMetaTagMetadata.addMetaTagToElement(this, metaTag, this.clazz, true);
+	public void addTypeMetaTag(ASMetaTagMetadata metaTag, boolean flush) {
+		As3ParserMetaTagMetadata.addMetaTagToElement(this, metaTag, this.clazz, flush);
+		if (!flush) {
+			isDirty = true;
+		}
+	}
+	
+	public void updateField(ASFieldMetadata fieldMetadata, boolean flush) {
+		Assert.isInstanceOf(ASClassType.class, this.clazz, "Cannot update a field on an interface");
+		Assert.isTrue(getDeclaredFields().contains(fieldMetadata), "Field does not exist.");
+		As3ParserFieldMetadata.updateField(this, ((ASClassType)this.clazz), fieldMetadata, flush);
+		if (!flush) {
+			isDirty = true;
+		}
 	}
 
 	public String getDeclaredByMetadataId() {
@@ -184,11 +203,11 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.declaredConstructor;
 	}
 
-	public List<? extends ASFieldMetadata> getDeclaredFields() {
+	public List<ASFieldMetadata> getDeclaredFields() {
 		return this.declaredFields;
 	}
 
-	public List<? extends ASMethodMetadata> getDeclaredMethods() {
+	public List<ASMethodMetadata> getDeclaredMethods() {
 		return this.declaredMethods;
 	}
 	
@@ -200,17 +219,23 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 		return this.implementsTypes;
 	}
 
-	public List<? extends ASMetaTagMetadata> getTypeMetaTags() {
+	public List<ASMetaTagMetadata> getTypeMetaTags() {
 		return this.typeMetaTags;
 	}
 
-	public void removeField(ActionScriptSymbolName fieldName) {
+	public void removeField(ActionScriptSymbolName fieldName, boolean flush) {
 		Assert.isInstanceOf(ASClassType.class, this.clazz, "Cannot remove a field from an interface");
-		As3ParserFieldMetadata.removeField(this, ((ASClassType)this.clazz), fieldName);
+		As3ParserFieldMetadata.removeField(this, ((ASClassType)this.clazz), fieldName, flush);
+		if (!flush) {
+			isDirty = true;
+		}
 	}
 
-	public void removeTypeMetaTag(String name) {
-		As3ParserMetaTagMetadata.removeMetatagFromElement(this, this.clazz, name);
+	public void removeTypeMetaTag(String name, boolean flush) {
+		As3ParserMetaTagMetadata.removeMetatagFromElement(this, this.clazz, name, flush);
+		if (!flush) {
+			isDirty = true;
+		}
 	}
 
 	public ActionScriptType getName() {
@@ -339,5 +364,36 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 	
 	public ASClassOrInterfaceTypeDetails getSuperClass() {
 		return this.superclass;
+	}
+
+	public void addField(ASFieldMetadata fieldMetadata) {
+		addField(fieldMetadata, true);
+	}
+
+	public void addMethod(ASMethodMetadata methodMetadata) {
+		addMethod(methodMetadata, true);
+	}
+
+	public void addTypeMetaTag(ASMetaTagMetadata metaTag) {
+		addTypeMetaTag(metaTag, true);
+	}
+	
+	public void updateField(ASFieldMetadata fieldMetadata) {
+		addField(fieldMetadata, true);
+	}
+
+	public void removeField(ActionScriptSymbolName fieldName) {
+		removeField(fieldName, true);
+	}
+
+	public void removeTypeMetaTag(String name) {
+		removeTypeMetaTag(name, true);
+	}
+
+	public void commit() {
+		if (isDirty) {
+			flush();
+			isDirty = false;
+		}
 	}
 }

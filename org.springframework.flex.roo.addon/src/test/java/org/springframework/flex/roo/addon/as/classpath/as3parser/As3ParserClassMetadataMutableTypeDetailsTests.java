@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASMethodMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
@@ -81,7 +82,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 
 	private As3ParserClassMetadata metadata;
 
-	private As3ParserMutableClassOrInterfaceTypeDetails details;
+	private ASMutableClassOrInterfaceTypeDetails details;
 	
 	private ByteArrayOutputStream outputStream;
 	
@@ -107,7 +108,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 		metadata = new As3ParserClassMetadata(fileManager, fileIdentifier, metadataId, metadataService, provider);
 		assertNotNull(metadata);
 		assertNotNull(metadata.getPhysicalTypeDetails());
-		details = (As3ParserMutableClassOrInterfaceTypeDetails) metadata.getPhysicalTypeDetails();
+		details = (ASMutableClassOrInterfaceTypeDetails) metadata.getPhysicalTypeDetails();
 		
 		lastFile = "";
 		outputStream = new ByteArrayOutputStream();

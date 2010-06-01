@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.As3ParserUtils;
 import org.springframework.flex.roo.addon.as.classpath.as3parser.CompilationUnitServices;
 import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.AbstractASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
@@ -16,7 +17,7 @@ import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASField;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 
-public class As3ParserFieldMetadata implements ASFieldMetadata {
+public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
@@ -33,10 +34,10 @@ public class As3ParserFieldMetadata implements ASFieldMetadata {
 		Assert.notNull(field, "ActionScript field is required");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
 		
-		this.declaredByMetadataId = declaredByMetadataId;
+		this.setDeclaredByMetadataId(declaredByMetadataId);
 		
 		this.fieldType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getType());
-		this.fieldName = new ActionScriptSymbolName(field.getName());
+		this.setFieldName(new ActionScriptSymbolName(field.getName()));
 		this.visibility = As3ParserUtils.getASTypeVisibility(field.getVisibility());
 
 		for(ASMetaTag metaTag : (List<ASMetaTag>)field.getAllMetaTags()) {
@@ -44,10 +45,12 @@ public class As3ParserFieldMetadata implements ASFieldMetadata {
 		}
 	}
 
+	@Override
 	public String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
 
+	@Override
 	public ActionScriptSymbolName getFieldName() {
 		return fieldName;
 	}
@@ -87,7 +90,30 @@ public class As3ParserFieldMetadata implements ASFieldMetadata {
 		}
 	}
 	
-	public static void removeField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ActionScriptSymbolName fieldName) {
+	public static void updateField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
+		
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(clazz, "Class required");
+		Assert.notNull(field, "Field required");
+		
+		// Import the field type into the compilation unit
+		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
+		
+		ASField existingField = clazz.getField(field.getFieldName().getSymbolName());
+		
+		existingField.setVisibility(As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()));
+		
+		existingField.setType(field.getFieldType().getSimpleTypeName());
+		
+		// Add meta tags to the field
+		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
+			if (existingField.getFirstMetatag(metaTag.getName()) != null) {
+				As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, existingField, false);
+			}
+		}
+	}
+	
+	public static void removeField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ActionScriptSymbolName fieldName, boolean permitFlush) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(clazz, "Class required");
 		Assert.notNull(fieldName, "Field name required");
@@ -96,6 +122,18 @@ public class As3ParserFieldMetadata implements ASFieldMetadata {
 		
 		clazz.removeField(fieldName.getSymbolName());
 		
-		compilationUnitServices.flush();
+		if(permitFlush) {
+			compilationUnitServices.flush();
+		}
 	}
+
+	private void setDeclaredByMetadataId(String declaredByMetadataId) {
+		this.declaredByMetadataId = declaredByMetadataId;
+	}
+
+	private void setFieldName(ActionScriptSymbolName fieldName) {
+		this.fieldName = fieldName;
+	}
+	
+	
 }

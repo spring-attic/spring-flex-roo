@@ -79,7 +79,7 @@ public class As3ParserMetaTagMetadata implements ASMetaTagMetadata {
 		}
 	}
 
-	public static void removeMetatagFromElement(CompilationUnitServices compilationUnitServices, MetaTagable element, String name) {
+	public static void removeMetatagFromElement(CompilationUnitServices compilationUnitServices, MetaTagable element, String name, boolean permitFlush) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(name, "Name required");
 		Assert.notNull(element, "Element required");
@@ -93,7 +93,9 @@ public class As3ParserMetaTagMetadata implements ASMetaTagMetadata {
 		
 		//For this to work, we'll have to extend the existing parser and add in something like MetaTagable#removeTag(String name)
 		
-		compilationUnitServices.flush();
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
 	}
 
 }

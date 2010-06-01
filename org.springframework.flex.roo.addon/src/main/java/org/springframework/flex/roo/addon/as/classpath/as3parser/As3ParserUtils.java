@@ -3,7 +3,9 @@ package org.springframework.flex.roo.addon.as.classpath.as3parser;
 import java.util.List;
 
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.BooleanAttributeValue;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.IntegerAttributeValue;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.MetaTagAttributeValue;
+import org.springframework.flex.roo.addon.as.classpath.details.metatag.StringAttributeValue;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
@@ -78,6 +80,10 @@ public class As3ParserUtils {
 			return;
 		}
 		
+		if(compilationUnitServices.getCompilationUnitPackage().equals(typeToImport.getPackage())) {
+			return;
+		}
+		
 		if (compilationUnitServices.getImports().contains(typeToImport.getFullyQualifiedTypeName())) {
 			return;
 		}
@@ -109,7 +115,10 @@ public class As3ParserUtils {
 	public static MetaTagAttributeValue<?> getMetaTagAttributeValue(Param param) {
 		if (param.getValue() instanceof Boolean) {
 			return new BooleanAttributeValue(new ActionScriptSymbolName(param.getName()), (Boolean) param.getValue());
+		} else if (param.getValue() instanceof Integer) {
+			return new IntegerAttributeValue(new ActionScriptSymbolName(param.getName()), (Integer) param.getValue());
+		} else {
+			return new StringAttributeValue(new ActionScriptSymbolName(param.getName()), String.valueOf(param.getValue()));
 		}
-		return  null;
 	}
 }

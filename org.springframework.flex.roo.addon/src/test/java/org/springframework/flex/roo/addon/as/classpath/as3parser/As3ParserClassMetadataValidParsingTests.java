@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.io.IOException;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -16,6 +18,7 @@ import org.springframework.flex.roo.addon.as.classpath.details.ASConstructorMeta
 import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.ASMethodMetadata;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
+import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
@@ -87,9 +90,12 @@ public class As3ParserClassMetadataValidParsingTests {
 	
 	@Test
 	public void testClassLevelMetadata() {
-		assertEquals(1, details.getTypeMetaTags().size());
+		assertEquals(2, details.getTypeMetaTags().size());
 		assertEquals("ClassLevelTag1", details.getTypeMetaTags().get(0).getName());
 		assertEquals(0,details.getTypeMetaTags().get(0).getAttributeNames().size());
+		assertEquals("ClassLevelTag2", details.getTypeMetaTags().get(1).getName());
+		assertEquals(1,details.getTypeMetaTags().get(1).getAttributeNames().size());
+		assertEquals("bar",details.getTypeMetaTags().get(1).getAttribute(new ActionScriptSymbolName("foo")).getValue());
 	}
 	
 	@Test

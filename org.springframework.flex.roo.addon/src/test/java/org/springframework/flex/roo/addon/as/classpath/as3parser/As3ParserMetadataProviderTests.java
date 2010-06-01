@@ -337,8 +337,10 @@ public class As3ParserMetadataProviderTests {
 		List<ASFieldMetadata> fields = new ArrayList<ASFieldMetadata>();
 		ASFieldMetadata field1 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), new ActionScriptSymbolName("name"), null, metaTags);
 		ASFieldMetadata field2 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Brother"), new ActionScriptSymbolName("brother"), ASTypeVisibility.PROTECTED, null);
+		ASFieldMetadata field3 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.stuff.Stuff"), new ActionScriptSymbolName("stuff"), ASTypeVisibility.PRIVATE, null);
 		fields.add(field1);
 		fields.add(field2);
+		fields.add(field3);
 		
 		ASPhysicalTypeDetails details = new DefaultASClassOrInterfaceTypeDetails(metadataId, new ActionScriptType("com.foo.stuff.FooImpl"), 
 				ASPhysicalTypeCategory.CLASS, fields, null, null, null, null, null, null);
@@ -348,9 +350,10 @@ public class As3ParserMetadataProviderTests {
 		
 		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(fileManager.lastFile));
 		ASClassType clazz = (ASClassType) compUnit.getType();
-		assertEquals(2, clazz.getFields().size());
+		assertEquals(3, clazz.getFields().size());
 		assertNotNull(clazz.getField("name").getMetaTagsWithName("Bindable"));
 		assertTrue(compUnit.getPackage().findImports().contains("com.foo.other.Brother"));
+		assertFalse(compUnit.getPackage().findImports().contains("com.foo.stuff.Stuff"));
 	}
 	
 	@Test

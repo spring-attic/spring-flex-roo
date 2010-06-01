@@ -9,7 +9,7 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
-public class DefaultASFieldMetadata implements ASFieldMetadata {
+public class DefaultASFieldMetadata extends AbstractASFieldMetadata {
 
 	private String declaredByMetadataId;
 	private ActionScriptType fieldType;
@@ -33,19 +33,25 @@ public class DefaultASFieldMetadata implements ASFieldMetadata {
 			this.metaTags = metaTags;
 		}
 	}
-		
+	
+	@Override
 	public String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
+
 	public ActionScriptType getFieldType() {
 		return fieldType;
 	}
+	
+	@Override
 	public ActionScriptSymbolName getFieldName() {
 		return fieldName;
 	}
+	
 	public ASTypeVisibility getVisibility() {
 		return visibility;
 	}
+	
 	public List<ASMetaTagMetadata> getMetaTags() {
 		return metaTags;
 	}
