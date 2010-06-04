@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
-import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
+import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
@@ -21,6 +21,8 @@ import org.springframework.roo.model.JavaType;
 public abstract class ActionScriptMappingUtils {
 
 	private static final Map<JavaType, ActionScriptType> javaToAmfTypeMap = new HashMap<JavaType, ActionScriptType>();
+	
+	private static final Map<ActionScriptType, JavaType> amfToJavaTypeMap = new HashMap<ActionScriptType, JavaType>();
 	
 	static {
 		javaToAmfTypeMap.put(new JavaType(Enum.class.getName()), ActionScriptType.STRING_TYPE);
@@ -48,6 +50,16 @@ public abstract class ActionScriptMappingUtils {
 		javaToAmfTypeMap.put(new JavaType(BigDecimal.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.STRING_TYPE);
 		javaToAmfTypeMap.put(new JavaType(Calendar.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.DATE_TYPE);
 		javaToAmfTypeMap.put(new JavaType(Date.class.getName(), 0, DataType.TYPE, null, null), ActionScriptType.DATE_TYPE);
+		
+		amfToJavaTypeMap.put(ActionScriptType.STRING_TYPE, JavaType.STRING_OBJECT);
+		amfToJavaTypeMap.put(ActionScriptType.BOOLEAN_TYPE, JavaType.BOOLEAN_OBJECT);
+		amfToJavaTypeMap.put(ActionScriptType.INT_TYPE, JavaType.INT_OBJECT);
+		amfToJavaTypeMap.put(ActionScriptType.NUMBER_TYPE, JavaType.DOUBLE_OBJECT);
+		amfToJavaTypeMap.put(ActionScriptType.DATE_TYPE, new JavaType(Date.class.getName(), 0, DataType.TYPE, null, null));
+		amfToJavaTypeMap.put(new ActionScriptType("flash.utils.ByteArray"), new JavaType(Byte.class.getName(), 1, DataType.TYPE, null, null));
+		amfToJavaTypeMap.put(new ActionScriptType("mx.collections.ArrayCollection"), new JavaType(List.class.getName(), 0, DataType.TYPE, null, null));
+		amfToJavaTypeMap.put(ActionScriptType.ARRAY_TYPE, new JavaType(List.class.getName(), 0, DataType.TYPE, null, null));
+		amfToJavaTypeMap.put(ActionScriptType.OBJECT_TYPE, new JavaType(Map.class.getName(), 0, DataType.TYPE, null, null));
 	}
 	
 	public static ActionScriptType toActionScriptType(JavaType javaType) {
@@ -70,12 +82,28 @@ public abstract class ActionScriptMappingUtils {
 		return new ActionScriptType(javaType.getFullyQualifiedTypeName(), (javaType.isArray() ? 1 : 0), ASDataType.TYPE);
 	}
 	
+	public static JavaType toJavaType(ActionScriptType asType) {
+		if (amfToJavaTypeMap.containsKey(asType)) {
+			return amfToJavaTypeMap.get(asType);
+		}
+		
+		return new JavaType(asType.getFullyQualifiedTypeName());
+	}
+	
 	public static ActionScriptSymbolName toActionScriptSymbolName(JavaSymbolName name) {
 		return new ActionScriptSymbolName(name.getSymbolName());
 	}
 	
+	private static JavaSymbolName toJavaSymbolName(ActionScriptSymbolName fieldName) {
+		return new JavaSymbolName(fieldName.getSymbolName());
+	}
+	
 	public static ActionScriptPackage toActionScriptPackage(JavaPackage javaPackage) {
 		return new ActionScriptPackage(javaPackage.getFullyQualifiedPackageName());
+	}
+	
+	public static JavaPackage toJavaPackage(ActionScriptPackage asPackage) {
+		return new JavaPackage(asPackage.getFullyQualifiedPackageName());
 	}
 	
 	public static ASTypeVisibility toASTypeVisibility(int mod) {
@@ -89,10 +117,44 @@ public abstract class ActionScriptMappingUtils {
 			return ASTypeVisibility.DEFAULT;
 		}
 	}
+	
+	private static int toJavaModifier(ASTypeVisibility visibility) {
+		switch (visibility) {
+			case PUBLIC:
+				return Modifier.PUBLIC;
+			case PRIVATE:
+				return Modifier.PRIVATE;
+			case PROTECTED:
+				return Modifier.PROTECTED;
+			case INTERNAL:
+				return Modifier.PRIVATE;
+			case DEFAULT:
+			default:
+				return 0;
+		}
+	}
 
-	public static ASFieldMetadata toASFieldMetadata(String asEntityId, FieldMetadata javaField, List<ASMetaTagMetadata> metaTags, boolean makePublic) {
+	public static ASFieldMetadata toASFieldMetadata(String asEntityId, FieldMetadata javaField, boolean makePublic) {
 		return new DefaultASFieldMetadata(asEntityId, toActionScriptType(javaField.getFieldType()), toActionScriptSymbolName(javaField.getFieldName()), 
-				(makePublic ? ASTypeVisibility.PUBLIC : toASTypeVisibility(javaField.getModifier())), metaTags);
+				(makePublic ? ASTypeVisibility.PUBLIC : toASTypeVisibility(javaField.getModifier())), null);
 	}
 	
+	public static FieldMetadata toFieldMetadata(String javaEntityId,
+			ASFieldMetadata asField, boolean makePrivate) {
+		return new DefaultFieldMetadata(javaEntityId, (makePrivate ? Modifier.PRIVATE : toJavaModifier(asField.getVisibility())), 
+				toJavaSymbolName(asField.getFieldName()), toJavaType(asField.getFieldType()), null, null);
+	}
+
+	public static boolean isMappableType(ActionScriptType fieldType) {
+		
+		if (ActionScriptType.isImplicitType(fieldType.getFullyQualifiedTypeName())) {
+			return false;
+		}
+		
+		if (fieldType.getFullyQualifiedTypeName().startsWith("flash.") || fieldType.getFullyQualifiedTypeName().startsWith("mx.")) {
+			return false;
+		}
+		
+		return true;
+	}
 }

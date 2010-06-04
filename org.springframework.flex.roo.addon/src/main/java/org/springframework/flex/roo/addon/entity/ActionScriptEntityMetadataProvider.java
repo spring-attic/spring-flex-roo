@@ -2,6 +2,7 @@ package org.springframework.flex.roo.addon.entity;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -31,7 +32,6 @@ import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
@@ -45,6 +45,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
 /**
  * TODO - If the entity implements an interface, should we generate the interface as well? Currently they are ignored.
@@ -118,14 +119,8 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 			FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			
 			//TODO - We don't add any meta-tags and we set the field to public - any other choice?
-			ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, null, true);
-			if (!ActionScriptType.isImplicitType(asField.getFieldType().getFullyQualifiedTypeName())) {
-				String relatedEntityId = asPhysicalTypeProvider.findIdentifier(asField.getFieldType());
-				if (!StringUtils.hasText(relatedEntityId)) {
-					relatedEntityId = ASPhysicalTypeIdentifier.createIdentifier(asField.getFieldType(), FlexPath.SRC_MAIN_FLEX);
-					relatedTypes.add(new TypeMapping(relatedEntityId, asField.getFieldType(), javaField.getFieldType()));
-				}
-			}
+			ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
+			relatedTypes.addAll(findRequiredMappings(javaField, asField));
 			declaredFields.add(asField);
 		}  
 		
@@ -134,8 +129,6 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 		//		declaredConstructor, declaredMethods, superClass, extendsTypes, implementsTypes, typeMetaTags);
 		ASPhysicalTypeMetadata asMetadata = new DefaultASPhysicalTypeMetadata(asEntityId, getPhysicalLocationCanonicalPath(asEntityId), asDetails);
 		asPhysicalTypeProvider.createPhysicalType(asMetadata);
-		
-		//TODO - Register the proper meta-data dependency relationship so that we can update the ActionScript class when the Java class changes.
 		
 		//Now trigger the creation of any related types
 		while (!relatedTypes.isEmpty()) {
@@ -190,7 +183,67 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 	}
 
 	private void processActionScriptTypeChanged(String asEntityId) {
-		//System.out.println("Processing notification for ActionScript entity with id: "+asEntityId+"\n");
+		List<String> processedFields = new ArrayList<String>();
+		
+		ActionScriptType asType = ASPhysicalTypeIdentifier.getActionScriptType(asEntityId);
+		
+		JavaType javaType = ActionScriptMappingUtils.toJavaType(asType);
+		String javaEntityId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		
+		MutableClassOrInterfaceTypeDetails javaTypeDetails = getClassDetails(javaEntityId);
+		
+		//Nothing to do if Java class doesn't exist
+		if (javaTypeDetails == null) {
+			return;
+		}
+		
+		ASMutableClassOrInterfaceTypeDetails asTypeDetails = getASClassDetails(asEntityId);
+		
+		//AS class was probably deleted, so nothing to do.
+		if (asTypeDetails == null) {
+			return;
+		}
+		
+		//Verify that the ActionScript class is enabled for remoting
+		if (!isRemotingClass(javaType, asTypeDetails)) {
+			return;
+		}
+		
+		List<String> javaFieldNames = new ArrayList<String>();
+		for (FieldMetadata javaField : javaTypeDetails.getDeclaredFields()) {
+			javaFieldNames.add(javaField.getFieldName().getSymbolName());
+		}
+		
+		List<String> javaPropertyNames = new ArrayList<String>();
+		BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
+			javaPropertyNames.add(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+		}
+		
+		//TODO - don't currently handle changing of field types because there is no updateField() method on MutablePhysicalTypeDetails
+		//TODO - we don't currently create new JavaTypes that don't exist because there is no simple "create entity" operation for us to access 
+		
+		//Add new fields - here we compare directly against property names instead of fields so that we don't mistakenly add fields that 
+		//might be ITD-only like version and id
+		for(ASFieldMetadata asField : asTypeDetails.getDeclaredFields()) {
+			String fieldName = asField.getFieldName().getSymbolName();
+			if (!javaPropertyNames.contains(fieldName)) {
+				javaTypeDetails.addField(ActionScriptMappingUtils.toFieldMetadata(javaEntityId, asField, true));
+			}
+			processedFields.add(fieldName);
+		}
+		
+		//TODO - how should we handle fields that don't exist in the ActionScript object?  For now we will just remove...should
+		//add some way to turn this off later.
+		
+		//Remove missing fields - here we are careful to only remove things for wich there is an actual field in the Java source, so the user 
+		//can't accidentally remove ITD-required fields like version and id
+		for (String javaFieldName : javaFieldNames) {
+			if (!processedFields.contains(javaFieldName)) {
+				javaTypeDetails.removeField(new JavaSymbolName(javaFieldName));
+			}
+		}
+		
 	}
 
 	private void processJavaTypeChanged(String javaEntityId) {
@@ -208,20 +261,8 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 			return;
 		}
 		
-		boolean isRemotingClass = false;
-		for(ASMetaTagMetadata metaTag : asTypeDetails.getTypeMetaTags()) {
-			if (metaTag.getName().equals(REMOTE_CLASS_TAG)) {
-				MetaTagAttributeValue<?> value = metaTag.getAttribute(new ActionScriptSymbolName(ALIAS_ATTR)); 
-				if (value != null && value instanceof StringAttributeValue) {
-					if (javaType.getFullyQualifiedTypeName().equals(value.getValue())) {
-						isRemotingClass = true;
-						break;
-					}
-				}
-			}
-		}
-		
-		if (!isRemotingClass) {
+		//Verify that the ActionScript class is enabled for remoting
+		if (!isRemotingClass(javaType, asTypeDetails)) {
 			return;
 		}
 		
@@ -234,7 +275,7 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 			
 			//TODO - We don't add any meta-tags and we set the field to public - any other choice? Probaby not until
 			//we potentially add some sort of support for AS getters and setters
-			ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, null, true);
+			ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
 			
 			int existingIndex = declaredFields.indexOf(asField);
 			if (existingIndex > -1) {
@@ -248,13 +289,8 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 				asTypeDetails.addField(asField, false);
 			}
 			
-			if (!ActionScriptType.isImplicitType(asField.getFieldType().getFullyQualifiedTypeName())) {
-				String relatedEntityId = asPhysicalTypeProvider.findIdentifier(asField.getFieldType());
-				if (!StringUtils.hasText(relatedEntityId)) {
-					relatedEntityId = ASPhysicalTypeIdentifier.createIdentifier(asField.getFieldType(), FlexPath.SRC_MAIN_FLEX);
-					relatedTypes.add(new TypeMapping(relatedEntityId, asField.getFieldType(), javaField.getFieldType()));
-				}
-			}
+		    relatedTypes.addAll(findRequiredMappings(javaField, asField));
+			
 			processedProperties.add(asField);
 		}
 		
@@ -267,5 +303,51 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 		}
 		
 		asTypeDetails.commit();
+		
+		//Now trigger the creation of any newly added related types
+		while (!relatedTypes.isEmpty()) {
+			TypeMapping mapping = relatedTypes.poll();
+			createActionScriptMirrorClass(mapping.getMetadataId(), mapping.getAsType(), mapping.getJavaType());
+		}
+	}
+	
+	private boolean isRemotingClass(JavaType javaType,
+			ASMutableClassOrInterfaceTypeDetails asTypeDetails) {
+		boolean isRemotingClass = false;
+		for(ASMetaTagMetadata metaTag : asTypeDetails.getTypeMetaTags()) {
+			if (metaTag.getName().equals(REMOTE_CLASS_TAG)) {
+				MetaTagAttributeValue<?> value = metaTag.getAttribute(new ActionScriptSymbolName(ALIAS_ATTR)); 
+				if (value != null && value instanceof StringAttributeValue) {
+					if (javaType.getFullyQualifiedTypeName().equals(value.getValue())) {
+						isRemotingClass = true;
+						break;
+					}
+				}
+			}
+		}
+		return isRemotingClass;
+	}
+
+	private List<TypeMapping> findRequiredMappings(FieldMetadata javaField, ASFieldMetadata asField) {
+		List<TypeMapping> relatedTypes = new ArrayList<TypeMapping>();
+		if (ActionScriptMappingUtils.isMappableType(asField.getFieldType())) {
+			if (!StringUtils.hasText(asPhysicalTypeProvider.findIdentifier(asField.getFieldType()))) {
+				String relatedEntityId = ASPhysicalTypeIdentifier.createIdentifier(asField.getFieldType(), FlexPath.SRC_MAIN_FLEX);
+				if (!asField.getDeclaredByMetadataId().equals(relatedEntityId)) {
+					relatedTypes.add(new TypeMapping(relatedEntityId, asField.getFieldType(), javaField.getFieldType()));
+				}
+			}
+		} else if (javaField.getFieldType().isCommonCollectionType() && !CollectionUtils.isEmpty(javaField.getFieldType().getParameters())) {
+			for (JavaType javaParamType : javaField.getFieldType().getParameters()) {
+				ActionScriptType asParamType = ActionScriptMappingUtils.toActionScriptType(javaParamType);
+				if (!StringUtils.hasText(asPhysicalTypeProvider.findIdentifier(asField.getFieldType()))) {
+					String relatedEntityId = ASPhysicalTypeIdentifier.createIdentifier(asParamType, FlexPath.SRC_MAIN_FLEX);
+					if (!asField.getDeclaredByMetadataId().equals(relatedEntityId)) {
+						relatedTypes.add(new TypeMapping(relatedEntityId, asParamType, javaParamType));
+					}
+				}
+			}
+		}
+		return relatedTypes;
 	}
 }
