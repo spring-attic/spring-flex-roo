@@ -14,4 +14,5 @@ public interface ASFieldMetadata extends ASIdentifiableMember{
 
 	List<ASMetaTagMetadata> getMetaTags();
 	
+	String getFieldInitializer();
 }

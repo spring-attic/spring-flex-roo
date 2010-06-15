@@ -335,9 +335,9 @@ public class As3ParserMetadataProviderTests {
 		metaTags.add(bindableTag);
 		
 		List<ASFieldMetadata> fields = new ArrayList<ASFieldMetadata>();
-		ASFieldMetadata field1 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), new ActionScriptSymbolName("name"), null, metaTags);
-		ASFieldMetadata field2 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Brother"), new ActionScriptSymbolName("brother"), ASTypeVisibility.PROTECTED, null);
-		ASFieldMetadata field3 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.stuff.Stuff"), new ActionScriptSymbolName("stuff"), ASTypeVisibility.PRIVATE, null);
+		ASFieldMetadata field1 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), new ActionScriptSymbolName("name"), null, null, metaTags);
+		ASFieldMetadata field2 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Brother"), new ActionScriptSymbolName("brother"), ASTypeVisibility.PROTECTED, null, null);
+		ASFieldMetadata field3 = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.stuff.Stuff"), new ActionScriptSymbolName("stuff"), ASTypeVisibility.PRIVATE, null, null);
 		fields.add(field1);
 		fields.add(field2);
 		fields.add(field3);

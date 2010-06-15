@@ -22,6 +22,7 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
 	private ASTypeVisibility visibility;
+	private String fieldInitializer;
 	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 	private String declaredByMetadataId;
 	
@@ -39,6 +40,7 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 		this.fieldType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getType());
 		this.setFieldName(new ActionScriptSymbolName(field.getName()));
 		this.visibility = As3ParserUtils.getASTypeVisibility(field.getVisibility());
+		this.fieldInitializer = field.getInitializer() != null ? field.getInitializer().toString() : null;
 
 		for(ASMetaTag metaTag : (List<ASMetaTag>)field.getAllMetaTags()) {
 			metaTags.add(new As3ParserMetaTagMetadata(metaTag));
@@ -66,6 +68,9 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 	public ASTypeVisibility getVisibility() {
 		return visibility;
 	}
+	public String getFieldInitializer() {
+		return fieldInitializer;
+	}
 	
 	public static void addField(CompilationUnitServices compilationUnitServices, 
 			ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
@@ -79,6 +84,10 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 		
 		// Add the field
 		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
+		
+		if (field.getFieldInitializer() != null) {
+			newField.setInitializer(field.getFieldInitializer());
+		}
 		
 		// Add meta tags to the field
 		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
@@ -104,6 +113,10 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 		existingField.setVisibility(As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()));
 		
 		existingField.setType(field.getFieldType().getSimpleTypeName());
+		
+		if (field.getFieldInitializer() != null) {
+			existingField.setInitializer(field.getFieldInitializer());
+		}
 		
 		// Add meta tags to the field
 		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
@@ -134,6 +147,4 @@ public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 	private void setFieldName(ActionScriptSymbolName fieldName) {
 		this.fieldName = fieldName;
 	}
-	
-	
 }

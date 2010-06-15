@@ -251,10 +251,10 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Reader compilationUnitInputStream = new StringReader(writer.toString());
+		Reader compilationUnitReader = new StringReader(writer.toString());
 		MutableFile mutableFile = fileManager.updateFile(fileIdentifier);
 		try {
-			FileCopyUtils.copy(compilationUnitInputStream, new OutputStreamWriter(mutableFile.getOutputStream()));
+			FileCopyUtils.copy(compilationUnitReader, new OutputStreamWriter(mutableFile.getOutputStream()));
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Could not update '" + fileIdentifier + "'", ioe);
 		}

@@ -1,0 +1,1 @@
+<fx:String>$flexScaffoldMetadata.beanInfoMetadata.javaBean.simpleTypeName$</fx:String>

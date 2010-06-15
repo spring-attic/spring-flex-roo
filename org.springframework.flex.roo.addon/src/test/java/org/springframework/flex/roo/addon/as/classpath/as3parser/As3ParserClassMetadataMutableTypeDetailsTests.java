@@ -129,7 +129,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	public void testAddSimpleField() throws UnsupportedEncodingException {
 		
 		ASFieldMetadata fieldMetadata = new DefaultASFieldMetadata(metadataId, new ActionScriptType("String"), 
-				new ActionScriptSymbolName("name"), ASTypeVisibility.PRIVATE, null);
+				new ActionScriptSymbolName("name"), ASTypeVisibility.PRIVATE, null, null);
 		
 		details.addField(fieldMetadata);
 		
@@ -142,6 +142,23 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 	}
 	
 	@Test
+	public void testAddSimpleFieldWithInitializer() throws UnsupportedEncodingException {
+		
+		ASFieldMetadata fieldMetadata = new DefaultASFieldMetadata(metadataId, ActionScriptType.NUMBER_TYPE, 
+				new ActionScriptSymbolName("id"), ASTypeVisibility.PRIVATE, "-1", null);
+		
+		details.addField(fieldMetadata);
+		
+		readLastFile();
+		assertTrue(StringUtils.hasText(lastFile));
+		ASCompilationUnit compUnit = factory.newParser().parse(new StringReader(lastFile));
+		assertTrue(compUnit.getType() instanceof ASClassType);
+		ASClassType clazz = (ASClassType) compUnit.getType();
+		assertNotNull(clazz.getField("id"));
+		assertEquals("-1", clazz.getField("id").getInitializer().toString());
+	}
+	
+	@Test
 	public void testAddComplexField() throws UnsupportedEncodingException {
 		
 		List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
@@ -149,7 +166,7 @@ public class As3ParserClassMetadataMutableTypeDetailsTests {
 		metaTags.add(metaTag);
 		
 		ASFieldMetadata fieldMetadata = new DefaultASFieldMetadata(metadataId, new ActionScriptType("com.foo.other.Baz"), 
-				new ActionScriptSymbolName("baz"), ASTypeVisibility.PRIVATE, metaTags);
+				new ActionScriptSymbolName("baz"), ASTypeVisibility.PRIVATE, null, metaTags);
 		
 		details.addField(fieldMetadata);
 		

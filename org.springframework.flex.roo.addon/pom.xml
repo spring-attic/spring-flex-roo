@@ -164,6 +164,11 @@
 			<version>0.8</version>
 		</dependency>
 		<dependency>
+			<groupId>antlr</groupId>
+			<artifactId>antlr</artifactId>
+			<version>2.7.7</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.7</version>
@@ -221,11 +226,16 @@
 						<configuration>
 							<artifactSet>
 								<includes>
+									<include>antlr:antlr</include>
 									<include>org.antlr:*</include>
 									<include>uk.co.badgersinfoil.metaas:metaas</include>
 								</includes>
 							</artifactSet>
 							<relocations>
+								<relocation>
+									<pattern>antlr</pattern>
+									<shadedPattern>org.springframework.flex.roo.addon.antlr2</shadedPattern>
+								</relocation>
 								<relocation>
 									<pattern>org.antlr</pattern>
 									<shadedPattern>org.springframework.flex.roo.addon.antlr</shadedPattern>
@@ -354,7 +364,7 @@
 							Reserved.</Bundle-Copyright>
 						<Bundle-DocURL>${pom.url}</Bundle-DocURL>
 						<Export-Package>!org.springframework.flex.roo.addon.as.classpath.as3parser,org.springframework.flex.roo.addon.*</Export-Package>
-						<Import-Package>!uk.co.badgersinfoil.*,*</Import-Package>
+						<Import-Package>!uk.co.badgersinfoil.*,!org.antlr.*,!antlr.*,*</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

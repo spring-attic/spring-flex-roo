@@ -2,7 +2,6 @@ package org.springframework.flex.roo.addon.entity;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -54,7 +53,7 @@ import org.springframework.roo.support.util.StringUtils;
  * TODO - If the entity has a single constructor specified, should we mimic it? Would probably prove overly complicated.
  * TODO - Get JavaType's superclass and recursively generate a corresponding ActionScript class if necessary
  */
-@Component
+@Component(immediate=true)
 @Service
 public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 		MetadataNotificationListener {

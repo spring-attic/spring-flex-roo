@@ -21,6 +21,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 public class FlexScaffoldMetadata extends
 		AbstractItdTypeDetailsProvidingMetadataItem {
@@ -32,7 +33,7 @@ public class FlexScaffoldMetadata extends
 	
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
-	private String entityName;
+	private String entityReference;
 	
 	public FlexScaffoldMetadata(String identifier, JavaType aspectName,
 			PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata) {
@@ -50,14 +51,14 @@ public class FlexScaffoldMetadata extends
 
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
-		this.entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		this.entityReference = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
 		builder.addMethod(getCreateMethod());
 		builder.addMethod(getShowMethod());
 		builder.addMethod(getListMethod());
 		builder.addMethod(getListPagedMethod());
 		builder.addMethod(getUpdateMethod());
-		builder.addMethod(getDeleteMethod());
+		builder.addMethod(getRemoveMethod());
 		
 		itdTypeDetails = builder.build();
 		
@@ -76,6 +77,18 @@ public class FlexScaffoldMetadata extends
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
+	public BeanInfoMetadata getBeanInfoMetadata() {
+		return beanInfoMetadata;
+	}
+
+	public EntityMetadata getEntityMetadata() {
+		return entityMetadata;
+	}
+
+	public String getEntityReference() {
+		return entityReference;
+	}
+
 	public static final Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
@@ -84,8 +97,8 @@ public class FlexScaffoldMetadata extends
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 	
-	private MethodMetadata getDeleteMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("delete");
+	private MethodMetadata getRemoveMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("remove");
 		
 		MethodMetadata method = methodExists(methodName);
 		
@@ -187,11 +200,11 @@ public class FlexScaffoldMetadata extends
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), null));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(entityName));
+		paramNames.add(new JavaSymbolName(entityReference));
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getPersistMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return "+entityName+";");
+		bodyBuilder.appendFormalLine(entityReference + "." + entityMetadata.getPersistMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return "+entityReference+";");
 		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, beanInfoMetadata.getJavaBean(), paramTypes, paramNames, null, null, bodyBuilder.getOutput());
 	}
@@ -206,12 +219,12 @@ public class FlexScaffoldMetadata extends
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), null));	
 	
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(entityName));
+		paramNames.add(new JavaSymbolName(entityReference));
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
-		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getMergeMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return "+entityName+";");
+		bodyBuilder.appendFormalLine("if (" + entityReference + " == null) throw new IllegalArgumentException(\"A " + entityReference+ " is required\");");
+		bodyBuilder.appendFormalLine(entityReference + "." + entityMetadata.getMergeMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return "+entityReference+";");
 		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, beanInfoMetadata.getJavaBean(), paramTypes, paramNames, null, null, bodyBuilder.getOutput());
 	}

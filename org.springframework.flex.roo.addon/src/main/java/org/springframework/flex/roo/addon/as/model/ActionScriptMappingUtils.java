@@ -13,6 +13,7 @@ import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -135,10 +136,34 @@ public abstract class ActionScriptMappingUtils {
 	}
 
 	public static ASFieldMetadata toASFieldMetadata(String asEntityId, FieldMetadata javaField, boolean makePublic) {
+		
 		return new DefaultASFieldMetadata(asEntityId, toActionScriptType(javaField.getFieldType()), toActionScriptSymbolName(javaField.getFieldName()), 
-				(makePublic ? ASTypeVisibility.PUBLIC : toASTypeVisibility(javaField.getModifier())), null);
+				(makePublic ? ASTypeVisibility.PUBLIC : toASTypeVisibility(javaField.getModifier())), toASFieldInitialzer(javaField), null);
 	}
 	
+	public static String toASFieldInitialzer(FieldMetadata javaField) {
+		
+		ActionScriptType asType = toActionScriptType(javaField.getFieldType());
+		if (asType.isNumeric()) {
+			boolean isId = false;
+			boolean isGenerated = false;
+			
+			for (AnnotationMetadata annotation : javaField.getAnnotations()) {
+				if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Id")) {
+					isId = true;
+				} else if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.GeneratedValue")) {
+					isGenerated = true;
+				}
+			}
+			
+			if (isId && isGenerated) {
+				return "-1"; 
+			}
+			
+		}
+		return null;
+	}
+
 	public static FieldMetadata toFieldMetadata(String javaEntityId,
 			ASFieldMetadata asField, boolean makePrivate) {
 		return new DefaultFieldMetadata(javaEntityId, (makePrivate ? Modifier.PRIVATE : toJavaModifier(asField.getVisibility())), 

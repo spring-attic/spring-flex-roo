@@ -10,8 +10,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
+import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.entity.ActionScriptEntityMetadata;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
+import org.springframework.flex.roo.addon.ui.FlexUIMetadata;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -98,9 +100,12 @@ public class FlexOperationsImpl implements FlexOperations {
 		
 		classpathOperations.generateClassFile(details);
 		
+		ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(entity);
+		
 		//Trigger creation of corresponding ActionScript entities
-		metadataService.get(ActionScriptEntityMetadata.createTypeIdentifier(ActionScriptMappingUtils.toActionScriptType(entity), FlexPath.SRC_MAIN_FLEX));
+		metadataService.get(ActionScriptEntityMetadata.createTypeIdentifier(asType, FlexPath.SRC_MAIN_FLEX));		
 	}
+		
 
 	private void createServicesConfig() {
 		String servicesConfigFilename = "WEB-INF/flex/services-config.xml";

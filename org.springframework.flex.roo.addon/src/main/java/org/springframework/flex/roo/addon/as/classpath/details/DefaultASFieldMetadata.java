@@ -15,11 +15,12 @@ public class DefaultASFieldMetadata extends AbstractASFieldMetadata {
 	private ActionScriptType fieldType;
 	private ActionScriptSymbolName fieldName;
 	private ASTypeVisibility visibility;
+	private String fieldInitializer;
 	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 
 	public DefaultASFieldMetadata(String declaredByMetadataId,
 			ActionScriptType fieldType, ActionScriptSymbolName fieldName,
-			ASTypeVisibility visibility, List<ASMetaTagMetadata> metaTags) {
+			ASTypeVisibility visibility, String fieldInitializer, List<ASMetaTagMetadata> metaTags) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
@@ -28,6 +29,7 @@ public class DefaultASFieldMetadata extends AbstractASFieldMetadata {
 		this.fieldType = fieldType;
 		this.fieldName = fieldName;
 		this.visibility = visibility != null ? visibility : ASTypeVisibility.PUBLIC;
+		this.fieldInitializer = fieldInitializer;
 		
 		if (metaTags != null) {
 			this.metaTags = metaTags;
@@ -54,5 +56,9 @@ public class DefaultASFieldMetadata extends AbstractASFieldMetadata {
 	
 	public List<ASMetaTagMetadata> getMetaTags() {
 		return metaTags;
+	}
+
+	public String getFieldInitializer() {
+		return fieldInitializer;
 	}
 }

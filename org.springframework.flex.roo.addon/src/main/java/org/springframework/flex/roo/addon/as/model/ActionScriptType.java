@@ -93,6 +93,10 @@ public final class ActionScriptType implements Comparable<ActionScriptType> {
 		return array > 0;
 	}
 	
+	public boolean isNumeric() {
+		return this.equals(INT_TYPE) || this.equals(NUMBER_TYPE);
+	}
+	
 	public int getArray() {
 		return array;
 	}
