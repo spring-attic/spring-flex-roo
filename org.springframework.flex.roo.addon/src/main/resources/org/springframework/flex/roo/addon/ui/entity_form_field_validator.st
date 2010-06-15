@@ -1,5 +1,10 @@
-$if(it.date)$
-<mx:DateValidator source="{$it.metadata.fieldName.symbolName$Input}" property="selectedDate" $it.validations.keys,it.validations.values:{k,v| $k$="$v$"}$ />
+$if(it.validations)$
+$if(it.number)$
+<mx:NumberValidator source="{$it.metadata.fieldName.symbolName$Input}" property="text"
+$elseif(it.date)$
+<mx:DateValidator source="{$it.metadata.fieldName.symbolName$Input}" property="selectedDate"
 $else$
-<mx:StringValidator source="{$it.metadata.fieldName.symbolName$Input}" property="text" $it.validations.keys,it.validations.values:{k,v| $k$="$v$"}$ />
+<mx:StringValidator source="{$it.metadata.fieldName.symbolName$Input}" property="text" 
+$endif$
+$it.validations.keys,it.validations.values:{k,v| $\ $$k$="$v$"}$ />
 $endif$

@@ -19,7 +19,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.flex.roo.addon.FlexScaffoldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.ASMutablePhysicalTypeMetadataProvider;
-import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
@@ -60,7 +59,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 	@Reference private MetadataService metadataService;
 	@Reference private ASMutablePhysicalTypeMetadataProvider asPhysicalTypeProvider;
 	
-	private Map<JavaType, String> pluralCache;
+	//private Map<JavaType, String> pluralCache;
 	
 	private StringTemplateGroup templateGroup;
 	
@@ -76,7 +75,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 	//TODO - For now this is mainly being driven by the JavaType referenced by FlexScaffoldMetadata...should see if we can make
 	//things happen in the right order to be able to consistently rely on the ActionScriptType instead
 	public MetadataItem get(String metadataId) {
-		pluralCache = new HashMap<JavaType, String>();
+		//pluralCache = new HashMap<JavaType, String>();
 		
 		JavaType javaType = FlexUIMetadata.getJavaType(metadataId);
 		Path path = FlexUIMetadata.getPath(metadataId);
@@ -194,7 +193,6 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		listViewTemplate.setAttribute("entityType", entityType);
 		listViewTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
 		listViewTemplate.setAttribute("fields", wrapFields(elegibleFields));
-		String test = listViewTemplate.toString();
 		ByteArrayInputStream stream = new ByteArrayInputStream(listViewTemplate.toString().getBytes(Charset.forName("UTF-8")));
 		try {
 			return XmlUtils.getDocumentBuilder().parse(stream);
@@ -203,7 +201,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		}
 	}
 	
-	private List<FormFieldWrapper> wrapFields(List<FieldMetadata> elegibleFields) {
+	protected static List<FormFieldWrapper> wrapFields(List<FieldMetadata> elegibleFields) {
 		List<FormFieldWrapper> wrappedFields = new ArrayList<FormFieldWrapper>();
 		for(FieldMetadata field : elegibleFields) {
 			wrappedFields.add(new FormFieldWrapper(field));
@@ -249,7 +247,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 				new IllegalStateException("Could not parse file: " + mxmlFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + mxmlFilename);
-			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
+			if (XmlRoundTripUtils.compareDocuments(original, proposed)) { //TODO - need to actually implement the comparison algorithm to allow non-destructive editing
 				mutableFile = fileManager.updateFile(mxmlFilename);
 			}
 		} else {
@@ -278,7 +276,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		return false;
 	}
 	
-	private Map<String, String> buildValidationsForField(FieldMetadata field) {
+	protected static Map<String, String> buildValidationsForField(FieldMetadata field) {
 		Map<String,String> validations = new HashMap<String, String>();
 		AnnotationMetadata annotationMetadata;
 		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")))) {
@@ -315,7 +313,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		return validations.size() > 0 ? validations : null;
 	}
 	
-	public final class FormFieldWrapper {
+	public static final class FormFieldWrapper {
 		
 		private FieldMetadata metadata;
 		
@@ -346,5 +344,4 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			return ActionScriptMappingUtils.toActionScriptType(metadata.getFieldType()).isNumeric();
 		}
 	}
-
 }
