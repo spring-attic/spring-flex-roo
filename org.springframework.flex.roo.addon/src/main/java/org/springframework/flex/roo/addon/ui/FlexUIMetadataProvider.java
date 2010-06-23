@@ -88,7 +88,8 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			return null;
 		}
 
-		String presentationPackage = projectMetadata.getTopLevelPackage()+".presentation."+flexScaffoldMetadata.getEntityReference();
+		String presentationPackage = projectMetadata.getTopLevelPackage()+".presentation";
+		String entityPresentationPackage = presentationPackage+"."+flexScaffoldMetadata.getEntityReference();
 		
 		// Install the root application MXML document if it doesn't already exist
 		String scaffoldAppFileId = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, projectMetadata.getProjectName()+"_scaffold.mxml");
@@ -98,8 +99,10 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			//TODO - update the entity list if necessary
 		}
 		
+		//TODO - Set up the custom flex-config.xml to compile in dynamically referenced View classes
+		
 		// Install the entity event class if it doesn't already exist
-		ActionScriptType entityEventType = new ActionScriptType(presentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Event");
+		ActionScriptType entityEventType = new ActionScriptType(entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Event");
 		if (!StringUtils.hasText(asPhysicalTypeProvider.findIdentifier(entityEventType))) {
 			createEntityEventType(entityEventType, flexScaffoldMetadata);
 		}
@@ -107,12 +110,12 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		List<FieldMetadata> elegibleFields = getElegibleFields(projectMetadata, flexScaffoldMetadata);
 		
 		// Create or update the list view
-		String listViewRelativePath = (presentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View").replace('.', File.separatorChar)+".mxml";
+		String listViewRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View").replace('.', File.separatorChar)+".mxml";
 		String listViewPath = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, listViewRelativePath);
 		writeToDiskIfNecessary(listViewPath, buildListViewDocument(flexScaffoldMetadata, elegibleFields));
 		
 		// Create or update the form view
-		String formRelativePath = (presentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Form").replace('.', File.separatorChar)+".mxml";
+		String formRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Form").replace('.', File.separatorChar)+".mxml";
 		String formPath = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, formRelativePath);
 		writeToDiskIfNecessary(formPath, buildFormDocument(flexScaffoldMetadata, elegibleFields));
 		
@@ -156,7 +159,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		scaffoldTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
 		scaffoldTemplate.setAttribute("presentationPackage", presentationPackage);
 		//TODO - Extract this value from services-config.xml?
-		scaffoldTemplate.setAttribute("amfRemotingUrl", "http://{server.name}:{server.port}/"+projectMetadata.getProjectName()+"/messagebroker/amf");
+		scaffoldTemplate.setAttribute("amfRemotingUrl", "http://localhost:8080/"+projectMetadata.getProjectName()+"/messagebroker/amf");
 		fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString());
 	}
 	

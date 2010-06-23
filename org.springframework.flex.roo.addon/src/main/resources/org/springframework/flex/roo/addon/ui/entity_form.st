@@ -5,6 +5,7 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
+			import mx.events.ValidationResultEvent;
 			import mx.managers.PopUpManager;
 			
 			import $entityType.fullyQualifiedTypeName$;
@@ -17,9 +18,20 @@
 			}            
 			
 			private function processSave():void {
+				if (!validateAndCommit()){
+					return;
+				}
 				this.dispatchEvent(new $entityType.simpleTypeName$Event(((!$flexScaffoldMetadata.entityReference$.id || $flexScaffoldMetadata.entityReference$.id <= 0) ? $entityType.simpleTypeName$Event.CREATE : $entityType.simpleTypeName$Event.UPDATE), $flexScaffoldMetadata.entityReference$));
 				PopUpManager.removePopUp(this);
 			}
+			
+			private function validateAndCommit():Boolean{
+				var vResult:ValidationResultEvent;
+				$fields:org/springframework/flex/roo/addon/ui/entity_form_field_validator_invoker()$
+				$fields:org/springframework/flex/roo/addon/ui/entity_form_field_value_commit()$
+				return true;
+			}
+			
 		]]>
 	</fx:Script>
 	

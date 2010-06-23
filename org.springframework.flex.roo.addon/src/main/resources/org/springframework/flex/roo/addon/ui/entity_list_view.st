@@ -134,7 +134,7 @@
 	
 	<mx:DataGrid id="$flexScaffoldMetadata.entityReference$Grid" dataProvider="{$flexScaffoldMetadata.entityReference$Service.list.lastResult}" height="80%" width="80%">
 		<mx:columns>
-			$fields:{<mx:DataGridColumn id="$it.fieldName.symbolName$" dataField="$it.fieldName.symbolName$" headerText="$it.fieldName.readableSymbolName$" />}$
+			$fields:{<mx:DataGridColumn id="$it.fieldName.symbolName$Column" dataField="$it.fieldName.symbolName$" headerText="$it.fieldName.readableSymbolName$" />}$
 		</mx:columns>
 	</mx:DataGrid>
 	
