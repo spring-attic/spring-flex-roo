@@ -1,19 +1,28 @@
 package org.springframework.flex.roo.addon;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.StringTemplateGroup;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.entity.ActionScriptEntityMetadata;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
-import org.springframework.flex.roo.addon.ui.FlexUIMetadata;
+import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -32,9 +41,11 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -52,6 +63,8 @@ import org.w3c.dom.Element;
 @Service
 public class FlexOperationsImpl implements FlexOperations {
 	
+	private static final String TEMPLATE_PATH = FlexOperationsImpl.class.getPackage().getName().replace(".", "/");
+	
 	//private static Logger logger = Logger.getLogger(FlexOperationsImpl.class.getName());
 	
 	//private static final ActionScriptFactory asFactory = new ActionScriptFactory();
@@ -61,15 +74,61 @@ public class FlexOperationsImpl implements FlexOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private ClasspathOperations classpathOperations;
+	@Reference private FlexPathResolver flexPathResolver;
+	
+	private ComponentContext context;
+	
+	private StringTemplateGroup templateGroup;
+	
+	protected void activate(ComponentContext context) {
+		this.context = context;
+		this.templateGroup = new StringTemplateGroup("flexOperationsTemplateGroup");
+	}
 	
 	public void installFlex() {
 		createServicesConfig();
 		createFlexConfig();
 		updateDependencies();
+		configureFlexBuild();
+		createScaffoldApp();
+		createFlexCompilerConfig();
 	}
 
 	public boolean isFlexAvailable() {
 		return getPathResolver() != null;
+	}
+	
+	public void createScaffoldApp() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		String scaffoldAppFileId = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, projectMetadata.getProjectName()+"_scaffold.mxml");
+		String presentationPackage = projectMetadata.getTopLevelPackage()+".presentation";
+		StringTemplate scaffoldTemplate = templateGroup.getInstanceOf(TEMPLATE_PATH+"/appname_scaffold");
+		scaffoldTemplate.setAttribute("presentationPackage", presentationPackage);
+		//TODO - Extract this value from services-config.xml?
+		scaffoldTemplate.setAttribute("amfRemotingUrl", "http://localhost:8080/"+projectMetadata.getProjectName()+"/messagebroker/amf");
+		fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString());
+		
+		//Create the HTML wrapper
+		String htmlWrapperFileId = getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, projectMetadata.getProjectName()+"_scaffold.html");
+		StringTemplate htmlWrapperTemplate = templateGroup.getInstanceOf(TEMPLATE_PATH+"/appname_scaffold_html");
+		htmlWrapperTemplate.setAttribute("projectName", projectMetadata.getProjectName());
+		fileManager.createOrUpdateTextFileIfRequired(htmlWrapperFileId, htmlWrapperTemplate.toString());
+		
+		copyDirectoryContents("htmlwrapper/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/"));
+		copyDirectoryContents("htmlwrapper/history/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/history"));
+		copyDirectoryContents("flashbuilder/html-template/*.*", getPathResolver().getIdentifier(Path.ROOT, "/html-template"));
+	}
+	
+	public void createFlexCompilerConfig() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		String compilerConfigFileId = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, projectMetadata.getProjectName()+"_scaffold-config.xml");
+		try {
+			if (!fileManager.exists(compilerConfigFileId)) {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flex-compiler-config.xml"), fileManager.createFile(compilerConfigFileId).getOutputStream());
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	public void createRemotingDestination(JavaType service, JavaType entity) {
@@ -134,6 +193,7 @@ public class FlexOperationsImpl implements FlexOperations {
 			throw new IllegalStateException(e);
 		}
 		
+		//TODO - possible to do this without hardcoding the path?
 		//adjust MVC config to accommodate Spring Flex
 		String mvcContextPath = getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
 		MutableFile mvcContextMutableFile = null;
@@ -157,6 +217,18 @@ public class FlexOperationsImpl implements FlexOperations {
 			root.appendChild(importFlex);
 			XmlUtils.writeXml(mvcContextMutableFile.getOutputStream(), mvcAppCtx);	
 		}
+		
+		//TODO - possible to do this without hardcoding the path?
+		//TODO - should really be updating the existing urlrewrite file, but it seems urlrewrite may go away so this is just temporary anyway
+		//modify URLRewrite config to allow simple static resources to be served properly
+		String urlRewriteFileId = getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/urlrewrite.xml");
+		InputStreamReader templateReader = new InputStreamReader(TemplateUtils.getTemplate(getClass(), "urlrewrite-template.xml"));
+		Assert.notNull(templateReader, "Could not acquire urlrewrite-template.xml file");
+		try {
+			fileManager.createOrUpdateTextFileIfRequired(urlRewriteFileId, FileCopyUtils.copyToString(templateReader));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	private void updateDependencies() {	
@@ -176,7 +248,128 @@ public class FlexOperationsImpl implements FlexOperations {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 		
+		fixBrokenFlexDependency();
+		
 		projectOperations.updateProjectType(ProjectType.WAR);
+	}
+	
+	//TODO - ProjectMetadata doesn't support all artifact types, in this case "pom" is needed for flex-framework - this ultimately should be fixed in Roo itself
+	private void fixBrokenFlexDependency() {
+		String pomPath = getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile pomMutableFile = null;
+		
+		Document pomDoc;
+		try {
+			pomMutableFile = fileManager.updateFile(pomPath);
+			pomDoc = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		Element typeElement = XmlUtils.findFirstElement("/project/dependencies/dependency[artifactId='flex-framework']/type",pomDoc.getDocumentElement());
+		Assert.notNull(typeElement, "Could not find the flex-framework dependency type.");
+		typeElement.setTextContent("pom");
+		
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, pomDoc);
+		String mxmlContent = byteArrayOutputStream.toString();
+
+		try {
+			FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(pomMutableFile.getOutputStream()));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	//TODO - ProjectMetadata doesn't support all artifact types, in this case "pom" is needed for flex-compiler - this ultimately should be fixed in Roo itself
+	//TODO - The plugin metamodel doesn't support configuration per-execution - this ultimately should be fixed in Roo itself
+	private void fixBrokenFlexPlugin() {
+		String pomPath = getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile pomMutableFile = null;
+		
+		Document pomDoc;
+		try {
+			pomMutableFile = fileManager.updateFile(pomPath);
+			pomDoc = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		Element pluginDependencyElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='flexmojos-maven-plugin']/dependencies/dependency", pomDoc.getDocumentElement());
+		Assert.notNull(pluginDependencyElement, "Could not find the flexmojos-maven-plugin's dependency element.");
+		Element newTypeNode = pomDoc.createElement("type");
+		newTypeNode.setTextContent("pom");
+		pluginDependencyElement.appendChild(newTypeNode);
+		
+		Element pluginExecutionElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='flexmojos-maven-plugin']/executions/execution", pomDoc.getDocumentElement());
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "pluginsFix.xml");
+		Document configurationTemplate;
+		try {
+			configurationTemplate = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		Element configurationElement = XmlUtils.findFirstElement("/configuration", configurationTemplate.getDocumentElement());
+		Assert.notNull(configurationElement, "flexmojos-maven-plugin configuration did not parse as expected.");
+		
+		pluginExecutionElement.appendChild(pomDoc.importNode(configurationElement, true));
+		
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, pomDoc);
+		String mxmlContent = byteArrayOutputStream.toString();
+
+		try {
+			FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(pomMutableFile.getOutputStream()));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void configureFlexBuild() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		
+		Repository flexRepository = new Repository("flex", "Sonatype Flex Repo", "http://repository.sonatype.org/content/groups/flexgroup/");
+		if (!projectMetadata.isRepositoryRegistered(flexRepository)) {
+			projectOperations.addRepository(flexRepository);
+		}
+		
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "plugins.xml");
+		Assert.notNull(templateInputStream, "Could not acquire plugins.xml file");
+		Document pluginDoc;
+		try {
+			pluginDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element pluginsElement = (Element) pluginDoc.getFirstChild();
+		
+		List<Element> flexPlugins = XmlUtils.findElements("/plugins/springFlex/plugin", pluginsElement);
+		for(Element pluginElement : flexPlugins) {
+			//TODO - this is a temporary hack - currently it's the only easy way to update an existing plugin
+			Plugin flexPlugin = new Plugin(pluginElement);
+			if (projectMetadata.isBuildPluginRegistered(flexPlugin)) {
+				projectOperations.removeBuildPlugin(flexPlugin);
+			}
+			projectOperations.addBuildPlugin(flexPlugin);
+		}
+		
+		fixBrokenFlexPlugin();
+		
+		String flexPropertiesFileId = getPathResolver().getIdentifier(Path.ROOT, ".flexProperties");
+		if (!fileManager.exists(flexPropertiesFileId)) {
+			StringTemplate flexPropertiesTemplate = templateGroup.getInstanceOf(TEMPLATE_PATH+"/flex_properties");
+			flexPropertiesTemplate.setAttribute("projectName", projectMetadata.getProjectName());
+			fileManager.createOrUpdateTextFileIfRequired(flexPropertiesFileId, flexPropertiesTemplate.toString());
+		}
+		
+		String actionScriptPropertiesFiledId = getPathResolver().getIdentifier(Path.ROOT, ".actionScriptProperties");
+		if (!fileManager.exists(actionScriptPropertiesFiledId)) {
+			StringTemplate actionScriptPropertiesTemplate = templateGroup.getInstanceOf(TEMPLATE_PATH+"/actionscript_properties");
+			actionScriptPropertiesTemplate.setAttribute("projectName", projectMetadata.getProjectName());
+			actionScriptPropertiesTemplate.setAttribute("projectUUID", UUID.randomUUID());
+			fileManager.createOrUpdateTextFileIfRequired(actionScriptPropertiesFiledId, actionScriptPropertiesTemplate.toString());
+		}
 	}
 	
 	/**
@@ -188,5 +381,38 @@ public class FlexOperationsImpl implements FlexOperations {
 			return null;
 		}
 		return projectMetadata.getPathResolver();
+	}
+	
+	/**
+	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
+	 * 
+	 * @param sourceAntPath directory
+	 * @param target directory
+	 */
+	private void copyDirectoryContents(String sourceAntPath, String targetDirectory) {
+		Assert.hasText(sourceAntPath, "Source path required");
+		Assert.hasText(targetDirectory, "Target directory required");
+
+		if (!targetDirectory.endsWith("/")) {
+			targetDirectory += "/";
+		}
+
+		if (!fileManager.exists(targetDirectory)) {
+			fileManager.createDirectory(targetDirectory);
+		}
+
+		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
+		Set<URL> urls = TemplateUtils.findMatchingClasspathResources(context.getBundleContext(), path);
+		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
+		for (URL url : urls) {
+			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+			if (!fileManager.exists(targetDirectory + fileName)) {
+				try {
+					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());
+				} catch (IOException e) {
+					new IllegalStateException("Encountered an error during copying of resources for Flex addon.", e);
+				}
+			}
+		}
 	}
 }

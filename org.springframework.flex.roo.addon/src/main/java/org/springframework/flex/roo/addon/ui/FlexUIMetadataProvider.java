@@ -17,6 +17,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.flex.roo.addon.FlexOperations;
 import org.springframework.flex.roo.addon.FlexScaffoldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.ASMutablePhysicalTypeMetadataProvider;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
@@ -44,9 +45,9 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
-import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 @Component(immediate=true)
 @Service
@@ -58,6 +59,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ASMutablePhysicalTypeMetadataProvider asPhysicalTypeProvider;
+	@Reference private FlexOperations flexOperations;
 	
 	//private Map<JavaType, String> pluralCache;
 	
@@ -89,17 +91,22 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		}
 
 		String presentationPackage = projectMetadata.getTopLevelPackage()+".presentation";
-		String entityPresentationPackage = presentationPackage+"."+flexScaffoldMetadata.getEntityReference();
+		String entityPresentationPackage = presentationPackage+"."+flexScaffoldMetadata.getEntityReference().toLowerCase();
 		
 		// Install the root application MXML document if it doesn't already exist
 		String scaffoldAppFileId = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, projectMetadata.getProjectName()+"_scaffold.mxml");
 		if (!fileManager.exists(scaffoldAppFileId)) {
-			createScaffoldApp(scaffoldAppFileId, presentationPackage, flexScaffoldMetadata, projectMetadata);
-		} else {
-			//TODO - update the entity list if necessary
+			flexOperations.createScaffoldApp();
 		}
 		
-		//TODO - Set up the custom flex-config.xml to compile in dynamically referenced View classes
+		updateScaffoldIfNecessary(scaffoldAppFileId, flexScaffoldMetadata);
+		
+		String flexConfigFileId = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, projectMetadata.getProjectName()+"_scaffold-config.xml");
+		if (!fileManager.exists(flexConfigFileId)) {
+			flexOperations.createFlexCompilerConfig();
+		}
+			
+		updateCompilerConfigIfNecessary(flexConfigFileId, entityPresentationPackage, flexScaffoldMetadata);
 		
 		// Install the entity event class if it doesn't already exist
 		ActionScriptType entityEventType = new ActionScriptType(entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Event");
@@ -122,6 +129,77 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		// Add an entry to flex-config
 		
 		return new FlexUIMetadata(metadataId);
+	}
+
+	private void updateScaffoldIfNecessary(String scaffoldAppFileId, FlexScaffoldMetadata flexScaffoldMetadata) {
+		MutableFile scaffoldMutableFile = null;
+		
+		Document scaffoldDoc;
+		try {
+			scaffoldMutableFile = fileManager.updateFile(scaffoldAppFileId);
+			scaffoldDoc = XmlUtils.getDocumentBuilder().parse(scaffoldMutableFile.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		String entityName = flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName();
+		
+		if (XmlUtils.findFirstElement("/Application/Declarations/ArrayList[@id='entities' and String='"+entityName+"']", scaffoldDoc.getDocumentElement()) != null) {
+			return;
+		}
+		
+		Element entitiesElement = XmlUtils.findFirstElement("/Application/Declarations/ArrayList[@id='entities']",scaffoldDoc.getDocumentElement());
+		Assert.notNull(entitiesElement, "Could not find the entities element in the main scaffold mxml.");
+		Element entityElement = scaffoldDoc.createElement("fx:String");
+		entityElement.setTextContent(entityName);
+		entitiesElement.appendChild(entityElement);
+		
+		// Build a string representation of the MXML and write it to disk
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, scaffoldDoc);
+		String mxmlContent = byteArrayOutputStream.toString();
+
+		try {
+			FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(scaffoldMutableFile.getOutputStream()));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+	
+	private void updateCompilerConfigIfNecessary(String flexConfigFileId, String entityPresentationPackage, FlexScaffoldMetadata flexScaffoldMetadata) {
+		MutableFile flexConfigMutableFile = null;
+		
+		Document flexConfigDoc;
+		try {
+			flexConfigMutableFile = fileManager.updateFile(flexConfigFileId);
+			flexConfigDoc = XmlUtils.getDocumentBuilder().parse(flexConfigMutableFile.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		String viewName = entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View";
+		
+		if (XmlUtils.findFirstElement("/flex-config/includes[symbol='"+viewName+"']", flexConfigDoc.getDocumentElement()) != null) {
+			return;
+		}
+		
+		Element includesElement = XmlUtils.findFirstElement("/flex-config/includes",flexConfigDoc.getDocumentElement());
+		Assert.notNull(includesElement, "Could not find the includes element in the flex compiler config.");
+		
+		Element entityElement = flexConfigDoc.createElement("symbol");
+		entityElement.setTextContent(viewName);
+		includesElement.appendChild(entityElement);
+		
+		// Build a string representation of the MXML and write it to disk
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, flexConfigDoc);
+		String mxmlContent = byteArrayOutputStream.toString();
+
+		try {
+			FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(flexConfigMutableFile.getOutputStream()));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public String getProvidesType() {
@@ -152,15 +230,6 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
 		}
 
-	}
-	
-	private void createScaffoldApp(String scaffoldAppFileId, String presentationPackage, FlexScaffoldMetadata flexScaffoldMetadata, ProjectMetadata projectMetadata) {
-		StringTemplate scaffoldTemplate = templateGroup.getInstanceOf("org/springframework/flex/roo/addon/ui/appname_scaffold");
-		scaffoldTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
-		scaffoldTemplate.setAttribute("presentationPackage", presentationPackage);
-		//TODO - Extract this value from services-config.xml?
-		scaffoldTemplate.setAttribute("amfRemotingUrl", "http://localhost:8080/"+projectMetadata.getProjectName()+"/messagebroker/amf");
-		fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString());
 	}
 	
 	private void createEntityEventType(ActionScriptType entityEventType, FlexScaffoldMetadata flexScaffoldMetadata) {
@@ -250,7 +319,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 				new IllegalStateException("Could not parse file: " + mxmlFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + mxmlFilename);
-			if (XmlRoundTripUtils.compareDocuments(original, proposed)) { //TODO - need to actually implement the comparison algorithm to allow non-destructive editing
+			if (MxmlRoundTripUtils.compareDocuments(original, proposed)) { //TODO - need to actually implement the comparison algorithm in a way that works for MXML to allow non-destructive editing
 				mutableFile = fileManager.updateFile(mxmlFilename);
 			}
 		} else {

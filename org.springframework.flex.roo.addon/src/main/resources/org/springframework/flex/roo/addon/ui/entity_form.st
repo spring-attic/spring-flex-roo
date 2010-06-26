@@ -5,8 +5,8 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
-			import mx.events.ValidationResultEvent;
 			import mx.managers.PopUpManager;
+			import mx.validators.Validator;
 			
 			import $entityType.fullyQualifiedTypeName$;
 			
@@ -26,8 +26,10 @@
 			}
 			
 			private function validateAndCommit():Boolean{
-				var vResult:ValidationResultEvent;
-				$fields:org/springframework/flex/roo/addon/ui/entity_form_field_validator_invoker()$
+				var validatorErrors:Array = Validator.validateAll(validators.source);
+				if (validatorErrors.length > 0){
+					return false;
+				}
 				$fields:org/springframework/flex/roo/addon/ui/entity_form_field_value_commit()$
 				return true;
 			}
@@ -36,14 +38,16 @@
 	</fx:Script>
 	
 	<fx:Declarations>
-		$fields:org/springframework/flex/roo/addon/ui/entity_form_field_validator()$
+		<s:ArrayList id="validators">
+			$fields:org/springframework/flex/roo/addon/ui/entity_form_field_validator()$
+		</s:ArrayList>
 	</fx:Declarations>
 	
 	<s:layout>
 		<s:VerticalLayout/>
 	</s:layout>
 	
-	<mx:Form>
+	<mx:Form id="$flexScaffoldMetadata.entityReference$Form">
 		$fields:org/springframework/flex/roo/addon/ui/entity_form_field()$
 	</mx:Form>
 	

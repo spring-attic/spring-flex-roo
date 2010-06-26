@@ -46,17 +46,19 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.CollectionUtils;
 import org.springframework.roo.support.util.StringUtils;
-/**
- * TODO - If the entity implements an interface, should we generate the interface as well? Currently they are ignored.
- * TODO - Consider adding support for getters and setters
- * TODO - Currently ignoring non-accessor methods - is there any reason to do otherwise?
- * TODO - If the entity has a single constructor specified, should we mimic it? Would probably prove overly complicated.
- * TODO - Get JavaType's superclass and recursively generate a corresponding ActionScript class if necessary
- */
+
 @Component(immediate=true)
 @Service
 public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 		MetadataNotificationListener {
+	
+	/**
+	 * TODO - If the entity implements an interface, should we generate the interface as well? Currently they are ignored.
+	 * TODO - Consider adding support for getters and setters
+	 * TODO - Currently ignoring non-accessor methods - is there any reason to do otherwise?
+	 * TODO - If the entity has a single constructor specified, should we mimic it? Would probably prove overly complicated.
+	 * TODO - Get JavaType's superclass and recursively generate a corresponding ActionScript class if necessary
+	 */
 	
 	private static final String REMOTE_CLASS_TAG = "RemoteClass";
 	private static final String ALIAS_ATTR = "alias";
@@ -81,7 +83,7 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider,
 		
 		JavaType javaType = ActionScriptEntityMetadata.getJavaType(metadataId);
 		
-		//TODO - validate that the JavaType exists and is a class
+		//TODO - Validate that the Java type exists and is a class
 		
 		ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(javaType);
 		

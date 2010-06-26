@@ -30,7 +30,6 @@
 
 	<fx:Declarations>
 		<s:ArrayList id="entities">
-			$org/springframework/flex/roo/addon/ui/entity_list_entry()$
 		</s:ArrayList>
 		
 		<s:ChannelSet id="remotingChannels">

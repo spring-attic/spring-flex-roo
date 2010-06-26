@@ -22,6 +22,7 @@ public class FlexMojosPathResolver extends AbstractPathResolver implements FlexP
 		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
 		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		pathInformation.add(new PathInformation(FlexPath.SRC_MAIN_FLEX, true, new File(root, "src/main/flex")));
+		pathInformation.add(new PathInformation(FlexPath.LIBS, false, new File(root, "libs")));
 		init();
 	}
 

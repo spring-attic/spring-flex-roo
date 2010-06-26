@@ -10,4 +10,8 @@ public interface FlexOperations {
 
 	boolean isFlexAvailable();
 
+	void createFlexCompilerConfig();
+
+	void createScaffoldApp();
+
 }
