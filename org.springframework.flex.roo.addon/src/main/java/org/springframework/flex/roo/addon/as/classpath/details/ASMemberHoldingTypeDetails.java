@@ -22,18 +22,23 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTagMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
+/**
+ * Details of a member holding ActionScript type (i.e., a class or interface).
+ *
+ * @author Jeremy Grelle
+ */
 public interface ASMemberHoldingTypeDetails extends ASPhysicalTypeDetails {
 
-	List<ASMethodMetadata> getDeclaredMethods();
+    List<ASMethodMetadata> getDeclaredMethods();
 
-	ASConstructorMetadata getDeclaredConstructor();
+    ASConstructorMetadata getDeclaredConstructor();
 
-	List<ASFieldMetadata> getDeclaredFields();
+    List<ASFieldMetadata> getDeclaredFields();
 
-	List<ASMetaTagMetadata> getTypeMetaTags();
-	
-	List<ActionScriptType> getExtendsTypes();
+    List<ASMetaTagMetadata> getTypeMetaTags();
 
-	List<ActionScriptType> getImplementsTypes();
+    List<ActionScriptType> getExtendsTypes();
+
+    List<ActionScriptType> getImplementsTypes();
 
 }

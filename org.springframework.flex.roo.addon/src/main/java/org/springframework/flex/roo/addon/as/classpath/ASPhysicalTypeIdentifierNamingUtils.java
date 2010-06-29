@@ -21,42 +21,49 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Utility methods for manipulation of metadata id's for ActionScript source files.
+ *
+ * @author Jeremy Grelle
+ */
 public class ASPhysicalTypeIdentifierNamingUtils {
 
-	public static final String createIdentifier(String providesType, ActionScriptType actionScriptType, Path path) {
-		Assert.notNull(actionScriptType, "ActionScript type required");
-		Assert.notNull(path, "Path required");
-		return MetadataIdentificationUtils.create(providesType, path.getName() + "?" + actionScriptType.getFullyQualifiedTypeName());
-	}
+    public static final String createIdentifier(String providesType, ActionScriptType actionScriptType, Path path) {
+        Assert.notNull(actionScriptType, "ActionScript type required");
+        Assert.notNull(path, "Path required");
+        return MetadataIdentificationUtils.create(providesType, path.getName() + "?" + actionScriptType.getFullyQualifiedTypeName());
+    }
 
-	public static final ActionScriptType getActionScriptType(String providesType, String metadataIdentificationString) {
-		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid actionscript type identifier");
-		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
-		int index = instance.indexOf("?");
-		return new ActionScriptType(instance.substring(index+1));
-	}
+    public static final ActionScriptType getActionScriptType(String providesType, String metadataIdentificationString) {
+        Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString
+            + "' does not appear to be a valid actionscript type identifier");
+        String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
+        int index = instance.indexOf("?");
+        return new ActionScriptType(instance.substring(index + 1));
+    }
 
-	public static final Path getPath(String providesType, String metadataIdentificationString) {
-		Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid actionscript type identifier");
-		String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
-		int index = instance.indexOf("?");
-		return new Path(instance.substring(0, index));
-	}
+    public static final Path getPath(String providesType, String metadataIdentificationString) {
+        Assert.isTrue(isValid(providesType, metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString
+            + "' does not appear to be a valid actionscript type identifier");
+        String instance = MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString);
+        int index = instance.indexOf("?");
+        return new Path(instance.substring(0, index));
+    }
 
-	/**
-	 * Indicates whether the presented metadata identification string appears to be valid.
-	 * 
-	 * @param providesType to verify the presented type (required)
-	 * @param metadataIdentificationString to evaluate (can be null or empty)
-	 * @return true only if the string appears to be valid
-	 */
-	public static boolean isValid(String providesType, String metadataIdentificationString) {
-		if (!MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString)) {
-			return false;
-		}
-		if (!MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString).equals(providesType)) {
-			return false;
-		}
-		return MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString).contains("?");
-	}
+    /**
+     * Indicates whether the presented metadata identification string appears to be valid.
+     * 
+     * @param providesType to verify the presented type (required)
+     * @param metadataIdentificationString to evaluate (can be null or empty)
+     * @return true only if the string appears to be valid
+     */
+    public static boolean isValid(String providesType, String metadataIdentificationString) {
+        if (!MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString)) {
+            return false;
+        }
+        if (!MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString).equals(providesType)) {
+            return false;
+        }
+        return MetadataIdentificationUtils.getMetadataInstance(metadataIdentificationString).contains("?");
+    }
 }

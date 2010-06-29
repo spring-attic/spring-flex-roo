@@ -16,7 +16,11 @@
 
 package org.springframework.flex.roo.addon.as.classpath;
 
+/**
+ * Category of ActionScript source types.
+ *
+ * @author Jeremy Grelle
+ */
 public enum ASPhysicalTypeCategory {
-	CLASS,
-	INTERFACE
+    CLASS, INTERFACE
 }

@@ -21,24 +21,30 @@ import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeDetails;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Default detail representation of an ActionScript source file.
+ *
+ * @author Jeremy Grelle
+ */
 public class DefaultASPhysicalTypeDetails implements ASPhysicalTypeDetails {
 
-	private ASPhysicalTypeCategory physicalTypeCategory;
-	private ActionScriptType name;
-	
-	public DefaultASPhysicalTypeDetails(ASPhysicalTypeCategory physicalTypeCategory, ActionScriptType name) {
-		Assert.notNull(physicalTypeCategory, "Physical type category required");
-		Assert.notNull(name, "Name required");
-		this.physicalTypeCategory = physicalTypeCategory;
-		this.name = name;
-	}
+    private final ASPhysicalTypeCategory physicalTypeCategory;
 
-	public ActionScriptType getName() {
-		return name;
-	}
+    private final ActionScriptType name;
 
-	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
-		return physicalTypeCategory;
-	}
+    public DefaultASPhysicalTypeDetails(ASPhysicalTypeCategory physicalTypeCategory, ActionScriptType name) {
+        Assert.notNull(physicalTypeCategory, "Physical type category required");
+        Assert.notNull(name, "Name required");
+        this.physicalTypeCategory = physicalTypeCategory;
+        this.name = name;
+    }
+
+    public ActionScriptType getName() {
+        return this.name;
+    }
+
+    public ASPhysicalTypeCategory getPhysicalTypeCategory() {
+        return this.physicalTypeCategory;
+    }
 
 }

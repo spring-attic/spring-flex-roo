@@ -19,18 +19,23 @@ package org.springframework.flex.roo.addon;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
+/**
+ * Operations for manipulating Flex projects.
+ *
+ * @author Jeremy Grelle
+ */
 public interface FlexOperations {
 
-	void generateAll(JavaPackage javaPackage);
-	
-	void createRemotingDestination(JavaType service, JavaType entity);
+    void generateAll(JavaPackage javaPackage);
 
-	void installFlex();
+    void createRemotingDestination(JavaType service, JavaType entity);
 
-	boolean isFlexAvailable();
+    void installFlex();
 
-	void createFlexCompilerConfig();
+    boolean isFlexAvailable();
 
-	void createScaffoldApp();
+    void createFlexCompilerConfig();
+
+    void createScaffoldApp();
 
 }

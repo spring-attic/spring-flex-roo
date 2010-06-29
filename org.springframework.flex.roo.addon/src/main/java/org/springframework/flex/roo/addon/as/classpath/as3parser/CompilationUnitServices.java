@@ -20,16 +20,21 @@ import java.util.List;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptPackage;
 
+/**
+ * Services for manipulation of an ActionScript compilation unit.
+ *
+ * @author Jeremy Grelle
+ */
 public interface CompilationUnitServices {
 
-	List<String> getImports();
-	
-	void addImport(String fullyQualifiedTypeName);
+    List<String> getImports();
 
-	ActionScriptPackage getCompilationUnitPackage();
+    void addImport(String fullyQualifiedTypeName);
 
-	/**
-	 * Forces the implementation to flush any changes.
-	 */
-	void flush();
+    ActionScriptPackage getCompilationUnitPackage();
+
+    /**
+     * Forces the implementation to flush any changes.
+     */
+    void flush();
 }

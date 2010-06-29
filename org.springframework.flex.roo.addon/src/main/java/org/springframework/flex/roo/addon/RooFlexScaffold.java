@@ -21,9 +21,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates a type that should be exposed for remoting to a Flex client.
+ *
+ * @author Jeremy Grelle
+ */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface RooFlexScaffold {
 
-	Class<?> entity();
+    Class<?> entity();
 }

@@ -16,10 +16,15 @@
 
 package org.springframework.flex.roo.addon.as.classpath.details;
 
-public interface ASClassOrInterfaceTypeDetails extends ASMemberHoldingTypeDetails{
+/**
+ * Details pertaining to an ActionScript class or interface.
+ *
+ * @author Jeremy Grelle
+ */
+public interface ASClassOrInterfaceTypeDetails extends ASMemberHoldingTypeDetails {
 
-	ASClassOrInterfaceTypeDetails getSuperClass();
+    ASClassOrInterfaceTypeDetails getSuperClass();
 
-	String getDeclaredByMetadataId();
+    String getDeclaredByMetadataId();
 
 }

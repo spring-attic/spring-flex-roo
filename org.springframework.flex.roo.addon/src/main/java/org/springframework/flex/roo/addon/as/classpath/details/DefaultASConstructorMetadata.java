@@ -23,17 +23,19 @@ import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
+/**
+ * Default metadata representation of an ActionScript constructor method.
+ *
+ * @author Jeremy Grelle
+ */
 public class DefaultASConstructorMetadata extends AbstractInvocableMemberMetadata implements ASConstructorMetadata {
-	
-	public DefaultASConstructorMetadata(String declaredByMetadataId,
-			String methodBody, List<ASMetaTagMetadata> metaTags,
-			List<ActionScriptType> paramTypes,
-			List<ActionScriptSymbolName> paramNames, ASTypeVisibility visibility) {
-		super(declaredByMetadataId, methodBody, metaTags, paramTypes, paramNames,
-				visibility);
-	}
 
-	public DefaultASConstructorMetadata(String declaredByMetadataId) {
-		super(declaredByMetadataId);
-	}
+    public DefaultASConstructorMetadata(String declaredByMetadataId, String methodBody, List<ASMetaTagMetadata> metaTags,
+        List<ActionScriptType> paramTypes, List<ActionScriptSymbolName> paramNames, ASTypeVisibility visibility) {
+        super(declaredByMetadataId, methodBody, metaTags, paramTypes, paramNames, visibility);
+    }
+
+    public DefaultASConstructorMetadata(String declaredByMetadataId) {
+        super(declaredByMetadataId);
+    }
 }

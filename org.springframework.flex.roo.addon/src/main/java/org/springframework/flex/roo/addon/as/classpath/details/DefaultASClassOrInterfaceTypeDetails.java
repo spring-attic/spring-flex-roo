@@ -24,118 +24,121 @@ import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTag
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
-public class DefaultASClassOrInterfaceTypeDetails implements
-		ASClassOrInterfaceTypeDetails {
+/**
+ * Default detail representation of an ActionScript class or interface.
+ *
+ * @author Jeremy Grelle
+ */
+public class DefaultASClassOrInterfaceTypeDetails implements ASClassOrInterfaceTypeDetails {
 
-	private ActionScriptType name;
-	private ASPhysicalTypeCategory physicalTypeCategory;
-	private ASConstructorMetadata declaredConstructor;
-	private List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
-	private List<ASMethodMetadata> declaredMethods = new ArrayList<ASMethodMetadata>();
-	private ASClassOrInterfaceTypeDetails superClass;
-	private List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
-	private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
-	private List<ASMetaTagMetadata> typeMetaTags = new ArrayList<ASMetaTagMetadata>();
-	private String declaredByMetadataId;
+    private final ActionScriptType name;
 
-	public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId,
-			ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
-			List<ASMetaTagMetadata> typeMetaTags) {
-		Assert
-				.hasText(declaredByMetadataId,
-						"Declared by metadata ID required");
-		Assert.notNull(name, "Name required");
-		Assert.notNull(physicalTypeCategory, "Physical type category required");
+    private final ASPhysicalTypeCategory physicalTypeCategory;
 
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.name = name;
-		this.physicalTypeCategory = physicalTypeCategory;
+    private ASConstructorMetadata declaredConstructor;
 
-		if (typeMetaTags != null) {
-			this.typeMetaTags = typeMetaTags;
-		}
-	}
+    private List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
 
-	public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId,
-			ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
-			List<ASFieldMetadata> declaredFields,
-			ASConstructorMetadata declaredConstructor,
-			List<ASMethodMetadata> declaredMethods,
-			ASClassOrInterfaceTypeDetails superClass,
-			List<ActionScriptType> extendsTypes,
-			List<ActionScriptType> implementsTypes,
-			List<ASMetaTagMetadata> typeMetaTags) {
-		Assert
-				.hasText(declaredByMetadataId,
-						"Declared by metadata ID required");
-		Assert.notNull(name, "Name required");
-		Assert.notNull(physicalTypeCategory, "Physical type category required");
+    private List<ASMethodMetadata> declaredMethods = new ArrayList<ASMethodMetadata>();
 
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.name = name;
-		this.physicalTypeCategory = physicalTypeCategory;
-		this.superClass = superClass;
-		this.declaredConstructor = declaredConstructor;
+    private ASClassOrInterfaceTypeDetails superClass;
 
-		if (declaredFields != null) {
-			this.declaredFields = declaredFields;
-		}
+    private List<ActionScriptType> extendsTypes = new ArrayList<ActionScriptType>();
 
-		if (declaredMethods != null) {
-			this.declaredMethods = declaredMethods;
-		}
+    private List<ActionScriptType> implementsTypes = new ArrayList<ActionScriptType>();
 
-		if (extendsTypes != null) {
-			this.extendsTypes = extendsTypes;
-		}
+    private List<ASMetaTagMetadata> typeMetaTags = new ArrayList<ASMetaTagMetadata>();
 
-		if (implementsTypes != null) {
-			this.implementsTypes = implementsTypes;
-		}
+    private final String declaredByMetadataId;
 
-		if (typeMetaTags != null) {
-			this.typeMetaTags = typeMetaTags;
-		}
-	}
+    public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId, ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
+        List<ASMetaTagMetadata> typeMetaTags) {
+        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+        Assert.notNull(name, "Name required");
+        Assert.notNull(physicalTypeCategory, "Physical type category required");
 
-	public ActionScriptType getName() {
-		return name;
-	}
+        this.declaredByMetadataId = declaredByMetadataId;
+        this.name = name;
+        this.physicalTypeCategory = physicalTypeCategory;
 
-	public ASPhysicalTypeCategory getPhysicalTypeCategory() {
-		return physicalTypeCategory;
-	}
+        if (typeMetaTags != null) {
+            this.typeMetaTags = typeMetaTags;
+        }
+    }
 
-	public ASConstructorMetadata getDeclaredConstructor() {
-		return declaredConstructor;
-	}
+    public DefaultASClassOrInterfaceTypeDetails(String declaredByMetadataId, ActionScriptType name, ASPhysicalTypeCategory physicalTypeCategory,
+        List<ASFieldMetadata> declaredFields, ASConstructorMetadata declaredConstructor, List<ASMethodMetadata> declaredMethods,
+        ASClassOrInterfaceTypeDetails superClass, List<ActionScriptType> extendsTypes, List<ActionScriptType> implementsTypes,
+        List<ASMetaTagMetadata> typeMetaTags) {
+        Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+        Assert.notNull(name, "Name required");
+        Assert.notNull(physicalTypeCategory, "Physical type category required");
 
-	public List<ASFieldMetadata> getDeclaredFields() {
-		return declaredFields;
-	}
+        this.declaredByMetadataId = declaredByMetadataId;
+        this.name = name;
+        this.physicalTypeCategory = physicalTypeCategory;
+        this.superClass = superClass;
+        this.declaredConstructor = declaredConstructor;
 
-	public List<ASMethodMetadata> getDeclaredMethods() {
-		return declaredMethods;
-	}
+        if (declaredFields != null) {
+            this.declaredFields = declaredFields;
+        }
 
-	public ASClassOrInterfaceTypeDetails getSuperClass() {
-		return superClass;
-	}
+        if (declaredMethods != null) {
+            this.declaredMethods = declaredMethods;
+        }
 
-	public List<ActionScriptType> getExtendsTypes() {
-		return extendsTypes;
-	}
+        if (extendsTypes != null) {
+            this.extendsTypes = extendsTypes;
+        }
 
-	public List<ActionScriptType> getImplementsTypes() {
-		return implementsTypes;
-	}
+        if (implementsTypes != null) {
+            this.implementsTypes = implementsTypes;
+        }
 
-	public List<ASMetaTagMetadata> getTypeMetaTags() {
-		return typeMetaTags;
-	}
+        if (typeMetaTags != null) {
+            this.typeMetaTags = typeMetaTags;
+        }
+    }
 
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
+    public ActionScriptType getName() {
+        return this.name;
+    }
+
+    public ASPhysicalTypeCategory getPhysicalTypeCategory() {
+        return this.physicalTypeCategory;
+    }
+
+    public ASConstructorMetadata getDeclaredConstructor() {
+        return this.declaredConstructor;
+    }
+
+    public List<ASFieldMetadata> getDeclaredFields() {
+        return this.declaredFields;
+    }
+
+    public List<ASMethodMetadata> getDeclaredMethods() {
+        return this.declaredMethods;
+    }
+
+    public ASClassOrInterfaceTypeDetails getSuperClass() {
+        return this.superClass;
+    }
+
+    public List<ActionScriptType> getExtendsTypes() {
+        return this.extendsTypes;
+    }
+
+    public List<ActionScriptType> getImplementsTypes() {
+        return this.implementsTypes;
+    }
+
+    public List<ASMetaTagMetadata> getTypeMetaTags() {
+        return this.typeMetaTags;
+    }
+
+    public String getDeclaredByMetadataId() {
+        return this.declaredByMetadataId;
+    }
 
 }

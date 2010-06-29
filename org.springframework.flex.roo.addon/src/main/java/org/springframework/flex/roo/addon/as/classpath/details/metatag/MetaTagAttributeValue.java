@@ -18,10 +18,15 @@ package org.springframework.flex.roo.addon.as.classpath.details.metatag;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 
+/**
+ * Detail representation of an ActionScript meta-tag attribute.
+ *
+ * @author Jeremy Grelle
+ */
 public interface MetaTagAttributeValue<T extends Object> {
 
-	ActionScriptSymbolName getName();
-	
-	T getValue();
+    ActionScriptSymbolName getName();
+
+    T getValue();
 
 }

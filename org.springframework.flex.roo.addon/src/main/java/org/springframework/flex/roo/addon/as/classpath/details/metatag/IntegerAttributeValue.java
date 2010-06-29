@@ -18,20 +18,26 @@ package org.springframework.flex.roo.addon.as.classpath.details.metatag;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 
+/**
+ * Integer meta-tag attribute.
+ *
+ * @author Jeremy Grelle
+ */
 public class IntegerAttributeValue extends AbstractMetaTagAttributeValue<Integer> {
 
-	private int value;
-	
-	public IntegerAttributeValue(ActionScriptSymbolName name, Integer value) {
-		super(name);
-		this.value = value;
-	}
-	
-	public Integer getValue() {
-		return value;
-	}
-	
-	public String toString() {
-		return getName() + " -> " + new Integer(value).toString();
-	}
+    private final int value;
+
+    public IntegerAttributeValue(ActionScriptSymbolName name, Integer value) {
+        super(name);
+        this.value = value;
+    }
+
+    public Integer getValue() {
+        return this.value;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " -> " + new Integer(this.value).toString();
+    }
 }

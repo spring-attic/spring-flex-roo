@@ -22,13 +22,18 @@ import org.springframework.flex.roo.addon.as.classpath.details.metatag.ASMetaTag
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
-public interface ASFieldMetadata extends ASIdentifiableMember{
+/**
+ * Metadata representation of an ActionScript field.
+ *
+ * @author Jeremy Grelle
+ */
+public interface ASFieldMetadata extends ASIdentifiableMember {
 
-	ActionScriptType getFieldType();
-	
-	ActionScriptSymbolName getFieldName();
+    ActionScriptType getFieldType();
 
-	List<ASMetaTagMetadata> getMetaTags();
-	
-	String getFieldInitializer();
+    ActionScriptSymbolName getFieldName();
+
+    List<ASMetaTagMetadata> getMetaTags();
+
+    String getFieldInitializer();
 }

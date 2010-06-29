@@ -28,33 +28,38 @@ import org.springframework.roo.project.AbstractPathResolver;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathInformation;
 
-@Component(immediate=true)
+/**
+ * {@link PathResolver} implementation that resolves paths using the conventions of the Flex Mojos Maven plugin.
+ *
+ * @author Jeremy Grelle
+ */
+@Component(immediate = true)
 @Service(FlexPathResolver.class)
 public class FlexMojosPathResolver extends AbstractPathResolver implements FlexPathResolver {
 
-	private List<PathInformation> pathInformation = new ArrayList<PathInformation>();
-	
-	protected void activate(ComponentContext context) {
-		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
-		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
-		pathInformation.add(new PathInformation(FlexPath.SRC_MAIN_FLEX, true, new File(root, "src/main/flex")));
-		pathInformation.add(new PathInformation(FlexPath.LIBS, false, new File(root, "libs")));
-		init();
-	}
+    private final List<PathInformation> pathInformation = new ArrayList<PathInformation>();
 
-	public List<Path> getFlexSourcePaths() {
-		List<Path> flexSourcePaths = new ArrayList<Path>();
-		for (Path path : getPaths()) {
-			if (path instanceof FlexPath) {
-				flexSourcePaths.add(path);
-			}
-		}
-		return flexSourcePaths;
-	}
+    protected void activate(ComponentContext context) {
+        String workingDir = context.getBundleContext().getProperty("roo.working.directory");
+        File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
+        this.pathInformation.add(new PathInformation(FlexPath.SRC_MAIN_FLEX, true, new File(root, "src/main/flex")));
+        this.pathInformation.add(new PathInformation(FlexPath.LIBS, false, new File(root, "libs")));
+        init();
+    }
 
-	@Override
-	protected List<PathInformation> getPathInformation() {
-		return pathInformation;
-	}
+    public List<Path> getFlexSourcePaths() {
+        List<Path> flexSourcePaths = new ArrayList<Path>();
+        for (Path path : getPaths()) {
+            if (path instanceof FlexPath) {
+                flexSourcePaths.add(path);
+            }
+        }
+        return flexSourcePaths;
+    }
+
+    @Override
+    protected List<PathInformation> getPathInformation() {
+        return this.pathInformation;
+    }
 
 }

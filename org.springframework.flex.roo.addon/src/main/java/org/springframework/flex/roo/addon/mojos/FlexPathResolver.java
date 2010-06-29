@@ -21,7 +21,12 @@ import java.util.List;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 
+/**
+ * {@link PathResolver} that is aware of Flex-specific source paths.
+ *
+ * @author Jeremy Grelle
+ */
 public interface FlexPathResolver extends PathResolver {
 
-	List<Path> getFlexSourcePaths();
+    List<Path> getFlexSourcePaths();
 }

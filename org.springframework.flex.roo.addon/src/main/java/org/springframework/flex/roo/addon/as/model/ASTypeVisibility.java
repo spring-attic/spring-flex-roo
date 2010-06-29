@@ -16,10 +16,11 @@
 
 package org.springframework.flex.roo.addon.as.model;
 
+/**
+ * ActionScript type visibilities.
+ *
+ * @author Jeremy Grelle
+ */
 public enum ASTypeVisibility {
-	DEFAULT,
-	INTERNAL,
-	PRIVATE,
-	PROTECTED,
-	PUBLIC
+    DEFAULT, INTERNAL, PRIVATE, PROTECTED, PUBLIC
 }

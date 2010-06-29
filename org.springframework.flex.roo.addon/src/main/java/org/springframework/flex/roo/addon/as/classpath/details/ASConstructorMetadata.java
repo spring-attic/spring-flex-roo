@@ -16,6 +16,11 @@
 
 package org.springframework.flex.roo.addon.as.classpath.details;
 
-public interface ASConstructorMetadata extends ASInvocableMemberMetadata{
+/**
+ * Metadata representation of an ActionScript constructor.
+ *
+ * @author Jeremy Grelle
+ */
+public interface ASConstructorMetadata extends ASInvocableMemberMetadata {
 
 }

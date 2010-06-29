@@ -32,109 +32,115 @@ import uk.co.badgersinfoil.metaas.dom.ASType;
 import uk.co.badgersinfoil.metaas.dom.Visibility;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag.Param;
 
+/**
+ * Utility methods for working with the ActionScript parser implementation.
+ *
+ * @author Jeremy Grelle
+ */
 public class As3ParserUtils {
-	
-	//private static final ActionScriptFactory factory = new ActionScriptFactory();
 
-	public static final ActionScriptType getActionScriptType(ActionScriptPackage compilationUnitPackage, List<String> imports, ASType type) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
-		Assert.notNull(type, "ASType required");
-		
-		return getActionScriptType(compilationUnitPackage, imports, type.getName());
-	}
-	
-	public static final ActionScriptType getActionScriptType(ActionScriptPackage compilationUnitPackage, List<String> imports, String nameToFind) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
-		Assert.notNull(nameToFind, "Name to find is required");
-		
-		int offset = nameToFind.lastIndexOf('.');
-		if (offset > -1) {
-			return new ActionScriptType(nameToFind);
-		}
-		
-		if (ActionScriptType.isImplicitType(nameToFind)) {
-			return new ActionScriptType(nameToFind);
-		}
-		
-		String importDeclaration = getImportDeclarationFor(imports, nameToFind);
-		if (importDeclaration  == null) {
-			String name = compilationUnitPackage.getFullyQualifiedPackageName() == "" ? nameToFind : compilationUnitPackage.getFullyQualifiedPackageName() + "." + nameToFind;
-			return new ActionScriptType(name);
-		}
-		
-		return new ActionScriptType(importDeclaration);
-	}
-	
-	/*public static final ASType getASType(String typeName) {
-		Assert.notNull(typeName, "ActionScript type required");
-		return factory.newClass(typeName).getType();
-	}*/
-	
-	private static final String getImportDeclarationFor(List<String> imports, String typeName) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(typeName, "Type name required");
-		for (String candidate : imports) {
-			int offset = candidate.lastIndexOf('.');
-			if (typeName.equals(candidate.substring(offset+1))) {
-				return candidate;
-			}
-		}
-		return null;
-	}
+    // private static final ActionScriptFactory factory = new ActionScriptFactory();
 
-	public static void importTypeIfRequired(CompilationUnitServices compilationUnitServices, ActionScriptType typeToImport) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services is required");
-		Assert.notNull(typeToImport, "ActionScript type to import is required");
-		
-		if(ActionScriptType.isImplicitType(typeToImport.getFullyQualifiedTypeName())) {
-			return;
-		}
-			
-		if(typeToImport.isDefaultPackage()) {
-			return;
-		}
-		
-		if(compilationUnitServices.getCompilationUnitPackage().equals(typeToImport.getPackage())) {
-			return;
-		}
-		
-		if (compilationUnitServices.getImports().contains(typeToImport.getFullyQualifiedTypeName())) {
-			return;
-		}
-		
-		compilationUnitServices.addImport(typeToImport.getFullyQualifiedTypeName());
-	}
-	
-	public static ASTypeVisibility getASTypeVisibility(Visibility as3ParserVisibility) {
-		return ASTypeVisibility.valueOf(as3ParserVisibility.toString().replaceAll("\\[|\\]", "").toUpperCase());
-	}
-	
-	public static Visibility getAs3ParserVisiblity(ASTypeVisibility typeVisibility) {
-		switch(typeVisibility) {
-			case INTERNAL:
-				return Visibility.INTERNAL;
-			case PRIVATE:
-				return Visibility.PRIVATE;
-			case PROTECTED:
-				return Visibility.PROTECTED;
-			case PUBLIC:
-				return Visibility.PUBLIC;
-			case DEFAULT:
-			default:
-				return Visibility.DEFAULT;
-			
-		}
-	}
+    public static final ActionScriptType getActionScriptType(ActionScriptPackage compilationUnitPackage, List<String> imports, ASType type) {
+        Assert.notNull(imports, "Compilation unit imports required");
+        Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+        Assert.notNull(type, "ASType required");
 
-	public static MetaTagAttributeValue<?> getMetaTagAttributeValue(Param param) {
-		if (param.getValue() instanceof Boolean) {
-			return new BooleanAttributeValue(new ActionScriptSymbolName(param.getName()), (Boolean) param.getValue());
-		} else if (param.getValue() instanceof Integer) {
-			return new IntegerAttributeValue(new ActionScriptSymbolName(param.getName()), (Integer) param.getValue());
-		} else {
-			return new StringAttributeValue(new ActionScriptSymbolName(param.getName()), String.valueOf(param.getValue()));
-		}
-	}
+        return getActionScriptType(compilationUnitPackage, imports, type.getName());
+    }
+
+    public static final ActionScriptType getActionScriptType(ActionScriptPackage compilationUnitPackage, List<String> imports, String nameToFind) {
+        Assert.notNull(imports, "Compilation unit imports required");
+        Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+        Assert.notNull(nameToFind, "Name to find is required");
+
+        int offset = nameToFind.lastIndexOf('.');
+        if (offset > -1) {
+            return new ActionScriptType(nameToFind);
+        }
+
+        if (ActionScriptType.isImplicitType(nameToFind)) {
+            return new ActionScriptType(nameToFind);
+        }
+
+        String importDeclaration = getImportDeclarationFor(imports, nameToFind);
+        if (importDeclaration == null) {
+            String name = compilationUnitPackage.getFullyQualifiedPackageName() == "" ? nameToFind
+                : compilationUnitPackage.getFullyQualifiedPackageName() + "." + nameToFind;
+            return new ActionScriptType(name);
+        }
+
+        return new ActionScriptType(importDeclaration);
+    }
+
+    /*
+     * public static final ASType getASType(String typeName) { Assert.notNull(typeName, "ActionScript type required");
+     * return factory.newClass(typeName).getType(); }
+     */
+
+    private static final String getImportDeclarationFor(List<String> imports, String typeName) {
+        Assert.notNull(imports, "Compilation unit imports required");
+        Assert.notNull(typeName, "Type name required");
+        for (String candidate : imports) {
+            int offset = candidate.lastIndexOf('.');
+            if (typeName.equals(candidate.substring(offset + 1))) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    public static void importTypeIfRequired(CompilationUnitServices compilationUnitServices, ActionScriptType typeToImport) {
+        Assert.notNull(compilationUnitServices, "Compilation unit services is required");
+        Assert.notNull(typeToImport, "ActionScript type to import is required");
+
+        if (ActionScriptType.isImplicitType(typeToImport.getFullyQualifiedTypeName())) {
+            return;
+        }
+
+        if (typeToImport.isDefaultPackage()) {
+            return;
+        }
+
+        if (compilationUnitServices.getCompilationUnitPackage().equals(typeToImport.getPackage())) {
+            return;
+        }
+
+        if (compilationUnitServices.getImports().contains(typeToImport.getFullyQualifiedTypeName())) {
+            return;
+        }
+
+        compilationUnitServices.addImport(typeToImport.getFullyQualifiedTypeName());
+    }
+
+    public static ASTypeVisibility getASTypeVisibility(Visibility as3ParserVisibility) {
+        return ASTypeVisibility.valueOf(as3ParserVisibility.toString().replaceAll("\\[|\\]", "").toUpperCase());
+    }
+
+    public static Visibility getAs3ParserVisiblity(ASTypeVisibility typeVisibility) {
+        switch (typeVisibility) {
+            case INTERNAL:
+                return Visibility.INTERNAL;
+            case PRIVATE:
+                return Visibility.PRIVATE;
+            case PROTECTED:
+                return Visibility.PROTECTED;
+            case PUBLIC:
+                return Visibility.PUBLIC;
+            case DEFAULT:
+            default:
+                return Visibility.DEFAULT;
+
+        }
+    }
+
+    public static MetaTagAttributeValue<?> getMetaTagAttributeValue(Param param) {
+        if (param.getValue() instanceof Boolean) {
+            return new BooleanAttributeValue(new ActionScriptSymbolName(param.getName()), (Boolean) param.getValue());
+        } else if (param.getValue() instanceof Integer) {
+            return new IntegerAttributeValue(new ActionScriptSymbolName(param.getName()), (Integer) param.getValue());
+        } else {
+            return new StringAttributeValue(new ActionScriptSymbolName(param.getName()), String.valueOf(param.getValue()));
+        }
+    }
 }

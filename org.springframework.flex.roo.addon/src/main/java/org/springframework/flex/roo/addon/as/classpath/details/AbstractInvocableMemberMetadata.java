@@ -25,65 +25,71 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.roo.support.util.Assert;
 
-public abstract class AbstractInvocableMemberMetadata implements
-		ASInvocableMemberMetadata {
+/**
+ * Convenient base class for metadata representation of an invocable ActionScript member.
+ *
+ * @author Jeremy Grelle
+ */
+public abstract class AbstractInvocableMemberMetadata implements ASInvocableMemberMetadata {
 
-	private String declaredByMetadataId;
+    private final String declaredByMetadataId;
 
-	private String methodBody;
-	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
-	private List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
-	private List<ActionScriptSymbolName> paramNames = new ArrayList<ActionScriptSymbolName>();
-	private ASTypeVisibility visibility;
-	
-	public AbstractInvocableMemberMetadata(String declaredByMetadataId) {
-		this(declaredByMetadataId, null, null, null, null, null);
-	}
+    private final String methodBody;
 
-	public AbstractInvocableMemberMetadata(String declaredByMetadataId,
-			String methodBody, List<ASMetaTagMetadata> metaTags,
-			List<ActionScriptType> paramTypes,
-			List<ActionScriptSymbolName> paramNames, ASTypeVisibility visibility) {
-		Assert.notNull(declaredByMetadataId, "Metadata ID of owning type is required.");
-		
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.visibility = visibility != null ? visibility : ASTypeVisibility.PUBLIC;
-		this.methodBody = methodBody != null ? methodBody : "";
-		
-		if(metaTags != null) { 
-			this.metaTags = metaTags;
-		}
-		
-		if (paramTypes != null) {
-			this.paramTypes = paramTypes;
-		}
-		
-		if (paramNames != null) {
-			this.paramNames = paramNames;
-		}
-	}
+    private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
+    private List<ActionScriptType> paramTypes = new ArrayList<ActionScriptType>();
 
-	public String getBody() {
-		return methodBody;
-	}
+    private List<ActionScriptSymbolName> paramNames = new ArrayList<ActionScriptSymbolName>();
 
-	public List<ASMetaTagMetadata> getMetaTags() {
-		return metaTags;
-	}
+    private final ASTypeVisibility visibility;
 
-	public List<ActionScriptType> getParameterTypes() {
-		return paramTypes;
-	}
+    public AbstractInvocableMemberMetadata(String declaredByMetadataId) {
+        this(declaredByMetadataId, null, null, null, null, null);
+    }
 
-	public List<ActionScriptSymbolName> getParameterNames() {
-		return paramNames;
-	}
+    public AbstractInvocableMemberMetadata(String declaredByMetadataId, String methodBody, List<ASMetaTagMetadata> metaTags,
+        List<ActionScriptType> paramTypes, List<ActionScriptSymbolName> paramNames, ASTypeVisibility visibility) {
+        Assert.notNull(declaredByMetadataId, "Metadata ID of owning type is required.");
 
-	public ASTypeVisibility getVisibility() {
-		return visibility;
-	}
+        this.declaredByMetadataId = declaredByMetadataId;
+        this.visibility = visibility != null ? visibility : ASTypeVisibility.PUBLIC;
+        this.methodBody = methodBody != null ? methodBody : "";
+
+        if (metaTags != null) {
+            this.metaTags = metaTags;
+        }
+
+        if (paramTypes != null) {
+            this.paramTypes = paramTypes;
+        }
+
+        if (paramNames != null) {
+            this.paramNames = paramNames;
+        }
+    }
+
+    public String getDeclaredByMetadataId() {
+        return this.declaredByMetadataId;
+    }
+
+    public String getBody() {
+        return this.methodBody;
+    }
+
+    public List<ASMetaTagMetadata> getMetaTags() {
+        return this.metaTags;
+    }
+
+    public List<ActionScriptType> getParameterTypes() {
+        return this.paramTypes;
+    }
+
+    public List<ActionScriptSymbolName> getParameterNames() {
+        return this.paramNames;
+    }
+
+    public ASTypeVisibility getVisibility() {
+        return this.visibility;
+    }
 }

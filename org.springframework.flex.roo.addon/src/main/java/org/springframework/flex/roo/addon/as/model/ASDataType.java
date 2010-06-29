@@ -16,7 +16,11 @@
 
 package org.springframework.flex.roo.addon.as.model;
 
+/**
+ * ActionScript data types.
+ *
+ * @author Jeremy Grelle
+ */
 public enum ASDataType {
-	TYPE,
-	VARIABLE
+    TYPE, VARIABLE
 }

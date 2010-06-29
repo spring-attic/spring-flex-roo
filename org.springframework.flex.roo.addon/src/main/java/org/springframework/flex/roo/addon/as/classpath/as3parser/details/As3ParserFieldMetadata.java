@@ -33,134 +33,144 @@ import uk.co.badgersinfoil.metaas.dom.ASClassType;
 import uk.co.badgersinfoil.metaas.dom.ASField;
 import uk.co.badgersinfoil.metaas.dom.ASMetaTag;
 
+/**
+ * Parser-specific metadata representation of an ActionScript field.
+ *
+ * @author Jeremy Grelle
+ */
 public class As3ParserFieldMetadata extends AbstractASFieldMetadata {
 
-	private ActionScriptType fieldType;
-	private ActionScriptSymbolName fieldName;
-	private ASTypeVisibility visibility;
-	private String fieldInitializer;
-	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
-	private String declaredByMetadataId;
-	
-	@SuppressWarnings("unchecked")
-	public As3ParserFieldMetadata(
-			String declaredByMetadataId,
-			ASField field,
-			CompilationUnitServices compilationUnitServices) {
-		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
-		Assert.notNull(field, "ActionScript field is required");
-		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
-		
-		this.setDeclaredByMetadataId(declaredByMetadataId);
-		
-		this.fieldType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getType());
-		this.setFieldName(new ActionScriptSymbolName(field.getName()));
-		this.visibility = As3ParserUtils.getASTypeVisibility(field.getVisibility());
-		this.fieldInitializer = field.getInitializer() != null ? field.getInitializer().toString() : null;
+    private final ActionScriptType fieldType;
 
-		for(ASMetaTag metaTag : (List<ASMetaTag>)field.getAllMetaTags()) {
-			metaTags.add(new As3ParserMetaTagMetadata(metaTag));
-		}
-	}
+    private ActionScriptSymbolName fieldName;
 
-	@Override
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
+    private final ASTypeVisibility visibility;
 
-	@Override
-	public ActionScriptSymbolName getFieldName() {
-		return fieldName;
-	}
+    private final String fieldInitializer;
 
-	public ActionScriptType getFieldType() {
-		return fieldType;
-	}
+    private final List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 
-	public List<ASMetaTagMetadata> getMetaTags() {
-		return metaTags;
-	}
+    private String declaredByMetadataId;
 
-	public ASTypeVisibility getVisibility() {
-		return visibility;
-	}
-	public String getFieldInitializer() {
-		return fieldInitializer;
-	}
-	
-	public static void addField(CompilationUnitServices compilationUnitServices, 
-			ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
-		
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(clazz, "Class required");
-		Assert.notNull(field, "Field required");
-		
-		// Import the field type into the compilation unit
-		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
-		
-		// Add the field
-		ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()), field.getFieldType().getSimpleTypeName());
-		
-		if (field.getFieldInitializer() != null) {
-			newField.setInitializer(field.getFieldInitializer());
-		}
-		
-		// Add meta tags to the field
-		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, newField, false);
-		}
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
-	}
-	
-	public static void updateField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
-		
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(clazz, "Class required");
-		Assert.notNull(field, "Field required");
-		
-		// Import the field type into the compilation unit
-		As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
-		
-		ASField existingField = clazz.getField(field.getFieldName().getSymbolName());
-		
-		existingField.setVisibility(As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()));
-		
-		existingField.setType(field.getFieldType().getSimpleTypeName());
-		
-		if (field.getFieldInitializer() != null) {
-			existingField.setInitializer(field.getFieldInitializer());
-		}
-		
-		// Add meta tags to the field
-		for(ASMetaTagMetadata metaTag : field.getMetaTags()) {
-			if (existingField.getFirstMetatag(metaTag.getName()) != null) {
-				As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, existingField, false);
-			}
-		}
-	}
-	
-	public static void removeField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ActionScriptSymbolName fieldName, boolean permitFlush) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		Assert.notNull(clazz, "Class required");
-		Assert.notNull(fieldName, "Field name required");
-		
-		Assert.notNull(clazz.getField(fieldName.getSymbolName()), "Could not locate field '" + fieldName + "' to delete");
-		
-		clazz.removeField(fieldName.getSymbolName());
-		
-		if(permitFlush) {
-			compilationUnitServices.flush();
-		}
-	}
+    @SuppressWarnings("unchecked")
+    public As3ParserFieldMetadata(String declaredByMetadataId, ASField field, CompilationUnitServices compilationUnitServices) {
+        Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
+        Assert.notNull(field, "ActionScript field is required");
+        Assert.notNull(compilationUnitServices, "Compilation unit services are required");
 
-	private void setDeclaredByMetadataId(String declaredByMetadataId) {
-		this.declaredByMetadataId = declaredByMetadataId;
-	}
+        this.setDeclaredByMetadataId(declaredByMetadataId);
 
-	private void setFieldName(ActionScriptSymbolName fieldName) {
-		this.fieldName = fieldName;
-	}
+        this.fieldType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(),
+            compilationUnitServices.getImports(), field.getType());
+        this.setFieldName(new ActionScriptSymbolName(field.getName()));
+        this.visibility = As3ParserUtils.getASTypeVisibility(field.getVisibility());
+        this.fieldInitializer = field.getInitializer() != null ? field.getInitializer().toString() : null;
+
+        for (ASMetaTag metaTag : (List<ASMetaTag>) field.getAllMetaTags()) {
+            this.metaTags.add(new As3ParserMetaTagMetadata(metaTag));
+        }
+    }
+
+    @Override
+    public String getDeclaredByMetadataId() {
+        return this.declaredByMetadataId;
+    }
+
+    @Override
+    public ActionScriptSymbolName getFieldName() {
+        return this.fieldName;
+    }
+
+    public ActionScriptType getFieldType() {
+        return this.fieldType;
+    }
+
+    public List<ASMetaTagMetadata> getMetaTags() {
+        return this.metaTags;
+    }
+
+    public ASTypeVisibility getVisibility() {
+        return this.visibility;
+    }
+
+    public String getFieldInitializer() {
+        return this.fieldInitializer;
+    }
+
+    public static void addField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
+
+        Assert.notNull(compilationUnitServices, "Compilation unit services required");
+        Assert.notNull(clazz, "Class required");
+        Assert.notNull(field, "Field required");
+
+        // Import the field type into the compilation unit
+        As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
+
+        // Add the field
+        ASField newField = clazz.newField(field.getFieldName().getSymbolName(), As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()),
+            field.getFieldType().getSimpleTypeName());
+
+        if (field.getFieldInitializer() != null) {
+            newField.setInitializer(field.getFieldInitializer());
+        }
+
+        // Add meta tags to the field
+        for (ASMetaTagMetadata metaTag : field.getMetaTags()) {
+            As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, newField, false);
+        }
+
+        if (permitFlush) {
+            compilationUnitServices.flush();
+        }
+    }
+
+    public static void updateField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ASFieldMetadata field, boolean permitFlush) {
+
+        Assert.notNull(compilationUnitServices, "Compilation unit services required");
+        Assert.notNull(clazz, "Class required");
+        Assert.notNull(field, "Field required");
+
+        // Import the field type into the compilation unit
+        As3ParserUtils.importTypeIfRequired(compilationUnitServices, field.getFieldType());
+
+        ASField existingField = clazz.getField(field.getFieldName().getSymbolName());
+
+        existingField.setVisibility(As3ParserUtils.getAs3ParserVisiblity(field.getVisibility()));
+
+        existingField.setType(field.getFieldType().getSimpleTypeName());
+
+        if (field.getFieldInitializer() != null) {
+            existingField.setInitializer(field.getFieldInitializer());
+        }
+
+        // Add meta tags to the field
+        for (ASMetaTagMetadata metaTag : field.getMetaTags()) {
+            if (existingField.getFirstMetatag(metaTag.getName()) != null) {
+                As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, existingField, false);
+            }
+        }
+    }
+
+    public static void removeField(CompilationUnitServices compilationUnitServices, ASClassType clazz, ActionScriptSymbolName fieldName,
+        boolean permitFlush) {
+        Assert.notNull(compilationUnitServices, "Compilation unit services required");
+        Assert.notNull(clazz, "Class required");
+        Assert.notNull(fieldName, "Field name required");
+
+        Assert.notNull(clazz.getField(fieldName.getSymbolName()), "Could not locate field '" + fieldName + "' to delete");
+
+        clazz.removeField(fieldName.getSymbolName());
+
+        if (permitFlush) {
+            compilationUnitServices.flush();
+        }
+    }
+
+    private void setDeclaredByMetadataId(String declaredByMetadataId) {
+        this.declaredByMetadataId = declaredByMetadataId;
+    }
+
+    private void setFieldName(ActionScriptSymbolName fieldName) {
+        this.fieldName = fieldName;
+    }
 }

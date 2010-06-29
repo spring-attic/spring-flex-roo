@@ -18,9 +18,14 @@ package org.springframework.flex.roo.addon.as.classpath;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 
+/**
+ * Details for an ActionScript source file.
+ *
+ * @author Jeremy Grelle
+ */
 public interface ASPhysicalTypeDetails {
 
-	ASPhysicalTypeCategory getPhysicalTypeCategory();
-	
-	ActionScriptType getName();
+    ASPhysicalTypeCategory getPhysicalTypeCategory();
+
+    ActionScriptType getName();
 }

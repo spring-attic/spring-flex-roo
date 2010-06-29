@@ -24,32 +24,37 @@ import java.util.Map;
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Default metadata representation of an ActionScript meta-tag.
+ *
+ * @author Jeremy Grelle
+ */
 public class DefaultASMetaTagMetadata implements ASMetaTagMetadata {
 
-	private String name;
-	private Map<ActionScriptSymbolName, MetaTagAttributeValue<?>> attributes = new LinkedHashMap<ActionScriptSymbolName, MetaTagAttributeValue<?>>();
-	
-	public DefaultASMetaTagMetadata(String name,
-			List<MetaTagAttributeValue<?>> attributes) {
-		this.name = name;
-		if (attributes != null) {
-			for (MetaTagAttributeValue<?> attr : attributes) {
-				this.attributes.put(attr.getName(), attr);
-			}
-		}
-	}
+    private final String name;
 
-	public String getName() {
-		return name;
-	}
+    private final Map<ActionScriptSymbolName, MetaTagAttributeValue<?>> attributes = new LinkedHashMap<ActionScriptSymbolName, MetaTagAttributeValue<?>>();
 
-	public MetaTagAttributeValue<?> getAttribute(ActionScriptSymbolName attributeName) {
-		Assert.notNull(attributeName, "Attribute name required");
-		return attributes.get(attributeName);		
-	}
+    public DefaultASMetaTagMetadata(String name, List<MetaTagAttributeValue<?>> attributes) {
+        this.name = name;
+        if (attributes != null) {
+            for (MetaTagAttributeValue<?> attr : attributes) {
+                this.attributes.put(attr.getName(), attr);
+            }
+        }
+    }
 
-	public List<ActionScriptSymbolName> getAttributeNames() {
-		return new ArrayList<ActionScriptSymbolName>(attributes.keySet());
-	}
+    public String getName() {
+        return this.name;
+    }
+
+    public MetaTagAttributeValue<?> getAttribute(ActionScriptSymbolName attributeName) {
+        Assert.notNull(attributeName, "Attribute name required");
+        return this.attributes.get(attributeName);
+    }
+
+    public List<ActionScriptSymbolName> getAttributeNames() {
+        return new ArrayList<ActionScriptSymbolName>(this.attributes.keySet());
+    }
 
 }

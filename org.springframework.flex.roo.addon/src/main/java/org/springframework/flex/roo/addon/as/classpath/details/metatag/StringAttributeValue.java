@@ -18,21 +18,27 @@ package org.springframework.flex.roo.addon.as.classpath.details.metatag;
 
 import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 
+/**
+ * String meta-tag attribute.
+ *
+ * @author Jeremy Grelle
+ */
 public class StringAttributeValue extends AbstractMetaTagAttributeValue<String> {
 
-	private String value;
+    private final String value;
 
-	public StringAttributeValue(ActionScriptSymbolName name, String value) {
-		super(name);
-		this.value = value;
-	}
+    public StringAttributeValue(ActionScriptSymbolName name, String value) {
+        super(name);
+        this.value = value;
+    }
 
-	public String getValue() {
-		return value;
-	}
-	
-	public String toString() {
-		return getName() + " -> " + value;
-	}
+    public String getValue() {
+        return this.value;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " -> " + this.value;
+    }
 
 }

@@ -22,33 +22,39 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
+/**
+ * Metadata representation of the user interface scaffolding generated for a particular Flex entity.
+ *
+ * @author Jeremy Grelle
+ */
 public class FlexUIMetadata extends AbstractMetadataItem {
 
-	private static final String PROVIDES_TYPE_STRING = FlexUIMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-		
-	public FlexUIMetadata(String id) {
-		super(id);
-	}
+    private static final String PROVIDES_TYPE_STRING = FlexUIMetadata.class.getName();
 
-	public static String getMetadataIdentifierType() {
-		return PROVIDES_TYPE;
-	}
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	public static JavaType getJavaType(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public FlexUIMetadata(String id) {
+        super(id);
+    }
 
-	public static final Path getPath(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static String getMetadataIdentifierType() {
+        return PROVIDES_TYPE;
+    }
 
-	public static boolean isValid(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public static JavaType getJavaType(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 
-	public static String createIdentifier(JavaType javaType, Path path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
+    public static final Path getPath(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static boolean isValid(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static String createIdentifier(JavaType javaType, Path path) {
+        return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+    }
 
 }

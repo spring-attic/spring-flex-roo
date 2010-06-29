@@ -16,9 +16,12 @@
 
 package org.springframework.flex.roo.addon.as.classpath;
 
+/**
+ * {@link MetadataProvider} for mutable ActionScript source files.
+ *
+ * @author Jeremy Grelle
+ */
+public interface ASMutablePhysicalTypeMetadataProvider extends ASPhysicalTypeMetadataProvider {
 
-public interface ASMutablePhysicalTypeMetadataProvider extends
-		ASPhysicalTypeMetadataProvider {
-
-	void createPhysicalType(ASPhysicalTypeMetadata toCreate);
+    void createPhysicalType(ASPhysicalTypeMetadata toCreate);
 }

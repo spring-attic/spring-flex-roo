@@ -19,21 +19,22 @@ package org.springframework.flex.roo.addon.as.classpath.details;
 import org.springframework.flex.roo.addon.as.model.ASTypeVisibility;
 
 /**
- * Allows a member to be traced back to its declaring type.
- *
+ * Allows an ActionScript member to be traced back to its declaring type.
+ * 
+ * @author Jeremy Grelle
  */
 public interface ASIdentifiableMember {
 
-	/**
-	 * @return the ID of the metadata that declared this member (never null)
-	 */
-	String getDeclaredByMetadataId();
+    /**
+     * @return the ID of the metadata that declared this member (never null)
+     */
+    String getDeclaredByMetadataId();
 
-	/**
-	 * Indicates the visibility of the member. 
-	 * 
-	 * @return the visibility, if available (required) 
-	 */
-	ASTypeVisibility getVisibility();
-	
+    /**
+     * Indicates the visibility of the member.
+     * 
+     * @return the visibility, if available (required)
+     */
+    ASTypeVisibility getVisibility();
+
 }

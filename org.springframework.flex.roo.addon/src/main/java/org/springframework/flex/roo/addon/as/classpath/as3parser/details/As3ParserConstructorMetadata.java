@@ -36,96 +36,104 @@ import uk.co.badgersinfoil.metaas.dom.ASMethod;
 import uk.co.badgersinfoil.metaas.dom.ASType;
 import uk.co.badgersinfoil.metaas.dom.Statement;
 
+/**
+ * Parser-specific metadata representation of an ActionScript constructor method.
+ *
+ * @author Jeremy Grelle
+ */
 public class As3ParserConstructorMetadata implements ASConstructorMetadata {
 
-	private String declaredByMetadataId;
-	
-	private String methodBody;
-	private List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
-	private Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
-	private ASTypeVisibility visibility;
+    private final String declaredByMetadataId;
 
-	@SuppressWarnings("unchecked")
-	public As3ParserConstructorMetadata(
-			String declaredByMetadataId,
-			ASMethod method,
-			CompilationUnitServices compilationUnitServices) {
-		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
-		Assert.notNull(method, "Method declaration required");
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
-		
-		this.declaredByMetadataId = declaredByMetadataId;
-				
-		StringBuffer bodyBuf = new StringBuffer();
-		for (Statement statement : (List<Statement>) method.getStatementList()){
-			bodyBuf.append(statement.toString());
-		}
-		this.methodBody = bodyBuf.toString();
-		
-		List<ASMetaTag> metaTagList = method.getAllMetaTags();
-		if (metaTagList != null) {
-			for (ASMetaTag metaTag : metaTagList) {
-				As3ParserMetaTagMetadata md = new As3ParserMetaTagMetadata(metaTag);
-				metaTags.add(md);
-			}
-		}
-		
-		List<ASArg> args = method.getArgs();
-		for(ASArg arg : args) {
-			ActionScriptType paramType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), arg.getType());
-			params.put(new ActionScriptSymbolName(arg.getName()), paramType);
-		}
-		
-		this.visibility = As3ParserUtils.getASTypeVisibility(method.getVisibility());
-	}
-	
-	public String getBody() {
-		return this.methodBody;
-	}
+    private final String methodBody;
 
-	public List<ASMetaTagMetadata> getMetaTags() {
-		return this.metaTags;
-	}
+    private final List<ASMetaTagMetadata> metaTags = new ArrayList<ASMetaTagMetadata>();
 
-	public List<ActionScriptSymbolName> getParameterNames() {
-		return new ArrayList<ActionScriptSymbolName>(params.keySet());
-	}
+    private final Map<ActionScriptSymbolName, ActionScriptType> params = new LinkedHashMap<ActionScriptSymbolName, ActionScriptType>();
 
-	public List<ActionScriptType> getParameterTypes() {
-		return new ArrayList<ActionScriptType>(this.params.values());
-	}
+    private final ASTypeVisibility visibility;
 
-	public String getDeclaredByMetadataId() {
-		return this.declaredByMetadataId;
-	}
+    @SuppressWarnings("unchecked")
+    public As3ParserConstructorMetadata(String declaredByMetadataId, ASMethod method, CompilationUnitServices compilationUnitServices) {
+        Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
+        Assert.notNull(method, "Method declaration required");
+        Assert.notNull(compilationUnitServices, "Compilation unit services required");
 
-	public ASTypeVisibility getVisibility() {
-		return this.visibility;
-	}
-	
-	public static void addConstructor(CompilationUnitServices compilationUnitServices, ASType type, ASConstructorMetadata declaredConstructor, boolean permitFlush) {
-		
-		Assert.isNull(type.getMethod(type.getName()), "ActionScript classes may only have one constructor method.");
-		
-		ASMethod constructor = type.newMethod(type.getName(), As3ParserUtils.getAs3ParserVisiblity(declaredConstructor.getVisibility()), null);
-		
-		//TODO - The parser doesn't allow any control over re-ordering methods.  It would be good if we could ensure the constructor is the first method in the class.
-		
-		//Add MetaTags
-		for (ASMetaTagMetadata metaTag : declaredConstructor.getMetaTags()) {
-			As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, constructor, false);			
-		}
-		
-		//Add Arguments
-		for (int x=0; x<declaredConstructor.getParameterNames().size(); x++) {
-			ActionScriptSymbolName argName = declaredConstructor.getParameterNames().get(x);
-			ActionScriptType argType = declaredConstructor.getParameterTypes().get(x);
-			As3ParserUtils.importTypeIfRequired(compilationUnitServices, argType);
-			constructor.addParam(argName.getSymbolName(), argType.getSimpleTypeName());
-		}
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
-	} 
+        this.declaredByMetadataId = declaredByMetadataId;
+
+        StringBuffer bodyBuf = new StringBuffer();
+        for (Statement statement : (List<Statement>) method.getStatementList()) {
+            bodyBuf.append(statement.toString());
+        }
+        this.methodBody = bodyBuf.toString();
+
+        List<ASMetaTag> metaTagList = method.getAllMetaTags();
+        if (metaTagList != null) {
+            for (ASMetaTag metaTag : metaTagList) {
+                As3ParserMetaTagMetadata md = new As3ParserMetaTagMetadata(metaTag);
+                this.metaTags.add(md);
+            }
+        }
+
+        List<ASArg> args = method.getArgs();
+        for (ASArg arg : args) {
+            ActionScriptType paramType = As3ParserUtils.getActionScriptType(compilationUnitServices.getCompilationUnitPackage(),
+                compilationUnitServices.getImports(), arg.getType());
+            this.params.put(new ActionScriptSymbolName(arg.getName()), paramType);
+        }
+
+        this.visibility = As3ParserUtils.getASTypeVisibility(method.getVisibility());
+    }
+
+    public String getBody() {
+        return this.methodBody;
+    }
+
+    public List<ASMetaTagMetadata> getMetaTags() {
+        return this.metaTags;
+    }
+
+    public List<ActionScriptSymbolName> getParameterNames() {
+        return new ArrayList<ActionScriptSymbolName>(this.params.keySet());
+    }
+
+    public List<ActionScriptType> getParameterTypes() {
+        return new ArrayList<ActionScriptType>(this.params.values());
+    }
+
+    public String getDeclaredByMetadataId() {
+        return this.declaredByMetadataId;
+    }
+
+    public ASTypeVisibility getVisibility() {
+        return this.visibility;
+    }
+
+    public static void addConstructor(CompilationUnitServices compilationUnitServices, ASType type, ASConstructorMetadata declaredConstructor,
+        boolean permitFlush) {
+
+        Assert.isNull(type.getMethod(type.getName()), "ActionScript classes may only have one constructor method.");
+
+        ASMethod constructor = type.newMethod(type.getName(), As3ParserUtils.getAs3ParserVisiblity(declaredConstructor.getVisibility()), null);
+
+        // TODO - The parser doesn't allow any control over re-ordering methods. It would be good if we could ensure the
+        // constructor is the first method in the class.
+
+        // Add MetaTags
+        for (ASMetaTagMetadata metaTag : declaredConstructor.getMetaTags()) {
+            As3ParserMetaTagMetadata.addMetaTagToElement(compilationUnitServices, metaTag, constructor, false);
+        }
+
+        // Add Arguments
+        for (int x = 0; x < declaredConstructor.getParameterNames().size(); x++) {
+            ActionScriptSymbolName argName = declaredConstructor.getParameterNames().get(x);
+            ActionScriptType argType = declaredConstructor.getParameterTypes().get(x);
+            As3ParserUtils.importTypeIfRequired(compilationUnitServices, argType);
+            constructor.addParam(argName.getSymbolName(), argType.getSimpleTypeName());
+        }
+
+        if (permitFlush) {
+            compilationUnitServices.flush();
+        }
+    }
 }

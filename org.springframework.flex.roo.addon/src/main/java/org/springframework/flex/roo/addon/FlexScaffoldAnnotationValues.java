@@ -22,16 +22,22 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.model.JavaType;
 
+/**
+ * Annotation attribute values for {@link RooFlexScaffold}
+ *
+ * @author Jeremy Grelle
+ */
 public class FlexScaffoldAnnotationValues extends AbstractAnnotationValues {
 
-	@AutoPopulate JavaType entity = null;
-	
-	public FlexScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
-		super(governorPhysicalTypeMetadata, new JavaType(RooFlexScaffold.class.getName()));
-		AutoPopulationUtils.populate(this, annotationMetadata);
-	}
+    @AutoPopulate
+    JavaType entity = null;
 
-	public JavaType getEntity() {
-		return entity;
-	}
+    public FlexScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+        super(governorPhysicalTypeMetadata, new JavaType(RooFlexScaffold.class.getName()));
+        AutoPopulationUtils.populate(this, this.annotationMetadata);
+    }
+
+    public JavaType getEntity() {
+        return this.entity;
+    }
 }

@@ -27,52 +27,54 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Metadata that represents the root of a managed mapping between an ActionScript entity and a Java entity.
+ * Metadata representation of the root of a managed mapping between an ActionScript entity and a Java entity.
  * 
  * @author Jeremy Grelle
  */
 public class ActionScriptEntityMetadata extends AbstractMetadataItem {
 
-	private static final String PROVIDES_TYPE_STRING = ActionScriptEntityMetadata.class.getName();
-	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
-	private ActionScriptType actionScriptType;
-	private JavaType javaType;
-	
-	public ActionScriptEntityMetadata(String id, ActionScriptType actionScriptType, JavaType javaType) {
-		super(id);
-		Assert.notNull(actionScriptType, "The ActionScript type is required.");
-		Assert.notNull(javaType, "The Java type is required.");
-		
-		this.actionScriptType = actionScriptType;
-		this.javaType = javaType;
-	}
+    private static final String PROVIDES_TYPE_STRING = ActionScriptEntityMetadata.class.getName();
 
-	public ActionScriptType getActionScriptType() {
-		return actionScriptType;
-	}
+    private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
-	public JavaType getJavaType() {
-		return javaType;
-	}
+    private final ActionScriptType actionScriptType;
 
-	public static final String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
+    private final JavaType javaType;
 
-	public static final String createTypeIdentifier(ActionScriptType asType, FlexPath path) {
-		return ASPhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, asType, path);
-	}
+    public ActionScriptEntityMetadata(String id, ActionScriptType actionScriptType, JavaType javaType) {
+        super(id);
+        Assert.notNull(actionScriptType, "The ActionScript type is required.");
+        Assert.notNull(javaType, "The Java type is required.");
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+        this.actionScriptType = actionScriptType;
+        this.javaType = javaType;
+    }
 
-	public static final Path getJavaPath(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public ActionScriptType getActionScriptType() {
+        return this.actionScriptType;
+    }
 
-	public static boolean isValid(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
+    public JavaType getJavaType() {
+        return this.javaType;
+    }
+
+    public static final String getMetadataIdentiferType() {
+        return PROVIDES_TYPE;
+    }
+
+    public static final String createTypeIdentifier(ActionScriptType asType, FlexPath path) {
+        return ASPhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, asType, path);
+    }
+
+    public static final JavaType getJavaType(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static final Path getJavaPath(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
+
+    public static boolean isValid(String metadataIdentificationString) {
+        return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+    }
 }
