@@ -1,6 +1,7 @@
 package org.springframework.flex.roo.addon;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.UUID;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -23,17 +25,25 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.entity.ActionScriptEntityMetadata;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
+import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -75,6 +85,9 @@ public class FlexOperationsImpl implements FlexOperations {
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private FlexPathResolver flexPathResolver;
+	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	@Reference private ItdMetadataScanner itdMetadataScanner;
+	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	
 	private ComponentContext context;
 	
@@ -130,6 +143,52 @@ public class FlexOperationsImpl implements FlexOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	public void generateAll(JavaPackage javaPackage) {
+		FileDetails srcRoot = new FileDetails(new File(getPathResolver().getRoot(Path.SRC_MAIN_JAVA)), null);
+		String antPath = getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
+		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
+
+		each_file:
+		for (FileDetails file : entries) {
+			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
+			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
+			JavaType javaType = new JavaType(fullPath);
+			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
+			if (id != null) {
+				PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
+				if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+					continue;
+				}
+				
+				ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
+				if (Modifier.isAbstract(cid.getModifier())) {
+					continue;
+				}
+				
+				Set<MetadataItem> metadata = itdMetadataScanner.getMetadata(id);
+				for (MetadataItem item : metadata) {
+					if (item instanceof EntityMetadata) {
+						EntityMetadata em = (EntityMetadata) item;
+						Set<String> downstream = dependencyRegistry.getDownstream(em.getId());
+						// check to see if this entity metadata has a web scaffold metadata listening to it
+						for (String ds : downstream) {
+							if (FlexScaffoldMetadata.isValid(ds)) {
+								// there is already a controller for this entity
+								continue each_file;
+							}
+						}
+						// to get here, there is no listening controller, so add on
+						JavaType service = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Service");
+						JavaType entity = javaType;
+						createRemotingDestination(service, entity);
+						break;
+					}
+				}		
+			}
+		}
+		return;
 	}
 	
 	public void createRemotingDestination(JavaType service, JavaType entity) {
