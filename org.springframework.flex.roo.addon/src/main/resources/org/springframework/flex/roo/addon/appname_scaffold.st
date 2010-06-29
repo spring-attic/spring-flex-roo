@@ -14,12 +14,19 @@
 			
 			protected function entityList_doubleClickHandler(event:MouseEvent):void
 			{	
+				if (entityList.selectedItem == undefined) {
+					return;
+				}
 				var selectedEntity:String = entityList.selectedItem;
-				var selectedEntityPackage:String = selectedEntity.substr(0,1).toLowerCase() + selectedEntity.substring(1);
+				var selectedEntityPackage:String = selectedEntity.toLowerCase();
 				var viewClass:Class = getDefinitionByName("$presentationPackage$."+selectedEntityPackage+"::"+selectedEntity+"View") as Class;
 				if (viewClass != null) {
 					var newView:UIComponent = UIComponent(new viewClass());
+					newView.name = "entityListView";
 					newView["remotingChannels"] = remotingChannels;
+					if (mainGroup.getChildByName("entityListView") != null) {
+						mainGroup.removeElementAt(1);
+					}
 					mainGroup.addElement(newView);
 				} else {
 					Alert.show("No view found for the selected entity.", "View Unavailable");

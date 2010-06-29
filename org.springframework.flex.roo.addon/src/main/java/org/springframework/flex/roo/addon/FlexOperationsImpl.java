@@ -117,6 +117,7 @@ public class FlexOperationsImpl implements FlexOperations {
 		copyDirectoryContents("htmlwrapper/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/"));
 		copyDirectoryContents("htmlwrapper/history/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/history"));
 		copyDirectoryContents("flashbuilder/html-template/*.*", getPathResolver().getIdentifier(Path.ROOT, "/html-template"));
+		copyDirectoryContents("htmlwrapper/history/*.*", getPathResolver().getIdentifier(Path.ROOT, "/html-template/history"));
 	}
 	
 	public void createFlexCompilerConfig() {

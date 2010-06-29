@@ -10,7 +10,9 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
@@ -22,12 +24,15 @@ import org.mockito.Mock;
 import org.springframework.flex.roo.addon.FlexScaffoldMetadata;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
+import org.springframework.flex.roo.addon.ui.FlexUIMetadataProvider.FormFieldWrapper;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.XmlUtils;
@@ -245,5 +250,33 @@ public class FormTemplateTests {
 		ByteArrayInputStream stream = new ByteArrayInputStream(result.getBytes(Charset.forName("UTF-8")));
 		XmlUtils.getDocumentBuilder().parse(stream);
 	}
-
+	
+	@Test
+	public void testFormWithOneToOneRelationship() throws SAXException, IOException {
+		ActionScriptType entityType = new ActionScriptType("com.foo.Person");
+		StringTemplate listViewTemplate = templateGroup.getInstanceOf("org/springframework/flex/roo/addon/ui/entity_form");
+		listViewTemplate.setAttribute("entityType", entityType);
+		listViewTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
+		
+		List<FieldMetadata> elegibleFields = new ArrayList<FieldMetadata>();
+		List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+		attrs.add(new ClassAttributeValue(new JavaSymbolName("targetEntity"), new JavaType("com.foo.Address")));
+		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attrs);
+		FieldMetadata field = new DefaultFieldMetadata("person", Modifier.PRIVATE, new JavaSymbolName("currentAddress"), new JavaType("com.foo.Address"), null, Collections.singletonList(annotation));
+		elegibleFields.add(field);
+		listViewTemplate.setAttribute("fields", FlexUIMetadataProvider.wrapFields(elegibleFields));
+		listViewTemplate.setAttribute("relatedTypes", Collections.singletonList(new FlexUIMetadataProvider.RelatedTypeWrapper(new ActionScriptType("com.foo.Address"), elegibleFields, true)));
+		Map<String, String> labelFields = new HashMap<String, String>();
+		labelFields.put("currentAddress", "street");
+		listViewTemplate.setAttribute("labelFields", labelFields);
+		
+		String result = listViewTemplate.toString();
+		log.debug(result);
+		
+		assertTrue(result.contains("import com.foo.Address;"));
+		assertTrue(result.contains("person.currentAddress = currentAddressInput.selectedItem;"));
+		
+		ByteArrayInputStream stream = new ByteArrayInputStream(result.getBytes(Charset.forName("UTF-8")));
+		XmlUtils.getDocumentBuilder().parse(stream);
+	}
 }

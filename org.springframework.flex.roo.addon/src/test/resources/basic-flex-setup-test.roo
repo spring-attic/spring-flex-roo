@@ -7,6 +7,7 @@ flex setup
 flex remoting scaffold --name ~.service.PersonService
 entity --class ~.domain.Address
 field string --fieldName street
+flex remoting scaffold --name ~.service.AddressService
 focus --class ~.domain.Person
 field reference --fieldName currentAddress --type ~.domain.Address
 field reference --fieldName spouse --type ~.domain.Person --cardinality ONE_TO_ONE 
@@ -15,5 +16,7 @@ entity --class ~.domain.BuildingInfo
 field reference --fieldName address --type ~.domain.Address --cardinality ONE_TO_ONE 
 flex remoting scaffold --name BuildingInfoService
 entity --class ~.domain.TaxRecord
+field string --fieldName taxId
+flex remoting scaffold --name TaxRecordService
 focus --class ~.domain.Address
 field reference --type ~.domain.TaxRecord --fieldName taxRecord --cardinality ONE_TO_ONE

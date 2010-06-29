@@ -45,6 +45,7 @@
 			private function showForm($flexScaffoldMetadata.entityReference$:$entityType.simpleTypeName$ = null):void 
 			{
 				var form:$entityType.simpleTypeName$Form = PopUpManager.createPopUp(this, $entityType.simpleTypeName$Form, true) as $entityType.simpleTypeName$Form;
+				form.remotingChannels = remotingChannels;
 				form.$flexScaffoldMetadata.entityReference$ = $flexScaffoldMetadata.entityReference$ != null ? $flexScaffoldMetadata.entityReference$ : new $entityType.simpleTypeName$();
 				form.addEventListener($entityType.simpleTypeName$Event.CREATE, $flexScaffoldMetadata.entityReference$View_$flexScaffoldMetadata.entityReference$CreateEventHandler);
 				form.addEventListener($entityType.simpleTypeName$Event.UPDATE, $flexScaffoldMetadata.entityReference$View_$flexScaffoldMetadata.entityReference$UpdateEventHandler);

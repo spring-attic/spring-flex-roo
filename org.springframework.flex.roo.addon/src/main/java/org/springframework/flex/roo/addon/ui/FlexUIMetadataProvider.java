@@ -8,8 +8,10 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
@@ -20,6 +22,10 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.flex.roo.addon.FlexOperations;
 import org.springframework.flex.roo.addon.FlexScaffoldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.ASMutablePhysicalTypeMetadataProvider;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeIdentifier;
+import org.springframework.flex.roo.addon.as.classpath.ASPhysicalTypeMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
+import org.springframework.flex.roo.addon.as.classpath.details.ASMutableClassOrInterfaceTypeDetails;
 import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
@@ -114,19 +120,15 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			createEntityEventType(entityEventType, flexScaffoldMetadata);
 		}
 		
-		List<FieldMetadata> elegibleFields = getElegibleFields(projectMetadata, flexScaffoldMetadata);
-		
 		// Create or update the list view
 		String listViewRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View").replace('.', File.separatorChar)+".mxml";
 		String listViewPath = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, listViewRelativePath);
-		writeToDiskIfNecessary(listViewPath, buildListViewDocument(flexScaffoldMetadata, elegibleFields));
+		writeToDiskIfNecessary(listViewPath, buildListViewDocument(flexScaffoldMetadata, getElegibleListFields(projectMetadata, flexScaffoldMetadata)));
 		
 		// Create or update the form view
 		String formRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Form").replace('.', File.separatorChar)+".mxml";
 		String formPath = flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, formRelativePath);
-		writeToDiskIfNecessary(formPath, buildFormDocument(flexScaffoldMetadata, elegibleFields));
-		
-		// Add an entry to flex-config
+		writeToDiskIfNecessary(formPath, buildFormDocument(flexScaffoldMetadata, getElegibleFormFields(projectMetadata, flexScaffoldMetadata)));
 		
 		return new FlexUIMetadata(metadataId);
 	}
@@ -265,6 +267,9 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		listViewTemplate.setAttribute("entityType", entityType);
 		listViewTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
 		listViewTemplate.setAttribute("fields", wrapFields(elegibleFields));
+		Set<RelatedTypeWrapper> relatedTypes = findRelatedTypes(flexScaffoldMetadata, elegibleFields);
+		listViewTemplate.setAttribute("relatedTypes", relatedTypes);
+		listViewTemplate.setAttribute("labelFields", calculateLabelFields(relatedTypes));
 		ByteArrayInputStream stream = new ByteArrayInputStream(listViewTemplate.toString().getBytes(Charset.forName("UTF-8")));
 		try {
 			return XmlUtils.getDocumentBuilder().parse(stream);
@@ -273,6 +278,54 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		}
 	}
 	
+	//TODO - Provide a clean way for the user to specify a specific label via metadata
+	private Map<String, String> calculateLabelFields(Set<RelatedTypeWrapper> relatedTypes) {
+		Map<String, String> labelFields = new HashMap<String, String>();
+		for (RelatedTypeWrapper relatedType : relatedTypes) {
+			String labelField = "id"; //Default in case we don't find a better candidate
+			String asPhysicalTypeMetadataKey = ASPhysicalTypeIdentifier.createIdentifier(relatedType.getType(), FlexPath.SRC_MAIN_FLEX);
+			ASMutableClassOrInterfaceTypeDetails details = getASClassDetails(asPhysicalTypeMetadataKey);
+			if (details == null) {
+				continue;
+			}
+			for(ASFieldMetadata asField : details.getDeclaredFields()) {
+				if (asField.getFieldType().equals(ActionScriptType.STRING_TYPE)) {
+					labelField = asField.getFieldName().getSymbolName();
+					break;
+				}
+			}
+			for(FieldMetadata fieldOfType : relatedType.fieldsOfType) {
+				labelFields.put(fieldOfType.getFieldName().getSymbolName(), labelField);
+			}
+		}
+		return labelFields;
+	}
+	
+	private ASMutableClassOrInterfaceTypeDetails getASClassDetails(String metadataId){
+		ASPhysicalTypeMetadata metadata = (ASPhysicalTypeMetadata) metadataService.get(metadataId);
+		if(metadata == null) {
+			return null;
+		}
+		Assert.isInstanceOf(ASMutableClassOrInterfaceTypeDetails.class, metadata.getPhysicalTypeDetails(), "ActionScript entity must be a class or interface.");
+		return (ASMutableClassOrInterfaceTypeDetails) metadata.getPhysicalTypeDetails();
+	}
+
+	//TODO - Should we actually obtain the FlexScaffoldMetadata for the other type? Could wind up in an infinite loop if not careful
+	private Set<RelatedTypeWrapper> findRelatedTypes(FlexScaffoldMetadata flexScaffoldMetadata, List<FieldMetadata> elegibleFields) {
+		Set<RelatedTypeWrapper> relatedTypes = new LinkedHashSet<RelatedTypeWrapper>();
+		BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
+			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+			FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
+			if (null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.OneToOne")) || 
+					null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.ManyToOne"))) {
+				ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(javaField.getFieldType());
+				relatedTypes.add(new RelatedTypeWrapper(asType, elegibleFields, !asType.getFullyQualifiedTypeName().equals(flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getFullyQualifiedTypeName())));
+			}
+		}
+		return relatedTypes;
+	}
+
 	protected static List<FormFieldWrapper> wrapFields(List<FieldMetadata> elegibleFields) {
 		List<FormFieldWrapper> wrappedFields = new ArrayList<FormFieldWrapper>();
 		for(FieldMetadata field : elegibleFields) {
@@ -281,7 +334,7 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		return wrappedFields;
 	}
 
-	private List<FieldMetadata> getElegibleFields(ProjectMetadata projectMetadata, FlexScaffoldMetadata flexScaffoldMetadata) {
+	private List<FieldMetadata> getElegibleListFields(ProjectMetadata projectMetadata, FlexScaffoldMetadata flexScaffoldMetadata) {
 		List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
 		BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
 		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
@@ -290,7 +343,30 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 			//TODO - For now we ignore relationships in the list view
 			if (!javaField.getFieldType().isCommonCollectionType() && 
 					!javaField.getFieldType().isArray() &&
-					!javaField.getFieldType().getPackage(). getFullyQualifiedPackageName().startsWith((projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName()))) {
+					!javaField.getFieldType().getPackage().getFullyQualifiedPackageName().startsWith((projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName()))) {
+				// Never include id field 
+				if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
+					continue;
+				}
+				// Never include version field 
+				if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+					continue;
+				}
+				eligibleFields.add(javaField);
+			}
+		}
+		return eligibleFields;
+	}
+	
+	private List<FieldMetadata> getElegibleFormFields(ProjectMetadata projectMetadata, FlexScaffoldMetadata flexScaffoldMetadata) {
+		List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
+		BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+			FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
+			//TODO - For now we ignore relationships in the list view
+			if (!javaField.getFieldType().isCommonCollectionType() && 
+					!javaField.getFieldType().isArray()) {
 				// Never include id field 
 				if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
 					continue;
@@ -414,6 +490,83 @@ public class FlexUIMetadataProvider implements MetadataProvider,
 		
 		public Boolean isNumber() {
 			return ActionScriptMappingUtils.toActionScriptType(metadata.getFieldType()).isNumeric();
+		}
+		
+		public Boolean isSingleEndedRelationship() {
+			if (ActionScriptMappingUtils.isMappableType(ActionScriptMappingUtils.toActionScriptType(metadata.getFieldType()))) {
+				return null != MemberFindingUtils.getAnnotationOfType(metadata.getAnnotations(), new JavaType("javax.persistence.OneToOne")) || 
+						null != MemberFindingUtils.getAnnotationOfType(metadata.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
+			}
+			return false;	
+		}
+	}
+	
+	public static final class RelatedTypeWrapper {
+		
+		private ActionScriptType asType;
+		
+		private List<FieldMetadata> fieldsOfType = new ArrayList<FieldMetadata>();
+		
+		private boolean importRequired;
+		
+		public RelatedTypeWrapper(ActionScriptType asType, List<FieldMetadata> elegibleFields, boolean importRequired) {
+			this.asType = asType;
+			this.importRequired = importRequired;
+			for (FieldMetadata field : elegibleFields) {
+				if (field.getFieldType().getFullyQualifiedTypeName().equals(asType.getFullyQualifiedTypeName())) {
+					fieldsOfType.add(field);
+				}
+			}
+		}
+		
+		public String getServiceReference() {
+			return StringUtils.uncapitalize(asType.getSimpleTypeName())+"Service";
+		}
+
+		public List<FieldMetadata> getFieldsOfType() {
+			return fieldsOfType;
+		}
+		
+		public ActionScriptType getType() {
+			return asType;
+		}
+		
+		public String getTypeName() {
+			return asType.getSimpleTypeName();
+		}
+		
+		public String getTypeReference() {
+			return StringUtils.uncapitalize(asType.getSimpleTypeName());
+		}
+		
+		public Boolean isImportRequired() {
+			return importRequired;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((asType == null) ? 0 : asType.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			RelatedTypeWrapper other = (RelatedTypeWrapper) obj;
+			if (asType == null) {
+				if (other.asType != null)
+					return false;
+			} else if (!asType.equals(other.asType))
+				return false;
+			return true;
 		}
 	}
 }

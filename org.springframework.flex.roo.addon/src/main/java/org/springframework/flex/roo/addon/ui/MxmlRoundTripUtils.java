@@ -158,11 +158,14 @@ public abstract class MxmlRoundTripUtils {
 						if (placeHolder != null) { //insert right before place holder if we can find it
 							placeHolder.getParentNode().insertBefore(original.getOwnerDocument().importNode(proposedElement, false), placeHolder);
 						} else { //find the best place to insert the element
-							if (proposed.getAttribute("id").length() != 0 || proposed.getTagName().matches("[a-z].*")) { //try to find the id of the proposed element's parent id in the original document 
+							if (proposed.getAttribute("id").length() != 0 || proposed.getTagName().substring(2).matches(":[a-z].*") || proposed.getTagName().equals("fx:Declarations")) { //try to find the id of the proposed element's parent id in the original document 
 								Element originalParent = XmlUtils.findFirstElement("//*[@id='" + proposed.getAttribute("id") + "']", original);
 								if (originalParent != null) { //found parent with the same id, so we can just add it as new child
 									originalParent.appendChild(original.getOwnerDocument().importNode(proposedElement, false));
-								} else if (proposed.getTagName().matches("[a-z].*")) {
+								} else if (proposed.getTagName().equals("fx:Declarations")) {
+										originalParent = XmlUtils.findFirstElementByName("fx:Declarations", original);
+										originalParent.appendChild(original.getOwnerDocument().importNode(proposedElement, true));
+								} else if (proposed.getTagName().substring(2).matches(":[a-z].*")) {
 									//Likely an attribute tag rather than a component, thus not allowed to have an id, so we must match on the next level up
 									Element proposedParent = proposed.getParentNode().getNodeType() == Node.ELEMENT_NODE ? (Element)proposed.getParentNode() : null;
 									if (proposedParent != null && proposedParent.getAttribute("id").length() != 0) {
