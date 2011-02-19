@@ -6,6 +6,7 @@
 	<artifactId>org.springframework.flex.roo.addon</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Flex Roo Addon</name>
+	<version>1.0.0.BUILD-SNAPSHOT</version>
 	
 	<distributionManagement>
 		<repository>
@@ -224,7 +225,6 @@
 		</dependency>
 	</dependencies>
 
-	<version>1.0.0.BUILD-SNAPSHOT</version>
 	<build>
 		<plugins>
 			<!--

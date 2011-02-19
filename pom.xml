@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.springframework.flex.roo.addon</groupId>
+	<artifactId>org.springframework.flex.roo.root</artifactId>
+	<packaging>pom</packaging>
+	<name>Spring Flex Roo Addon Distribution</name>
+	<version>1.5.0.BUILD-SNAPSHOT</version>
+
+	<modules>
+		<module>org.springframework.flex.roo.addon</module>
+		<module>org.springframework.flex.roo.annotations</module>
+	</modules>
+
+	<distributionManagement>
+		<repository>
+			<id>spring-milestone</id>
+			<name>Spring Milestone Repository</name>
+			<url>s3://maven.springframework.org/milestone</url>
+		</repository>
+
+		<snapshotRepository>
+			<id>spring-snapshot</id>
+			<name>Spring Snapshot Repository</name>
+			<url>s3://maven.springframework.org/snapshot</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+	<build>
+		<extensions>
+			<extension>
+				<groupId>org.springframework.build.aws</groupId>
+				<artifactId>org.springframework.build.aws.maven</artifactId>
+				<version>3.0.0.RELEASE</version>
+			</extension>
+		</extensions>
+	</build>
+</project>
