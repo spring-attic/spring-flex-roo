@@ -410,7 +410,7 @@ public class As3ParserMetadataProviderTests {
 		
 		@Override
 		public void createOrUpdateTextFileIfRequired(String fileIdentifier,
-				String newContents) {
+				String newContents, boolean writeImmediately ) {
 			lastFile = newContents;
 		}
 	}

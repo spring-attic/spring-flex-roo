@@ -17,17 +17,14 @@
 package org.springframework.flex.roo.addon;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.UUID;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -42,22 +39,19 @@ import org.springframework.flex.roo.addon.entity.ActionScriptEntityMetadata;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -84,6 +78,7 @@ import org.w3c.dom.Element;
  * Implementation of flex operations that are available via the Roo shell.
  * 
  * @author Jeremy Grelle
+ * @author Thomas Fowler
  * @since 1.0
  */
 @Component
@@ -111,13 +106,10 @@ public class FlexOperationsImpl implements FlexOperations {
     private FlexPathResolver flexPathResolver;
 
     @Reference
-    private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-
-    @Reference
-    private ItdMetadataScanner itdMetadataScanner;
-
-    @Reference
     private MetadataDependencyRegistry dependencyRegistry;
+
+    @Reference
+    private TypeLocationService typeLocationService;
 
     private ComponentContext context;
 
@@ -149,13 +141,13 @@ public class FlexOperationsImpl implements FlexOperations {
         scaffoldTemplate.setAttribute("presentationPackage", presentationPackage);
         // TODO - Extract this value from services-config.xml?
         scaffoldTemplate.setAttribute("amfRemotingUrl", "http://localhost:8080/" + projectMetadata.getProjectName() + "/messagebroker/amf");
-        this.fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString());
+        this.fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString(), true);
 
         // Create the HTML wrapper
         String htmlWrapperFileId = getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, projectMetadata.getProjectName() + "_scaffold.html");
         StringTemplate htmlWrapperTemplate = this.templateGroup.getInstanceOf(TEMPLATE_PATH + "/appname_scaffold_html");
         htmlWrapperTemplate.setAttribute("projectName", projectMetadata.getProjectName());
-        this.fileManager.createOrUpdateTextFileIfRequired(htmlWrapperFileId, htmlWrapperTemplate.toString());
+        this.fileManager.createOrUpdateTextFileIfRequired(htmlWrapperFileId, htmlWrapperTemplate.toString(), true);
 
         copyDirectoryContents("htmlwrapper/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/"));
         copyDirectoryContents("htmlwrapper/history/*.*", getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/history"));
@@ -169,8 +161,8 @@ public class FlexOperationsImpl implements FlexOperations {
             + "_scaffold-config.xml");
         try {
             if (!this.fileManager.exists(compilerConfigFileId)) {
-                FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flex-compiler-config.xml"), this.fileManager.createFile(
-                    compilerConfigFileId).getOutputStream());
+                FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flex-compiler-config.xml"),
+                    this.fileManager.createFile(compilerConfigFileId).getOutputStream());
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -178,52 +170,36 @@ public class FlexOperationsImpl implements FlexOperations {
     }
 
     public void generateAll(JavaPackage javaPackage) {
-        FileDetails srcRoot = new FileDetails(new File(getPathResolver().getRoot(Path.SRC_MAIN_JAVA)), null);
-        String antPath = getPathResolver().getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
-        SortedSet<FileDetails> entries = this.fileManager.findMatchingAntPath(antPath);
+        Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(
+            RooEntity.class.getName()));
 
-        each_file: for (FileDetails file : entries) {
-            String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
-            fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch
-                                                                                                              // the
-                                                                                                              // first /
-                                                                                                              // and
-                                                                                                              // .java
-            JavaType javaType = new JavaType(fullPath);
-            String id = this.physicalTypeMetadataProvider.findIdentifier(javaType);
-            if (id != null) {
-                PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) this.metadataService.get(id);
-                if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
-                    continue;
-                }
+        for (ClassOrInterfaceTypeDetails cid : cids) {
 
-                ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
-                if (Modifier.isAbstract(cid.getModifier())) {
-                    continue;
-                }
-
-                Set<MetadataItem> metadata = this.itdMetadataScanner.getMetadata(id);
-                for (MetadataItem item : metadata) {
-                    if (item instanceof EntityMetadata) {
-                        EntityMetadata em = (EntityMetadata) item;
-                        Set<String> downstream = this.dependencyRegistry.getDownstream(em.getId());
-                        // check to see if this entity metadata has a web scaffold metadata listening to it
-                        for (String ds : downstream) {
-                            if (FlexScaffoldMetadata.isValid(ds)) {
-                                // there is already a controller for this entity
-                                continue each_file;
-                            }
-                        }
-                        // to get here, there is no listening controller, so add on
-                        JavaType service = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Service");
-                        JavaType entity = javaType;
-                        createRemotingDestination(service, entity);
-                        break;
-                    }
-                }
+            if (Modifier.isAbstract(cid.getModifier())) {
+                continue;
             }
+
+            JavaType javaType = cid.getName();
+            Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+
+           EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, path));
+
+            if (entityMetadata == null || (!entityMetadata.isValid())) {
+                continue;
+            }
+
+            // Check to see if this entity metadata has a flex scaffold metadata listening to it
+            String downstreamFlexScaffoldMetadataId = FlexScaffoldMetadata.createIdentifier(javaType, path);
+
+            if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamFlexScaffoldMetadataId)) {
+                // There is already Flex scaffolding this entity
+                continue;
+            }
+
+            // to get here, there is no listening service, so add one
+            JavaType service = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Service");
+            createRemotingDestination(service, javaType);
         }
-        return;
     }
 
     public void createRemotingDestination(JavaType service, JavaType entity) {
@@ -248,7 +224,7 @@ public class FlexOperationsImpl implements FlexOperations {
 
         String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(service, getPathResolver().getPath(resourceIdentifier));
         ClassOrInterfaceTypeDetailsBuilder typeBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, service,
-            PhysicalTypeCategory.CLASS); 
+            PhysicalTypeCategory.CLASS);
         typeBuilder.addAnnotation(atRooFlexScaffold);
         typeBuilder.addAnnotation(atRemotingDestination);
         typeBuilder.addAnnotation(atService);
@@ -271,8 +247,8 @@ public class FlexOperationsImpl implements FlexOperations {
         }
 
         try {
-            FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "services-config-template.xml"), this.fileManager.createFile(
-                getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, servicesConfigFilename)).getOutputStream());
+            FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "services-config-template.xml"),
+                this.fileManager.createFile(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, servicesConfigFilename)).getOutputStream());
         } catch (IOException e) {
             new IllegalStateException("Encountered an error during copying of resources for maven addon.", e);
         }
@@ -284,8 +260,8 @@ public class FlexOperationsImpl implements FlexOperations {
 
         try {
             if (!this.fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, flexConfigFilename))) {
-                FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flex-config.xml"), this.fileManager.createFile(
-                    getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, flexConfigFilename)).getOutputStream());
+                FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flex-config.xml"),
+                    this.fileManager.createFile(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, flexConfigFilename)).getOutputStream());
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -424,7 +400,7 @@ public class FlexOperationsImpl implements FlexOperations {
         if (!projectMetadata.isRepositoryRegistered(externalRepository)) {
             this.projectOperations.addRepository(externalRepository);
         }
-        
+
         Repository flexRepository = new Repository("flex", "Sonatype Flex Repo", "http://repository.sonatype.org/content/groups/flexgroup");
         if (!projectMetadata.isRepositoryRegistered(flexRepository)) {
             this.projectOperations.addRepository(flexRepository);
@@ -457,7 +433,7 @@ public class FlexOperationsImpl implements FlexOperations {
         if (!this.fileManager.exists(flexPropertiesFileId)) {
             StringTemplate flexPropertiesTemplate = this.templateGroup.getInstanceOf(TEMPLATE_PATH + "/flex_properties");
             flexPropertiesTemplate.setAttribute("projectName", projectMetadata.getProjectName());
-            this.fileManager.createOrUpdateTextFileIfRequired(flexPropertiesFileId, flexPropertiesTemplate.toString());
+            this.fileManager.createOrUpdateTextFileIfRequired(flexPropertiesFileId, flexPropertiesTemplate.toString(), true);
         }
 
         String actionScriptPropertiesFiledId = getPathResolver().getIdentifier(Path.ROOT, ".actionScriptProperties");
@@ -465,7 +441,7 @@ public class FlexOperationsImpl implements FlexOperations {
             StringTemplate actionScriptPropertiesTemplate = this.templateGroup.getInstanceOf(TEMPLATE_PATH + "/actionscript_properties");
             actionScriptPropertiesTemplate.setAttribute("projectName", projectMetadata.getProjectName());
             actionScriptPropertiesTemplate.setAttribute("projectUUID", UUID.randomUUID());
-            this.fileManager.createOrUpdateTextFileIfRequired(actionScriptPropertiesFiledId, actionScriptPropertiesTemplate.toString());
+            this.fileManager.createOrUpdateTextFileIfRequired(actionScriptPropertiesFiledId, actionScriptPropertiesTemplate.toString(), true);
         }
     }
 

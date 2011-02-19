@@ -46,6 +46,7 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -286,7 +287,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
 
         String relativePath = entityEventType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".as";
         String fileIdentifier = this.flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, relativePath);
-        this.fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, entityEventTemplate.toString());
+        this.fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, entityEventTemplate.toString(), true);
     }
 
     private Document buildListViewDocument(FlexScaffoldMetadata flexScaffoldMetadata, List<FieldMetadata> elegibleFields) {
@@ -360,7 +361,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
         Set<RelatedTypeWrapper> relatedTypes = new LinkedHashSet<RelatedTypeWrapper>();
         BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
             FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
             if (null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.OneToOne"))
                 || null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.ManyToOne"))) {
@@ -384,7 +385,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
         List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
         BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-            JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
             FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
             // TODO - For now we ignore relationships in the list view
             if (!javaField.getFieldType().isCommonCollectionType()
@@ -409,7 +410,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
         List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
         BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-            JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
             FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
             // TODO - For now we ignore relationships in the list view
             if (!javaField.getFieldType().isCommonCollectionType() && !javaField.getFieldType().isArray()) {

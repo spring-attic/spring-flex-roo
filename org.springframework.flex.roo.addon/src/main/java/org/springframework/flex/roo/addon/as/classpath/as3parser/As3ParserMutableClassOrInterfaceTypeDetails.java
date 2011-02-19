@@ -322,7 +322,7 @@ public class As3ParserMutableClassOrInterfaceTypeDetails implements ASMutableCla
 
         final String newContents = getOutput(cit);
 
-        fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+        fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
     }
 
     public static final String getOutput(final ASClassOrInterfaceTypeDetails cit) {

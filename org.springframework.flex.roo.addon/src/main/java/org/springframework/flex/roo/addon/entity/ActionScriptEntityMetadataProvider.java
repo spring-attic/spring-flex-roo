@@ -45,6 +45,7 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -144,7 +145,7 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
         BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
             FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
 
             // TODO - We don't add any meta-tags and we set the field to public - any other choice?
@@ -172,8 +173,8 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         if (metadata == null) {
             return null;
         }
-        Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, metadata.getPhysicalTypeDetails(), "Java entity must be a class or interface.");
-        return (MutableClassOrInterfaceTypeDetails) metadata.getPhysicalTypeDetails();
+        Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, metadata.getMemberHoldingTypeDetails(), "Java entity must be a class or interface.");
+        return (MutableClassOrInterfaceTypeDetails) metadata.getMemberHoldingTypeDetails();
     }
 
     private ASMutableClassOrInterfaceTypeDetails getASClassDetails(String metadataId) {
@@ -250,7 +251,7 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         List<String> javaPropertyNames = new ArrayList<String>();
         BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            javaPropertyNames.add(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+            javaPropertyNames.add(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
         }
 
         // TODO - don't currently handle changing of field types because there is no updateField() method on
@@ -307,8 +308,14 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         List<ASFieldMetadata> declaredFields = asTypeDetails.getDeclaredFields();
 
         BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
+        
+        if ( beanInfoMetadata == null )
+        {
+        	return;
+        }
+        
         for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
             FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
 
             // TODO - We don't add any meta-tags and we set the field to public - any other choice? Probaby not until

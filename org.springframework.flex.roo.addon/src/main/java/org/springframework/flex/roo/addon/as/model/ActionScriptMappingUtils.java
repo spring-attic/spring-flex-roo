@@ -27,7 +27,6 @@ import java.util.Map;
 
 import org.springframework.flex.roo.addon.as.classpath.details.ASFieldMetadata;
 import org.springframework.flex.roo.addon.as.classpath.details.DefaultASFieldMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
