@@ -19,16 +19,18 @@ package org.springframework.flex.roo.addon;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * {@link MetadataProvider} for scaffolded Flex remoting destinations.
@@ -68,28 +70,27 @@ public class FlexScaffoldMetadataProvider extends AbstractItdMetadataProvider {
         }
 
         // Lookup the form backing object's metadata
-        JavaType javaType = annotationValues.entity;
+        JavaType entityType = annotationValues.entity;
         Path path = Path.SRC_MAIN_JAVA;
-        String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
-        String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
-        String finderMetdadataKey = FinderMetadata.createIdentifier(javaType, path);
-
+        String entityMetadataKey = EntityMetadata.createIdentifier(entityType, path);
+        
         // We need to lookup the metadata we depend on
-        BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) this.metadataService.get(beanInfoMetadataKey);
         EntityMetadata entityMetadata = (EntityMetadata) this.metadataService.get(entityMetadataKey);
-        FinderMetadata finderMetadata = (FinderMetadata) this.metadataService.get(finderMetdadataKey);
-
         // We need to abort if we couldn't find dependent metadata
-        if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
+        if (entityMetadata == null || !entityMetadata.isValid()) {
             return null;
         }
 
         // We need to be informed if our dependent metadata changes
-        this.metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
         this.metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
+        
+        PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entityType, path));
+        Assert.notNull(entityPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + entityType.getFullyQualifiedTypeName());
+        ClassOrInterfaceTypeDetails entityClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+        MemberDetails entityMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceDetails);
 
-        return new FlexScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, beanInfoMetadata, entityMetadata,
-            finderMetadata);
+        return new FlexScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, entityMetadata,
+            WebMetadataUtils.getDynamicFinderMethodsAndFields(entityType, entityMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry));
     }
 
     public String getItdUniquenessFilenameSuffix() {

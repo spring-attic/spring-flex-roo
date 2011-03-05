@@ -88,19 +88,7 @@
 		<!-- Spring Roo modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-			<version>${roo.version}</version>
-			<type>bundle</type>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.entity</artifactId>
-			<version>${roo.version}</version>
-			<type>bundle</type>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.maven</artifactId>
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
@@ -449,7 +437,7 @@
 	</build>
 
 	<properties>
-		<roo.version>1.1.1.RELEASE</roo.version>
+		<roo.version>1.1.2.RELEASE</roo.version>
 	</properties>
 
 </project>

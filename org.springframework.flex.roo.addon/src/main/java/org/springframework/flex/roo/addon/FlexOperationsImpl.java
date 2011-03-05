@@ -44,13 +44,13 @@ import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -100,9 +100,6 @@ public class FlexOperationsImpl implements FlexOperations {
     private WebMvcOperations webMvcOperations;
 
     @Reference
-    private ClasspathOperations classpathOperations;
-
-    @Reference
     private FlexPathResolver flexPathResolver;
 
     @Reference
@@ -110,6 +107,9 @@ public class FlexOperationsImpl implements FlexOperations {
 
     @Reference
     private TypeLocationService typeLocationService;
+    
+    @Reference 
+    private TypeManagementService typeManagementService;
 
     private ComponentContext context;
 
@@ -206,7 +206,7 @@ public class FlexOperationsImpl implements FlexOperations {
         Assert.notNull(service, "Remoting Destination Java Type required");
         Assert.notNull(entity, "Entity Java Type required");
 
-        String resourceIdentifier = this.classpathOperations.getPhysicalLocationCanonicalPath(service, Path.SRC_MAIN_JAVA);
+        String resourceIdentifier = this.typeLocationService.getPhysicalLocationCanonicalPath(service, Path.SRC_MAIN_JAVA);
 
         // create annotation @RooFlexScaffold
         List<AnnotationAttributeValue<?>> rooFlexScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -230,7 +230,7 @@ public class FlexOperationsImpl implements FlexOperations {
         typeBuilder.addAnnotation(atService);
         ClassOrInterfaceTypeDetails details = typeBuilder.build();
 
-        this.classpathOperations.generateClassFile(details);
+        this.typeManagementService.generateClassFile(details);
 
         ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(entity);
 
@@ -305,10 +305,12 @@ public class FlexOperationsImpl implements FlexOperations {
 
         Element dependenciesElement = (Element) dependencyDoc.getFirstChild();
 
+        List<Dependency> dependencies = new ArrayList<Dependency>();
         List<Element> flexDependencies = XmlUtils.findElements("/dependencies/springFlex/dependency", dependenciesElement);
         for (Element dependency : flexDependencies) {
-            this.projectOperations.dependencyUpdate(new Dependency(dependency));
+            dependencies.add(new Dependency(dependency));
         }
+        this.projectOperations.addDependencies(dependencies);
 
         fixBrokenFlexDependency();
 

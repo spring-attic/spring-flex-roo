@@ -2,10 +2,8 @@
   <name>org.springframework.flex.roo.addon</name>
   <comment/>
   <projects>
-    <project>org.springframework.roo.addon.beaninfo</project>
     <project>org.springframework.roo.addon.entity</project>
     <project>org.springframework.roo.addon.finder</project>
-    <project>org.springframework.roo.addon.maven</project>
     <project>org.springframework.roo.addon.web.mvc.controller</project>
     <project>org.springframework.roo.addon.web.mvc.jsp</project>
     <project>org.springframework.roo.classpath</project>

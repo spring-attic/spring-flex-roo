@@ -44,13 +44,16 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptSymbolName;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -96,6 +99,9 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
 
     @Reference
     private ASMutablePhysicalTypeMetadataProvider asPhysicalTypeProvider;
+    
+    @Reference 
+    protected MemberDetailsScanner memberDetailsScanner;
 
     protected void activate(ComponentContext context) {
         this.metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -129,6 +135,20 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         ActionScriptEntityMetadata asEntityMetadata = new ActionScriptEntityMetadata(metadataId, asType, javaType);
         return asEntityMetadata;
     }
+    
+    public String getProvidesType() {
+        return ActionScriptEntityMetadata.getMetadataIdentiferType();
+    }
+
+    public void notify(String upstreamDependency, String downstreamDependency) {
+        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType()))) {
+            processJavaTypeChanged(upstreamDependency);
+        } else if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(
+            MetadataIdentificationUtils.getMetadataClass(ASPhysicalTypeIdentifier.getMetadataIdentiferType()))) {
+            processActionScriptTypeChanged(upstreamDependency);
+        }
+    }
 
     private void createActionScriptMirrorClass(String asEntityId, ActionScriptType asType, JavaType javaType) {
         Queue<TypeMapping> relatedTypes = new LinkedList<TypeMapping>();
@@ -143,15 +163,17 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         // to find all implementations and mirror those as well)
 
         List<ASFieldMetadata> declaredFields = new ArrayList<ASFieldMetadata>();
-        BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
-            FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
-
-            // TODO - We don't add any meta-tags and we set the field to public - any other choice?
-            ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
-            relatedTypes.addAll(findRequiredMappings(javaField, asField));
-            declaredFields.add(asField);
+        MemberDetails memberDetails = getMemberDetails(javaType);
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isAccessorMethod(method)) {
+                JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+                FieldMetadata javaField = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+    
+                // TODO - We don't add any meta-tags and we set the field to public - any other choice?
+                ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
+                relatedTypes.addAll(findRequiredMappings(javaField, asField));
+                declaredFields.add(asField);
+            }
         }
 
         ASClassOrInterfaceTypeDetails asDetails = new DefaultASClassOrInterfaceTypeDetails(asEntityId, asType, ASPhysicalTypeCategory.CLASS,
@@ -187,11 +209,6 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         return (ASMutableClassOrInterfaceTypeDetails) metadata.getPhysicalTypeDetails();
     }
 
-    private BeanInfoMetadata getBeanInfoMetadata(JavaType javaType) {
-        String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-        return (BeanInfoMetadata) this.metadataService.get(beanInfoMetadataKey);
-    }
-
     private String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
         Assert.isTrue(ASPhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
         Assert.notNull(this.flexPathResolver, "Cannot computed metadata ID of a type because the path resolver is presently unavailable");
@@ -200,20 +217,6 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         String relativePath = asType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".as";
         String physicalLocationCanonicalPath = this.flexPathResolver.getIdentifier(path, relativePath);
         return physicalLocationCanonicalPath;
-    }
-
-    public String getProvidesType() {
-        return ActionScriptEntityMetadata.getMetadataIdentiferType();
-    }
-
-    public void notify(String upstreamDependency, String downstreamDependency) {
-        if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType()))) {
-            processJavaTypeChanged(upstreamDependency);
-        } else if (MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(
-            MetadataIdentificationUtils.getMetadataClass(ASPhysicalTypeIdentifier.getMetadataIdentiferType()))) {
-            processActionScriptTypeChanged(upstreamDependency);
-        }
     }
 
     private void processActionScriptTypeChanged(String asEntityId) {
@@ -249,9 +252,11 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
         }
 
         List<String> javaPropertyNames = new ArrayList<String>();
-        BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            javaPropertyNames.add(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+        MemberDetails memberDetails = scanForMemberDetails(javaTypeDetails);
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isAccessorMethod(method)) {
+                javaPropertyNames.add(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(method).getSymbolName()));
+            }
         }
 
         // TODO - don't currently handle changing of field types because there is no updateField() method on
@@ -307,36 +312,37 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
 
         List<ASFieldMetadata> declaredFields = asTypeDetails.getDeclaredFields();
 
-        BeanInfoMetadata beanInfoMetadata = getBeanInfoMetadata(javaType);
+        MemberDetails memberDetails = getMemberDetails(javaType);
         
-        if ( beanInfoMetadata == null )
-        {
+        if (memberDetails == null) {
         	return;
         }
         
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
-            FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
-
-            // TODO - We don't add any meta-tags and we set the field to public - any other choice? Probaby not until
-            // we potentially add some sort of support for AS getters and setters
-            ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
-
-            int existingIndex = declaredFields.indexOf(asField);
-            if (existingIndex > -1) {
-                // Field already exists...does it need to be updated? Should we even do this, or just assume if the
-                // type is different that the user changed it intentionally.
-                ASFieldMetadata existingField = declaredFields.get(existingIndex);
-                if (!existingField.getFieldType().equals(asField.getFieldType())) {
-                    asTypeDetails.updateField(asField, false);
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isMutatorMethod(method)) {
+                JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+                FieldMetadata javaField = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+    
+                // TODO - We don't add any meta-tags and we set the field to public - any other choice? Probaby not until
+                // we potentially add some sort of support for AS getters and setters
+                ASFieldMetadata asField = ActionScriptMappingUtils.toASFieldMetadata(asEntityId, javaField, true);
+    
+                int existingIndex = declaredFields.indexOf(asField);
+                if (existingIndex > -1) {
+                    // Field already exists...does it need to be updated? Should we even do this, or just assume if the
+                    // type is different that the user changed it intentionally.
+                    ASFieldMetadata existingField = declaredFields.get(existingIndex);
+                    if (!existingField.getFieldType().equals(asField.getFieldType())) {
+                        asTypeDetails.updateField(asField, false);
+                    }
+                } else {
+                    asTypeDetails.addField(asField, false);
                 }
-            } else {
-                asTypeDetails.addField(asField, false);
+    
+                relatedTypes.addAll(findRequiredMappings(javaField, asField));
+    
+                processedProperties.add(asField);
             }
-
-            relatedTypes.addAll(findRequiredMappings(javaField, asField));
-
-            processedProperties.add(asField);
         }
 
         // TODO - how should we handle fields that don't exist in the Java object? For now we will just remove...should
@@ -393,5 +399,16 @@ public class ActionScriptEntityMetadataProvider implements MetadataProvider, Met
             }
         }
         return relatedTypes;
+    }
+    
+    private MemberDetails getMemberDetails(JavaType entityType) {
+        PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+        Assert.notNull(entityPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + entityType.getFullyQualifiedTypeName());
+        ClassOrInterfaceTypeDetails entityClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+        return scanForMemberDetails(entityClassOrInterfaceDetails);
+    }
+    
+    private MemberDetails scanForMemberDetails(ClassOrInterfaceTypeDetails entityClassOrInterfaceDetails) {
+        return memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceDetails);
     }
 }

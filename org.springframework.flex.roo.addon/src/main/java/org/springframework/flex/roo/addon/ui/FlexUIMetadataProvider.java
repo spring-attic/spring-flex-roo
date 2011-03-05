@@ -45,13 +45,17 @@ import org.springframework.flex.roo.addon.as.model.ActionScriptMappingUtils;
 import org.springframework.flex.roo.addon.as.model.ActionScriptType;
 import org.springframework.flex.roo.addon.mojos.FlexPath;
 import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -98,7 +102,8 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
     @Reference
     private FlexOperations flexOperations;
 
-    // private Map<JavaType, String> pluralCache;
+    @Reference
+    private MemberDetailsScanner memberDetailsScanner;
 
     private StringTemplateGroup templateGroup;
 
@@ -148,13 +153,13 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
 
         // Install the entity event class if it doesn't already exist
         ActionScriptType entityEventType = new ActionScriptType(entityPresentationPackage + "."
-            + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Event");
+            + flexScaffoldMetadata.getEntity().getSimpleTypeName() + "Event");
         if (!StringUtils.hasText(this.asPhysicalTypeProvider.findIdentifier(entityEventType))) {
             createEntityEventType(entityEventType, flexScaffoldMetadata);
         }
 
         // Create or update the list view
-        String listViewRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View").replace(
+        String listViewRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getEntity().getSimpleTypeName() + "View").replace(
             '.', File.separatorChar)
             + ".mxml";
         String listViewPath = this.flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, listViewRelativePath);
@@ -162,7 +167,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
             buildListViewDocument(flexScaffoldMetadata, getElegibleListFields(projectMetadata, flexScaffoldMetadata)));
 
         // Create or update the form view
-        String formRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "Form").replace(
+        String formRelativePath = (entityPresentationPackage + "." + flexScaffoldMetadata.getEntity().getSimpleTypeName() + "Form").replace(
             '.', File.separatorChar)
             + ".mxml";
         String formPath = this.flexPathResolver.getIdentifier(FlexPath.SRC_MAIN_FLEX, formRelativePath);
@@ -182,7 +187,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
             throw new IllegalStateException(e);
         }
 
-        String entityName = flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName();
+        String entityName = flexScaffoldMetadata.getEntity().getSimpleTypeName();
 
         if (XmlUtils.findFirstElement("/Application/Declarations/ArrayList[@id='entities' and String='" + entityName + "']",
             scaffoldDoc.getDocumentElement()) != null) {
@@ -218,7 +223,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
             throw new IllegalStateException(e);
         }
 
-        String viewName = entityPresentationPackage + "." + flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getSimpleTypeName() + "View";
+        String viewName = entityPresentationPackage + "." + flexScaffoldMetadata.getEntity().getSimpleTypeName() + "View";
 
         if (XmlUtils.findFirstElement("/flex-config/includes[symbol='" + viewName + "']", flexConfigDoc.getDocumentElement()) != null) {
             return;
@@ -279,7 +284,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
     }
 
     private void createEntityEventType(ActionScriptType entityEventType, FlexScaffoldMetadata flexScaffoldMetadata) {
-        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean());
+        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getEntity());
         StringTemplate entityEventTemplate = this.templateGroup.getInstanceOf("org/springframework/flex/roo/addon/ui/entity_event");
         entityEventTemplate.setAttribute("entityEventType", entityEventType);
         entityEventTemplate.setAttribute("entityType", entityType);
@@ -291,7 +296,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
     }
 
     private Document buildListViewDocument(FlexScaffoldMetadata flexScaffoldMetadata, List<FieldMetadata> elegibleFields) {
-        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean());
+        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getEntity());
         StringTemplate listViewTemplate = this.templateGroup.getInstanceOf("org/springframework/flex/roo/addon/ui/entity_list_view");
         listViewTemplate.setAttribute("entityType", entityType);
         listViewTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
@@ -306,7 +311,7 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
     }
 
     private Document buildFormDocument(FlexScaffoldMetadata flexScaffoldMetadata, List<FieldMetadata> elegibleFields) {
-        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean());
+        ActionScriptType entityType = ActionScriptMappingUtils.toActionScriptType(flexScaffoldMetadata.getEntity());
         StringTemplate listViewTemplate = this.templateGroup.getInstanceOf("org/springframework/flex/roo/addon/ui/entity_form");
         listViewTemplate.setAttribute("entityType", entityType);
         listViewTemplate.setAttribute("flexScaffoldMetadata", flexScaffoldMetadata);
@@ -359,15 +364,17 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
     // if not careful
     private Set<RelatedTypeWrapper> findRelatedTypes(FlexScaffoldMetadata flexScaffoldMetadata, List<FieldMetadata> elegibleFields) {
         Set<RelatedTypeWrapper> relatedTypes = new LinkedHashSet<RelatedTypeWrapper>();
-        BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
-            FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
-            if (null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.OneToOne"))
-                || null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.ManyToOne"))) {
-                ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(javaField.getFieldType());
-                relatedTypes.add(new RelatedTypeWrapper(asType, elegibleFields, !asType.getFullyQualifiedTypeName().equals(
-                    flexScaffoldMetadata.getBeanInfoMetadata().getJavaBean().getFullyQualifiedTypeName())));
+        MemberDetails memberDetails = getMemberDetails(flexScaffoldMetadata.getEntity());
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isAccessorMethod(method)) {
+                JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+                FieldMetadata javaField = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+                if (null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.OneToOne"))
+                    || null != MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.ManyToOne"))) {
+                    ActionScriptType asType = ActionScriptMappingUtils.toActionScriptType(javaField.getFieldType());
+                    relatedTypes.add(new RelatedTypeWrapper(asType, elegibleFields, !asType.getFullyQualifiedTypeName().equals(
+                        flexScaffoldMetadata.getEntity().getFullyQualifiedTypeName())));
+                }
             }
         }
         return relatedTypes;
@@ -383,24 +390,26 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
 
     private List<FieldMetadata> getElegibleListFields(ProjectMetadata projectMetadata, FlexScaffoldMetadata flexScaffoldMetadata) {
         List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
-        BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
-            FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
-            // TODO - For now we ignore relationships in the list view
-            if (!javaField.getFieldType().isCommonCollectionType()
-                && !javaField.getFieldType().isArray()
-                && !javaField.getFieldType().getPackage().getFullyQualifiedPackageName().startsWith(
-                    projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {
-                // Never include id field
-                if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
-                    continue;
+        MemberDetails memberDetails = getMemberDetails(flexScaffoldMetadata.getEntity());
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isAccessorMethod(method)) {
+                JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+                FieldMetadata javaField = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+                // TODO - For now we ignore relationships in the list view
+                if (!javaField.getFieldType().isCommonCollectionType()
+                    && !javaField.getFieldType().isArray()
+                    && !javaField.getFieldType().getPackage().getFullyQualifiedPackageName().startsWith(
+                        projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {
+                    // Never include id field
+                    if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
+                        continue;
+                    }
+                    // Never include version field
+                    if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+                        continue;
+                    }
+                    eligibleFields.add(javaField);
                 }
-                // Never include version field
-                if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
-                    continue;
-                }
-                eligibleFields.add(javaField);
             }
         }
         return eligibleFields;
@@ -408,21 +417,23 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
 
     private List<FieldMetadata> getElegibleFormFields(ProjectMetadata projectMetadata, FlexScaffoldMetadata flexScaffoldMetadata) {
         List<FieldMetadata> eligibleFields = new ArrayList<FieldMetadata>();
-        BeanInfoMetadata beanInfoMetadata = flexScaffoldMetadata.getBeanInfoMetadata();
-        for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-            JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor);
-            FieldMetadata javaField = beanInfoMetadata.getFieldForPropertyName(propertyName);
-            // TODO - For now we ignore relationships in the list view
-            if (!javaField.getFieldType().isCommonCollectionType() && !javaField.getFieldType().isArray()) {
-                // Never include id field
-                if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
-                    continue;
+        MemberDetails memberDetails = getMemberDetails(flexScaffoldMetadata.getEntity());
+        for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+            if (BeanInfoUtils.isAccessorMethod(method)) {
+                JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+                FieldMetadata javaField = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+                // TODO - For now we ignore relationships in the list view
+                if (!javaField.getFieldType().isCommonCollectionType() && !javaField.getFieldType().isArray()) {
+                    // Never include id field
+                    if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
+                        continue;
+                    }
+                    // Never include version field
+                    if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+                        continue;
+                    }
+                    eligibleFields.add(javaField);
                 }
-                // Never include version field
-                if (MemberFindingUtils.getAnnotationOfType(javaField.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
-                    continue;
-                }
-                eligibleFields.add(javaField);
             }
         }
         return eligibleFields;
@@ -472,6 +483,17 @@ public class FlexUIMetadataProvider implements MetadataProvider, MetadataNotific
 
         // A file existed, but it contained the same content, so we return false
         return false;
+    }
+    
+    private MemberDetails getMemberDetails(JavaType entityType) {
+        PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(entityType, Path.SRC_MAIN_JAVA));
+        Assert.notNull(entityPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + entityType.getFullyQualifiedTypeName());
+        ClassOrInterfaceTypeDetails entityClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+        return scanForMemberDetails(entityClassOrInterfaceDetails);
+    }
+    
+    private MemberDetails scanForMemberDetails(ClassOrInterfaceTypeDetails entityClassOrInterfaceDetails) {
+        return memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceDetails);
     }
 
     protected static Map<String, String> buildValidationsForField(FieldMetadata field) {

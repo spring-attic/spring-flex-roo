@@ -14,10 +14,8 @@
   <classpathentry kind="var" path="M2_REPO/org/apache/felix/org.apache.felix.scr.annotations/1.2.0/org.apache.felix.scr.annotations-1.2.0.jar" sourcepath="M2_REPO/org/apache/felix/org.apache.felix.scr.annotations/1.2.0/org.apache.felix.scr.annotations-1.2.0-sources.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/osgi/org.osgi.compendium/4.1.0/org.osgi.compendium-4.1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/osgi/org.osgi.core/4.1.0/org.osgi.core-4.1.0.jar"/>
-  <classpathentry kind="src" path="/org.springframework.roo.addon.beaninfo"/>
   <classpathentry kind="src" path="/org.springframework.roo.addon.entity"/>
   <classpathentry kind="src" path="/org.springframework.roo.addon.finder"/>
-  <classpathentry kind="src" path="/org.springframework.roo.addon.maven"/>
   <classpathentry kind="src" path="/org.springframework.roo.addon.web.mvc.controller"/>
   <classpathentry kind="src" path="/org.springframework.roo.addon.web.mvc.jsp"/>
   <classpathentry kind="src" path="/org.springframework.roo.classpath"/>
