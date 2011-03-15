@@ -49,9 +49,14 @@ public class FlexCommands implements CommandMarker {
     @Reference
     private MetadataService metadataService;
 
-    @CliAvailabilityIndicator( { "flex setup", "flex remoting scaffold", "flex remoting all" })
+    @CliAvailabilityIndicator( { "flex setup" })
     public boolean isFlexAvailable() {
         return this.operations.isFlexAvailable();
+    }
+    
+    @CliAvailabilityIndicator( { "flex remoting scaffold", "flex remoting all" })
+    public boolean isFlexConfigured() {
+        return this.operations.isFlexConfigured();
     }
 
     @CliCommand(value = "flex setup", help = "Install Spring BlazeDS configuration artifacts into your project")

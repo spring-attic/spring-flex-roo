@@ -38,4 +38,6 @@ public interface FlexOperations {
 
     void createScaffoldApp();
 
+    boolean isFlexConfigured();
+
 }

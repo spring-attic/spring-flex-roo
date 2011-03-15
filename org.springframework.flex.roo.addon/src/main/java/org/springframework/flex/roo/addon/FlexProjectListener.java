@@ -22,12 +22,11 @@ import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.flex.roo.addon.mojos.FlexPathResolver;
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.file.undo.CreateDirectory;
 import org.springframework.roo.file.undo.FilenameResolver;
@@ -36,9 +35,9 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.process.manager.internal.UndoableMonitoringRequest;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.UndoableMonitoringRequest;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -46,10 +45,14 @@ import org.springframework.roo.support.util.Assert;
  *
  * @author Jeremy Grelle
  */
-@Component
+@Component(immediate = true)
+@Service
 public class FlexProjectListener implements MetadataNotificationListener {
 
     // TODO - Is there a better way to achieve the monitoring of the necessary Flex directories?
+    
+    @Reference 
+    private FilenameResolver filenameResolver;
 
     @Reference
     private MetadataService metadataService;
@@ -62,9 +65,6 @@ public class FlexProjectListener implements MetadataNotificationListener {
 
     @Reference
     private NotifiableFileMonitorService fileMonitorService;
-
-    @Reference
-    private FlexPathResolver pathResolver;
 
     private boolean pathsRegistered = false;
 
@@ -84,14 +84,15 @@ public class FlexProjectListener implements MetadataNotificationListener {
         Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency), "Upstream dependency is an invalid metadata identification string ('"
             + upstreamDependency + "')");
 
-        if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
+        if (upstreamDependency.equals(FlexProjectMetadata.getProjectIdentifier())) {
             // Acquire the Project Metadata, if available
-            ProjectMetadata md = (ProjectMetadata) this.metadataService.get(upstreamDependency);
+            FlexProjectMetadata md = (FlexProjectMetadata) this.metadataService.get(upstreamDependency);
             if (md == null) {
                 return;
             }
 
-            FilenameResolver filenameResolver = new PathResolvingAwareFilenameResolver();
+            PathResolver pathResolver = md.getPathResolver();
+            Assert.notNull(pathResolver, "Path resolver could not be acquired from changed metadata '" + md + "'");
 
             Set<FileOperation> notifyOn = new HashSet<FileOperation>();
             notifyOn.add(FileOperation.MONITORING_START);
@@ -101,37 +102,35 @@ public class FlexProjectListener implements MetadataNotificationListener {
             notifyOn.add(FileOperation.UPDATED);
             notifyOn.add(FileOperation.DELETED);
 
-            for (Path p : this.pathResolver.getFlexSourcePaths()) {
-                // Verify path exists and ensure it's monitored, except root (which we assume is already monitored via
-                // ProcessManager)
+            for (Path p : pathResolver.getPaths()) {
+                // Verify path exists and ensure it's monitored, except root (which we assume is already monitored via ProcessManager)
                 if (!Path.ROOT.equals(p)) {
-                    String fileIdentifier = this.pathResolver.getRoot(p);
+                    String fileIdentifier = pathResolver.getRoot(p);
                     File file = new File(fileIdentifier);
-                    Assert.isTrue(!file.exists() || file.exists() && file.isDirectory(), "Path '" + fileIdentifier
-                        + "' must either not exist or be a directory");
+                    Assert.isTrue(!file.exists() || (file.exists() && file.isDirectory()), "Path '" + fileIdentifier + "' must either not exist or be a directory");
                     if (!file.exists()) {
                         // Create directory, but no notifications as that will happen once we start monitoring it below
-                        new CreateDirectory(this.undoManager, filenameResolver, file);
+                        new CreateDirectory(undoManager, filenameResolver, file);
                     }
                     MonitoringRequest request = new DirectoryMonitoringRequest(file, true, notifyOn);
                     new UndoableMonitoringRequest(undoManager, fileMonitorService, request, md.isValid());
                 }
             }
 
-            // Explicitly perform a scan now that we've added all the directories we wish to monitor
-            //this.fileMonitorService.scanAll();
-
             // Avoid doing this operation again unless the validity changes
-            this.pathsRegistered = md.isValid();
+            pathsRegistered = md.isValid();
+            
+            // Explicitly perform a scan now that we've added all the directories we wish to monitor
+            fileMonitorService.scanAll();
         }
     }
 
-    private final class PathResolvingAwareFilenameResolver implements FilenameResolver {
+    /*private final class PathResolvingAwareFilenameResolver implements FilenameResolver {
 
         public String getMeaningfulName(File file) {
             Assert.notNull(file, "File required");
             return FlexProjectListener.this.pathResolver.getFriendlyName(FileDetails.getCanonicalPath(file));
         }
-    }
+    }*/
 
 }

@@ -130,7 +130,11 @@ public class FlexOperationsImpl implements FlexOperations {
     }
 
     public boolean isFlexAvailable() {
-        return getPathResolver() != null;
+        return getPathResolver() != null && !isFlexConfigured();
+    }
+    
+    public boolean isFlexConfigured() {
+        return this.metadataService.get(FlexProjectMetadata.getProjectIdentifier()) != null;
     }
 
     public void createScaffoldApp() {
@@ -252,6 +256,8 @@ public class FlexOperationsImpl implements FlexOperations {
         } catch (IOException e) {
             new IllegalStateException("Encountered an error during copying of resources for maven addon.", e);
         }
+        
+        fileManager.scan();
     }
 
     private void createFlexConfig() {
