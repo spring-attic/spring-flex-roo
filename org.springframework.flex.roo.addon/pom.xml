@@ -372,10 +372,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-						<Bundle-Copyright>Copyright ${pom.organization.name}. All Rights
-							Reserved.</Bundle-Copyright>
-						<Bundle-DocURL>${pom.url}</Bundle-DocURL>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Copyright>Copyright ${project.organization.name}. All Rights Reserved.</Bundle-Copyright>
+						<Bundle-DocURL>${project.url}</Bundle-DocURL>
 						<Export-Package>!org.springframework.flex.roo.addon.as.classpath.as3parser,org.springframework.flex.roo.addon.*</Export-Package>
 						<Import-Package>!uk.co.badgersinfoil.*,!org.antlr.*,!antlr.*,*</Import-Package>
 					</instructions>
