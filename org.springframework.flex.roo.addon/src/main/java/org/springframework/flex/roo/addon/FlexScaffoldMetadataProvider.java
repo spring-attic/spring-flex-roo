@@ -17,10 +17,11 @@
 package org.springframework.flex.roo.addon;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataService;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -40,6 +41,8 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true)
 @Service
 public class FlexScaffoldMetadataProvider extends AbstractItdMetadataProvider {
+
+    @Reference private WebMetadataService webMetadataService;
 
     protected void activate(ComponentContext context) {
         this.metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -90,7 +93,7 @@ public class FlexScaffoldMetadataProvider extends AbstractItdMetadataProvider {
         MemberDetails entityMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceDetails);
 
         return new FlexScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, entityMetadata,
-            WebMetadataUtils.getDynamicFinderMethodsAndFields(entityType, entityMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry));
+            webMetadataService.getDynamicFinderMethodsAndFields(entityType, entityMemberDetails, metadataIdentificationString));
     }
 
     public String getItdUniquenessFilenameSuffix() {

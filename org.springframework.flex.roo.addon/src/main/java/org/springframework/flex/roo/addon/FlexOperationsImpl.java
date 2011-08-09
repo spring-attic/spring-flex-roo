@@ -19,7 +19,6 @@ package org.springframework.flex.roo.addon;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
@@ -329,12 +328,10 @@ public class FlexOperationsImpl implements FlexOperations {
     // ultimately should be fixed in Roo itself
     private void fixBrokenFlexDependency() {
         String pomPath = getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-        MutableFile pomMutableFile = null;
 
         Document pomDoc;
         try {
-            pomMutableFile = this.fileManager.updateFile(pomPath);
-            pomDoc = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+            pomDoc = XmlUtils.getDocumentBuilder().parse(this.fileManager.getInputStream(pomPath));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -346,10 +343,10 @@ public class FlexOperationsImpl implements FlexOperations {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, pomDoc);
-        String mxmlContent = byteArrayOutputStream.toString();
+        String pomContent = byteArrayOutputStream.toString();
 
         try {
-            FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(pomMutableFile.getOutputStream()));
+            this.fileManager.createOrUpdateTextFileIfRequired(pomPath, pomContent, false);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -361,12 +358,10 @@ public class FlexOperationsImpl implements FlexOperations {
     // itself
     private void fixBrokenFlexPlugin() {
         String pomPath = getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
-        MutableFile pomMutableFile = null;
 
         Document pomDoc;
         try {
-            pomMutableFile = this.fileManager.updateFile(pomPath);
-            pomDoc = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+            pomDoc = XmlUtils.getDocumentBuilder().parse(this.fileManager.getInputStream(pomPath));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -394,10 +389,10 @@ public class FlexOperationsImpl implements FlexOperations {
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, pomDoc);
-        String mxmlContent = byteArrayOutputStream.toString();
+        String pomContent = byteArrayOutputStream.toString();
 
         try {
-            FileCopyUtils.copy(mxmlContent, new OutputStreamWriter(pomMutableFile.getOutputStream()));
+            this.fileManager.createOrUpdateTextFileIfRequired(pomPath, pomContent, false);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

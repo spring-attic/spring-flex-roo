@@ -437,7 +437,7 @@
 	</build>
 
 	<properties>
-		<roo.version>1.1.2.RELEASE</roo.version>
+		<roo.version>1.1.5.RELEASE</roo.version>
 	</properties>
 
 </project>
