@@ -413,6 +413,9 @@ public class FlexOperationsImpl implements FlexOperations {
         if (!projectMetadata.isRepositoryRegistered(flexRepository)) {
             this.projectOperations.addRepository(flexRepository);
         }
+        if (!projectMetadata.isPluginRepositoryRegistered(flexRepository)) {
+            this.projectOperations.addPluginRepository(flexRepository);
+        }
 
         InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "plugins.xml");
         Assert.notNull(templateInputStream, "Could not acquire plugins.xml file");
