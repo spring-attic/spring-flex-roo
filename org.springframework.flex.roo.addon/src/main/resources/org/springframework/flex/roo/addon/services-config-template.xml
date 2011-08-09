@@ -46,13 +46,9 @@
     </channels>
 
     <logging>
-        <target class="flex.messaging.log.ConsoleTarget" level="Warn">
+        <target class="org.springframework.flex.core.CommonsLoggingTarget" level="All">
             <properties>
-                <prefix>[BlazeDS] </prefix>
-                <includeDate>false</includeDate>
-                <includeTime>false</includeTime>
-                <includeLevel>false</includeLevel>
-                <includeCategory>false</includeCategory>
+                <categoryPrefix>blazeds</categoryPrefix>
             </properties>
             <filters>
                 <pattern>Endpoint.*</pattern>
