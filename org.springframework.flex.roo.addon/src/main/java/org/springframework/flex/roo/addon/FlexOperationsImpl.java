@@ -65,6 +65,7 @@ import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
+import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
@@ -317,6 +318,7 @@ public class FlexOperationsImpl implements FlexOperations {
             dependencies.add(new Dependency(dependency));
         }
         this.projectOperations.addDependencies(dependencies);
+        this.projectOperations.addProperty(new Property("flex.version", "4.0.0.14159"));
 
         fixBrokenFlexDependency();
 
