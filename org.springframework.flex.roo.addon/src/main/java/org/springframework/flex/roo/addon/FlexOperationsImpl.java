@@ -144,7 +144,7 @@ public class FlexOperationsImpl implements FlexOperations {
         StringTemplate scaffoldTemplate = this.templateGroup.getInstanceOf(TEMPLATE_PATH + "/appname_scaffold");
         scaffoldTemplate.setAttribute("presentationPackage", presentationPackage);
         // TODO - Extract this value from services-config.xml?
-        scaffoldTemplate.setAttribute("amfRemotingUrl", "http://localhost:8080/" + projectMetadata.getProjectName() + "/messagebroker/amf");
+        scaffoldTemplate.setAttribute("amfRemotingUrl", "messagebroker/amf");
         this.fileManager.createOrUpdateTextFileIfRequired(scaffoldAppFileId, scaffoldTemplate.toString(), true);
 
         // Create the HTML wrapper
