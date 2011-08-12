@@ -106,7 +106,7 @@
         <xsl:param name="gentext-key" select="''"/>
         <xsl:variable name="Version">
             <xsl:if test="//releaseinfo">
-                <xsl:value-of select="//releaseinfo" /><xsl:text>
+                <xsl:value-of select="//releaseinfo" />
             </xsl:if>
         </xsl:variable>
         <xsl:choose>

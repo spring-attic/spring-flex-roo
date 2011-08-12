@@ -10,7 +10,7 @@
 				<dependency>
 					<groupId>com.adobe.flex</groupId>
 					<artifactId>compiler</artifactId>
-					<version>4.0.0.14159</version>
+					<version>${flex.version}</version>
 					<type>pom</type>
 				</dependency>
 			</dependencies>
