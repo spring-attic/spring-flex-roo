@@ -271,7 +271,8 @@ public class FlexScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadat
         InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
         bodyBuilder.appendFormalLine("if (" + this.entityReference + " == null) throw new IllegalArgumentException(\"A " + this.entityReference
             + " is required\");");
-        bodyBuilder.appendFormalLine(this.entityReference + "." + this.entityMetadata.getMergeMethod().getMethodName() + "();");
+        // fix for https://jira.springsource.org/browse/ROOFLEX-16
+        bodyBuilder.appendFormalLine(this.entityReference + "=" + this.entityReference + "." + this.entityMetadata.getMergeMethod().getMethodName() + "();");
         bodyBuilder.appendFormalLine("return " + this.entityReference + ";");
 
         return new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, this.entity, paramTypes, paramNames, bodyBuilder).build();
