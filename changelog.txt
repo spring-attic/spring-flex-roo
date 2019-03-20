@@ -1,6 +1,6 @@
 FLEX ADDON FOR SPRING ROO CHANGELOG
 =========================
-http://www.springsource.org/spring-flex
+https://www.springsource.org/spring-flex
 
 Changes in Flex Addon for Spring Roo 1.0.0.M1 (06.30.2010)
 _________________________________________
