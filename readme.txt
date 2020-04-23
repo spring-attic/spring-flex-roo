@@ -1,6 +1,6 @@
 FLEX ADDON FOR SPRING ROO 1.0.0.M2 (? 2011)
 ----------------------------------
-http://www.springsource.org/spring-flex
+https://www.springsource.org/spring-flex
 
 1. INTRODUCTION
 ---------------

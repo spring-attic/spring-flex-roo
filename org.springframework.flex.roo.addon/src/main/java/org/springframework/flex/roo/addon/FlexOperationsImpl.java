@@ -401,12 +401,12 @@ public class FlexOperationsImpl implements FlexOperations {
     private void configureFlexBuild() {
         ProjectMetadata projectMetadata = (ProjectMetadata) this.metadataService.get(ProjectMetadata.getProjectIdentifier());
 
-        Repository externalRepository = new Repository("spring-external", "Spring External Repository", "http://maven.springframework.org/external");
+        Repository externalRepository = new Repository("spring-external", "Spring External Repository", "https://maven.springframework.org/external");
         if (!projectMetadata.isRepositoryRegistered(externalRepository)) {
             this.projectOperations.addRepository(externalRepository);
         }
 
-        Repository flexRepository = new Repository("flex", "Sonatype Flex Repo", "http://repository.sonatype.org/content/groups/flexgroup");
+        Repository flexRepository = new Repository("flex", "Sonatype Flex Repo", "https://repository.sonatype.org/content/groups/flexgroup");
         if (!projectMetadata.isRepositoryRegistered(flexRepository)) {
             this.projectOperations.addRepository(flexRepository);
         }
