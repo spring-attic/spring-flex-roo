@@ -1,3 +1,5 @@
+# VMware has ended active development of this project, this repository will no longer be updated.
+
 FLEX ADDON FOR SPRING ROO 1.0.0.M2 (? 2011)
 ----------------------------------
 http://www.springsource.org/spring-flex
